@@ -5,13 +5,13 @@ import ru.mail.park.view.View;
 
 public class ResponseBody {
     @JsonView(View.Summary.class)
-    private final int status;
+    private final int code;
 
     @JsonView(View.Summary.class)
-    private final String error;
+    private final String message;
 
-    public ResponseBody(int status, String error) {
-        this.status = status;
-        this.error = error;
+    public ResponseBody(int code, String message) {
+        this.code = code;
+        this.message = message;
     }
 }

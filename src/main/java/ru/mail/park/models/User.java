@@ -1,5 +1,7 @@
 package ru.mail.park.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import ru.mail.park.view.View;
 
@@ -12,12 +14,11 @@ public class User {
 
     private String password;
 
-    //@JsonCreator
+    @JsonCreator
     public User(
-            /*@JsonProperty("username") */String username,
-            /*@JsonProperty("email")*/ String email,
-            /*@JsonProperty("password")*/ String password
-
+            @JsonProperty("username") String username,
+            @JsonProperty("email") String email,
+            @JsonProperty("password") String password
     ) {
         this.username = username;
         this.email = email;

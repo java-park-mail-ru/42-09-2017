@@ -7,19 +7,16 @@ public class UserSignupInfo {
     private final String username;
     private final String email;
     private final String password;
-    private final String confirmation;
 
     @JsonCreator
     UserSignupInfo(
             @JsonProperty(value = "username", required = true) String username,
             @JsonProperty(value = "email", required = true) String email,
-            @JsonProperty(value = "password", required = true) String password,
-            @JsonProperty(value = "confirmation", required = true) String confirmation
+            @JsonProperty(value = "password", required = true) String password
     ) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.confirmation = confirmation;
     }
 
     public String getUsername() {
@@ -34,7 +31,4 @@ public class UserSignupInfo {
         return password;
     }
 
-    public String getConfirmation() {
-        return confirmation;
-    }
 }

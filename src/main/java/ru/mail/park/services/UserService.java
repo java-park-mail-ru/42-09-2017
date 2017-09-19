@@ -3,8 +3,6 @@ package ru.mail.park.services;
 import org.springframework.stereotype.Service;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
-import ru.mail.park.info.UserSigninInfo;
-import ru.mail.park.info.UserSignupInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +15,7 @@ public class UserService {
         userList = new ArrayList<>();
     }
 
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public User addUser(UserSignupInfo userSignupInfo) {
+    public User addUser(User userSignupInfo) {
         User user = new User(
                 userSignupInfo.getUsername(),
                 userSignupInfo.getEmail(),
@@ -31,25 +25,25 @@ public class UserService {
         return user;
     }
 
-    public User updateUser(User user, UserUpdateInfo userUpdateInfo) {
-        User userInList = findUser(user.getUsername());
-        final String username = userUpdateInfo.getUsername();
-        final String email = userUpdateInfo.getEmail();
-        final String password = userUpdateInfo.getPassword();
+    public User updateUser(String username, UserUpdateInfo userUpdateInfo) {
+        User user = getByUsername(username);
+        final String usernameNew = userUpdateInfo.getUsername();
+        final String emailNew = userUpdateInfo.getEmail();
+        final String passwordNew = userUpdateInfo.getPassword();
 
-        if (username != null) {
-            userInList.setUsername(username);
+        if (usernameNew != null) {
+            user.setUsername(usernameNew);
         }
 
-        if (email != null) {
-            userInList.setEmail(email);
+        if (emailNew != null) {
+            user.setEmail(emailNew);
         }
 
-        if (password != null) {
-            userInList.setPassword(password);
+        if (passwordNew != null) {
+            user.setPassword(passwordNew);
         }
 
-        return userInList;
+        return user;
     }
 
     private User findUser(String username) {
@@ -61,17 +55,43 @@ public class UserService {
         return null;
     }
 
-    public User checkUser(UserSigninInfo userSigninInfo) {
+    private User getByUsername(String username) {
+        for (User user : userList) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public boolean hasUsername(String username) {
+        for (User user : userList) {
+            if (user.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasEmail(String email) {
+        for (User user : userList) {
+            if (user.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public User checkUserAndPassword(String usernameOrEmail, String password) {
         User userFound = null;
         for (User user : userList) {
-            String usernameOrEmail = userSigninInfo.getUsernameOrEmail();
             if ((usernameOrEmail.equals(user.getUsername())) || usernameOrEmail.equals(user.getEmail())) {
                 userFound = user;
                 break;
             }
         }
         if (userFound != null) {
-            if (userSigninInfo.getPassword().equals(userFound.getPassword())) {
+            if (password.equals(userFound.getPassword())) {
                 return userFound;
             }
         }
