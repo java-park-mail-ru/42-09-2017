@@ -2,14 +2,10 @@ package ru.mail.park.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import ru.mail.park.view.View;
 
 public class User {
-    @JsonView(View.Summary.class)
     private String username;
 
-    @JsonView(View.Summary.class)
     private String email;
 
     private String password;
