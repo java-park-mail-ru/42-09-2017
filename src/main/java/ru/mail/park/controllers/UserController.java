@@ -8,7 +8,7 @@ import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.info.UserSignupInfo;
-import ru.mail.park.View.View;
+import ru.mail.park.view.View;
 import ru.mail.park.response.ResponseBody;
 import ru.mail.park.services.UserService;
 
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpSession;
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private UserService userService;
-    private final String SessionAttr = "user_info";
+    private final String sessionAttr = "user_info";
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping("signup")
     public ResponseEntity<? extends ResponseBody> signup(@RequestBody UserSignupInfo userSignupInfo) {
         User user = userService.addUser(userSignupInfo);
-        if(user != null) {
+        if (user != null) {
             return ResponseEntity.ok(null);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -41,14 +41,14 @@ public class UserController {
 
     @PostMapping("update")
     public ResponseEntity<User> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
-        User user = (User) httpSession.getAttribute(SessionAttr);
+        User user = (User) httpSession.getAttribute(sessionAttr);
         return ResponseEntity.ok(userService.updateUser(user, userUpdateInfo));
     }
 
     @JsonView(View.Summary.class)
     @PostMapping("me")
     public ResponseEntity<User> whoAmI(HttpSession httpSession) {
-        User user = (User) httpSession.getAttribute(SessionAttr);
+        User user = (User) httpSession.getAttribute(sessionAttr);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -61,7 +61,7 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.badRequest().body("Wrong username or password");
         }
-        httpSession.setAttribute(SessionAttr, user);
+        httpSession.setAttribute(sessionAttr, user);
         return ResponseEntity.ok("Logged in");
     }
 

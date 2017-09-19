@@ -1,7 +1,7 @@
 package ru.mail.park.response;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import ru.mail.park.View.View;
+import ru.mail.park.view.View;
 
 public class ResponseBody {
     @JsonView(View.Summary.class)

@@ -11,8 +11,7 @@ public class UserSigninInfo {
     public UserSigninInfo(
             @JsonProperty(value = "usernameOrEmail", required = true) String usernameOrEmail,
             @JsonProperty(value = "password", required = true) String password
-    )
-    {
+    ) {
         this.usernameOrEmail = usernameOrEmail;
         this.password = password;
     }

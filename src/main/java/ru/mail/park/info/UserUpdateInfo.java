@@ -13,8 +13,7 @@ public class UserUpdateInfo {
         @JsonProperty("username") String username,
         @JsonProperty("email") String email,
         @JsonProperty("password") String password
-    )
-    {
+    ) {
         this.username = username;
         this.email = email;
         this.password = password;
