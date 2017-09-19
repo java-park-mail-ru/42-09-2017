@@ -131,7 +131,7 @@ public class UserController {
         return ResponseEntity.ok(new ResponseBody(ResponseCodes.SUCCESS, "Logged in"));
     }
 
-    @PostMapping("logout")
+    @GetMapping("logout")
     public ResponseEntity<? extends ResponseBody> logout(HttpSession httpSession) {
         httpSession.invalidate();
         return ResponseEntity.ok(new ResponseBody(ResponseCodes.SUCCESS, "Logged out"));
