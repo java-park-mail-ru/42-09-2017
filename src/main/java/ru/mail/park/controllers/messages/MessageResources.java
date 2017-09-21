@@ -21,8 +21,7 @@ public enum MessageResources {
     SHORT_USERNAME("Username is too short"),
 
     EXISTS_USERNAME("Username already exists"),
-    EXISTS_EMAIL("Email address already exists")
-    ;
+    EXISTS_EMAIL("Email address already exists");
 
 
 
