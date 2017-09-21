@@ -1,9 +1,12 @@
 package ru.mail.park.controllers.validators;
 
+import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.services.UserService;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static ru.mail.park.controllers.messages.MessageResources.*;
 
 public class Validator {
     private final UserService userService;
@@ -22,55 +25,55 @@ public class Validator {
     private static Pattern patternUsername = Pattern.compile(USERNAME_REGEX);
     private static Pattern patternPassword = Pattern.compile(PASSWORD_REGEX);
 
-    public String validateEmail(String email) {
+    public Message validateEmail(String email) {
         final Matcher matcher = patternEmail.matcher(email);
 
         if (email.isEmpty()) {
-            return "EMAIL_FIELD_EMPTY";
+            return EMPTY_EMAIL.getMessage();
         }
 
         if (!matcher.matches()) {
-            return "EMAIL_FIELD_BAD";
+            return BAD_EMAIL.getMessage();
         }
 
         if (userService.hasEmail(email)) {
-            return "EMAIL_ALREADY_EXISTS";
+            return EXISTS_EMAIL.getMessage();
         }
 
         return null;
     }
 
-    public String validateUsername(String username) {
+    public Message validateUsername(String username) {
         final Matcher matcher = patternUsername.matcher(username);
 
         if (username.isEmpty()) {
-            return "USERNAME_FIELD_EMPTY";
+            return EMPTY_USERNAME.getMessage();
         }
 
         if (username.length() < USERNAME_MIN_LENGTH) {
-            return "USERNAME_FIELD_TOO_SHORT";
+            return SHORT_USERNAME.getMessage();
         }
 
         if (!matcher.matches()) {
-            return "USERNAME_FIELD_BAD";
+            return BAD_USERNAME.getMessage();
         }
 
         if (userService.hasUsername(username)) {
-            return "USERNAME_ALREADY_EXISTS";
+            return EXISTS_USERNAME.getMessage();
         }
 
         return null;
     }
 
-    public String validatePassword(String password) {
+    public Message validatePassword(String password) {
         final Matcher matcher = patternPassword.matcher(password);
 
         if (password.isEmpty()) {
-            return "PASSWORD_FIELD_EMPTY";
+            return EMPTY_PASSWORD.getMessage();
         }
 
         if (!matcher.matches()) {
-            return "PASSWORD_FIELD_BAD";
+            return BAD_PASSWORD.getMessage();
         }
 
         return null;
