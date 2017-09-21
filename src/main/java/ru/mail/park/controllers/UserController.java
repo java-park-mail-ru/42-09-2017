@@ -3,17 +3,13 @@ package ru.mail.park.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.ResponseCodes;
 import ru.mail.park.controllers.validators.Validator;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
 import ru.mail.park.info.UserSigninInfo;
-import ru.mail.park.response.ResponseBody;
 import ru.mail.park.services.UserService;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/auth")
@@ -27,114 +23,102 @@ public class UserController {
     }
 
     @PostMapping("signup")
-    public ResponseEntity<List<? extends ResponseBody>> signup(@RequestBody User userSignupInfo) {
-        List<ResponseBody> response = new ArrayList<>();
-        ResponseBody validateResult;
+    public ResponseEntity<String> signup(@RequestBody User userSignupInfo) {
+        String validateResult;
         Validator validator = new Validator(userService);
 
         validateResult = validator.validateUsername(userSignupInfo.getUsername());
         if (validateResult != null) {
-            response.add(validateResult);
+            return ResponseEntity.badRequest().body(validateResult);
         }
 
         validateResult = validator.validateEmail(userSignupInfo.getEmail());
         if (validateResult != null) {
-            response.add(validateResult);
+            return ResponseEntity.badRequest().body(validateResult);
         }
 
         validateResult = validator.validatePassword(userSignupInfo.getPassword());
         if (validateResult != null) {
-            response.add(validateResult);
-        }
-
-        if (!response.isEmpty()) {
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(validateResult);
         }
 
         userService.addUser(userSignupInfo);
-        response.add(new ResponseBody(ResponseCodes.SUCCESS, "Successfully signed up"));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok("Successfully signed up");
     }
 
     @PostMapping("update")
-    public ResponseEntity<List<? extends ResponseBody>> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
-        List<ResponseBody> response = new ArrayList<>();
-        ResponseBody validateResult;
+    public ResponseEntity<String> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
+        String validateResult;
         Validator validator = new Validator(userService);
 
         String username = (String) httpSession.getAttribute(SESSION_ATTR);
         if (username == null) {
-            response.add(new ResponseBody(ResponseCodes.UNAUTHORIZED, "You are not authorized"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
         }
 
         if (userUpdateInfo.getUsername() != null) {
             validateResult = validator.validateUsername(userUpdateInfo.getUsername());
             if (validateResult != null) {
-                response.add(validateResult);
+                return ResponseEntity.badRequest().body(validateResult);
             }
-            httpSession.setAttribute(SESSION_ATTR, userUpdateInfo.getUsername());
         }
         if (userUpdateInfo.getEmail() != null) {
             validateResult = validator.validateEmail(userUpdateInfo.getEmail());
             if (validateResult != null) {
-                response.add(validateResult);
+                return ResponseEntity.badRequest().body(validateResult);
             }
         }
         if (userUpdateInfo.getOldPassword() != null) {
             final String oldPassword = userUpdateInfo.getOldPassword();
             if (userService.checkUserAndPassword(username, oldPassword) == null) {
-                response.add(new ResponseBody(ResponseCodes.PASSWORD_FIELD_BAD, "Wrong old password"));
+                return ResponseEntity.badRequest().body("Wrong old password");
             }
             if (userUpdateInfo.getPassword() != null) {
                 final String newPassword = userUpdateInfo.getPassword();
                 validateResult = validator.validatePassword(newPassword);
                 if (validateResult != null) {
-                    response.add(validateResult);
+                    return ResponseEntity.badRequest().body(validateResult);
                 }
             } else {
-                response.add(new ResponseBody(ResponseCodes.PASSWORD_FIELD_BAD, "New password field is empty"));
+                return ResponseEntity.badRequest().body("New password field is empty");
             }
         } else if (userUpdateInfo.getPassword() != null) {
-            response.add(new ResponseBody(ResponseCodes.PASSWORD_FIELD_BAD, "Old password is necessary for changing password"));
-        }
-        if (!response.isEmpty()) {
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body("Old password is necessary for changing password");
         }
 
         userService.updateUser(username, userUpdateInfo);
-        response.add(new ResponseBody(ResponseCodes.SUCCESS, "Updated successfully"));
-
-        return ResponseEntity.ok(response);
+        if (userUpdateInfo.getUsername() != null) {
+            httpSession.setAttribute(SESSION_ATTR, userUpdateInfo.getUsername());
+        }
+        return ResponseEntity.ok("Updated successfully");
     }
 
     @GetMapping("me")
-    public ResponseEntity<? extends ResponseBody> me(HttpSession httpSession) {
+    public ResponseEntity<String> me(HttpSession httpSession) {
         String username = (String) httpSession.getAttribute(SESSION_ATTR);
         if (username == null) {
-            return ResponseEntity.badRequest().body(
-                    new ResponseBody(ResponseCodes.UNAUTHORIZED, "You are not authorized")
-            );
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
         }
-        return ResponseEntity.ok(new ResponseBody(ResponseCodes.SUCCESS, username));
+        return ResponseEntity.ok(username);
     }
 
     @PostMapping("login")
-    public ResponseEntity<? extends ResponseBody> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
+    public ResponseEntity<String> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
         final User user = userService.checkUserAndPassword(userSigninInfo.getUsernameOrEmail(), userSigninInfo.getPassword());
         if (user == null) {
-            return ResponseEntity.badRequest().body(
-                    new ResponseBody(ResponseCodes.USERNAME_OR_PASSWORD_WRONG, "Wrong username or password")
-            );
+            return ResponseEntity.badRequest().body("Wrong username or password");
         }
         httpSession.setAttribute(SESSION_ATTR, user.getUsername());
-        return ResponseEntity.ok(new ResponseBody(ResponseCodes.SUCCESS, "Logged in"));
+        return ResponseEntity.ok("Logged in");
     }
 
     @GetMapping("logout")
-    public ResponseEntity<? extends ResponseBody> logout(HttpSession httpSession) {
+    public ResponseEntity<String> logout(HttpSession httpSession) {
+        if (httpSession.getAttribute(SESSION_ATTR) == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
+        }
         httpSession.invalidate();
-        return ResponseEntity.ok(new ResponseBody(ResponseCodes.SUCCESS, "Logged out"));
+        return ResponseEntity.ok("Logged out");
     }
 
 }

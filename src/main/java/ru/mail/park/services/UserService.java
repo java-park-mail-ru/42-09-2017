@@ -46,15 +46,6 @@ public class UserService {
         return user;
     }
 
-    private User findUser(String username) {
-        for (User user : userList) {
-            if (username.equals(user.getUsername())) {
-                return user;
-            }
-        }
-        return null;
-    }
-
     private User getByUsername(String username) {
         for (User user : userList) {
             if (user.getUsername().equals(username)) {
