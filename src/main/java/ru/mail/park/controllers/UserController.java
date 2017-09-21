@@ -11,6 +11,7 @@ import ru.mail.park.services.UserService;
 
 import javax.servlet.http.HttpSession;
 
+@CrossOrigin(origins = "https://sand42box.herokuapp.com")
 @RestController
 @RequestMapping(path = "/api/auth")
 public class UserController {
