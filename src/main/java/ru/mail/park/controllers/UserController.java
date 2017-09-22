@@ -108,7 +108,7 @@ public class UserController {
 
     @PostMapping("login")
     public ResponseEntity<Message> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
-        final User user = userService.checkUserAndPassword(userSigninInfo.getUsernameOrEmail(), userSigninInfo.getPassword());
+        final User user = userService.checkUserAndPassword(userSigninInfo.getLogin(), userSigninInfo.getPassword());
         if (user == null) {
             return ResponseEntity.badRequest().body(BAD_LOGIN_DATA.getMessage());
         }

@@ -1,27 +1,27 @@
 package ru.mail.park.controllers.messages;
 
 public enum MessageResources {
-    SIGNED_UP("Successfully signed up"),
-    UPDATED("Updated successfully"),
-    LOGGED_IN("Logged_in"),
-    LOGGED_OUT("Logged_out"),
+    SIGNED_UP("SIGNED_UP"),
+    UPDATED("UPDATED"),
+    LOGGED_IN("LOGGED_IN"),
+    LOGGED_OUT("LOGGED_OUT"),
 
-    UNAUTHORIZED("You are not authorized"),
-    BAD_LOGIN_DATA("Invalid username or password"),
-    BAD_USERNAME("Invalid username"),
-    BAD_EMAIL("Invalid email address"),
-    BAD_OLD_PASSWORD("Invalid old password"),
-    BAD_PASSWORD("Invalid password"),
+    UNAUTHORIZED("NOT_AUTHORIZED"),
+    BAD_LOGIN_DATA("LOGIN_DATA_BAD"),
+    BAD_USERNAME("USERNAME_FIELD_BAD"),
+    BAD_EMAIL("EMAIL_FIELD_BAD"),
+    BAD_OLD_PASSWORD("OLD_PASSWORD_BAD"),
+    BAD_PASSWORD("PASSWORD_FIELD_BAD"),
 
-    EMPTY_USERNAME("Username field is empty"),
-    EMPTY_EMAIL("Email field is empty"),
-    EMPTY_OLD_PASSWORD("Old password is necessary for changing password"),
-    EMPTY_PASSWORD("Password field is empty"),
+    EMPTY_USERNAME("USERNAME_FIELD_EMPTY"),
+    EMPTY_EMAIL("EMAIL_FIELD_EMPTY"),
+    EMPTY_OLD_PASSWORD("OLD_PASSWORD_EMPTY"),
+    EMPTY_PASSWORD("PASSWORD_FIELD_EMPTY"),
 
-    SHORT_USERNAME("Username is too short"),
+    SHORT_USERNAME("USERNAME_FIELD_TOO_SHORT"),
 
-    EXISTS_USERNAME("Username already exists"),
-    EXISTS_EMAIL("Email address already exists");
+    EXISTS_USERNAME("USERNAME_ALREADY_EXISTS"),
+    EXISTS_EMAIL("EMAIL_ALREADY_EXISTS");
 
 
 

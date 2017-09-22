@@ -4,20 +4,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserSigninInfo {
-    private final String usernameOrEmail;
+    private final String login;
     private final String password;
 
     @JsonCreator
     public UserSigninInfo(
-            @JsonProperty(value = "usernameOrEmail", required = true) String usernameOrEmail,
+            @JsonProperty(value = "login", required = true) String login,
             @JsonProperty(value = "password", required = true) String password
     ) {
-        this.usernameOrEmail = usernameOrEmail;
+        this.login = login;
         this.password = password;
     }
 
-    public String getUsernameOrEmail() {
-        return usernameOrEmail;
+    public String getLogin() {
+        return login;
     }
 
     public String getPassword() {
