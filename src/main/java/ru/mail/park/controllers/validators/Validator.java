@@ -15,7 +15,7 @@ public class Validator {
 
     private static final String USERNAME_REGEX = "^[a-z][a-z0-9]*?([-_][a-z0-9]+){0,2}$";
     private static final String EMAIL_REGEX = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$";
-    private static final String PASSWORD_REGEX = "((?=.*\\d)(?=.*[a-zA-Z])(?!.*[@#$%]).{8,20})";
+    private static final String PASSWORD_REGEX = "[a-zA-Z0-9]{6,20}";
 
     public Validator(UserService userService) {
         this.userService = userService;
