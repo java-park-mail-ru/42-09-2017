@@ -1,9 +1,12 @@
 package ru.mail.park.controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.controllers.messages.UserMessage;
 import ru.mail.park.controllers.validators.Validator;
+import ru.mail.park.view.View;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
 import ru.mail.park.info.UserSigninInfo;
@@ -98,12 +101,14 @@ public class UserController {
     }
 
     @GetMapping("me")
-    public ResponseEntity<Message> me(HttpSession httpSession) {
+    @JsonView(View.Summary.class)
+    public ResponseEntity<UserMessage> me(HttpSession httpSession) {
         String username = (String) httpSession.getAttribute(SESSION_ATTR);
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new UserMessage(null));
         }
-        return ResponseEntity.ok(new Message(username));
+
+        return ResponseEntity.ok(new UserMessage(userService.getByUsername(username)));
     }
 
     @PostMapping("login")

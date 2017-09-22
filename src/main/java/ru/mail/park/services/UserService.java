@@ -4,15 +4,15 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class UserService {
-    private List<User> userList;
+    private Map<String, User> userList;
 
     public UserService() {
-        userList = new ArrayList<>();
+        userList = new HashMap<>();
     }
 
     public User addUser(User userSignupInfo) {
@@ -21,7 +21,7 @@ public class UserService {
                 userSignupInfo.getEmail(),
                 userSignupInfo.getPassword()
         );
-        userList.add(user);
+        userList.put(userSignupInfo.getUsername(), user);
         return user;
     }
 
@@ -46,27 +46,17 @@ public class UserService {
         return user;
     }
 
-    private User getByUsername(String username) {
-        for (User user : userList) {
-            if (user.getUsername().equals(username)) {
-                return user;
-            }
-        }
-        return null;
+    public User getByUsername(String username) {
+        return userList.get(username);
     }
 
     public boolean hasUsername(String username) {
-        for (User user : userList) {
-            if (user.getUsername().equals(username)) {
-                return true;
-            }
-        }
-        return false;
+        return userList.containsKey(username);
     }
 
     public boolean hasEmail(String email) {
-        for (User user : userList) {
-            if (user.getEmail().equals(email)) {
+        for (Map.Entry<String, User> entry : userList.entrySet()) {
+            if (entry.getValue().getEmail().equals(email)) {
                 return true;
             }
         }
@@ -75,9 +65,9 @@ public class UserService {
 
     public User checkUserAndPassword(String usernameOrEmail, String password) {
         User userFound = null;
-        for (User user : userList) {
-            if ((usernameOrEmail.equals(user.getUsername())) || usernameOrEmail.equals(user.getEmail())) {
-                userFound = user;
+        for (Map.Entry<String, User> entry : userList.entrySet()) {
+            if (entry.getValue().getEmail().equals(usernameOrEmail) || entry.getValue().getUsername().equals(usernameOrEmail)) {
+                userFound = entry.getValue();
                 break;
             }
         }
