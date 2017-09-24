@@ -9,19 +9,15 @@ import java.util.Map;
 
 @Service
 public class UserService {
-    private Map<String, User> userList;
+    private Map<String, User> userMap;
 
     public UserService() {
-        userList = new HashMap<>();
+        userMap = new HashMap<>();
     }
 
     public User addUser(User userSignupInfo) {
-        User user = new User(
-                userSignupInfo.getUsername(),
-                userSignupInfo.getEmail(),
-                userSignupInfo.getPassword()
-        );
-        userList.put(userSignupInfo.getUsername(), user);
+        User user = new User(userSignupInfo);
+        userMap.put(userSignupInfo.getUsername(), user);
         return user;
     }
 
@@ -47,15 +43,15 @@ public class UserService {
     }
 
     public User getByUsername(String username) {
-        return userList.get(username);
+        return userMap.get(username);
     }
 
     public boolean hasUsername(String username) {
-        return userList.containsKey(username);
+        return userMap.containsKey(username);
     }
 
     public boolean hasEmail(String email) {
-        for (Map.Entry<String, User> entry : userList.entrySet()) {
+        for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (entry.getValue().getEmail().equals(email)) {
                 return true;
             }
@@ -65,7 +61,7 @@ public class UserService {
 
     public User checkUserAndPassword(String usernameOrEmail, String password) {
         User userFound = null;
-        for (Map.Entry<String, User> entry : userList.entrySet()) {
+        for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (entry.getValue().getEmail().equals(usernameOrEmail) || entry.getValue().getUsername().equals(usernameOrEmail)) {
                 userFound = entry.getValue();
                 break;

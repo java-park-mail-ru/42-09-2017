@@ -1,5 +1,6 @@
 package ru.mail.park.controllers.validators;
 
+import org.springframework.stereotype.Service;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.services.UserService;
 
@@ -8,22 +9,19 @@ import java.util.regex.Pattern;
 
 import static ru.mail.park.controllers.messages.MessageResources.*;
 
+@Service
 public class Validator {
     private final UserService userService;
 
     private static final Integer USERNAME_MIN_LENGTH = 3;
-
-    private static final String USERNAME_REGEX = "^[a-z][a-z0-9]*?([-_][a-z0-9]+){0,2}$";
-    private static final String EMAIL_REGEX = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$";
-    private static final String PASSWORD_REGEX = "[a-zA-Z0-9]{6,20}";
+    private static final Integer PASSWORD_MIN_LENGTH = 6;
 
     public Validator(UserService userService) {
         this.userService = userService;
     }
 
-    private static Pattern patternEmail = Pattern.compile(EMAIL_REGEX);
-    private static Pattern patternUsername = Pattern.compile(USERNAME_REGEX);
-    private static Pattern patternPassword = Pattern.compile(PASSWORD_REGEX);
+    private static Pattern patternEmail = Pattern.compile("^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$");
+    private static Pattern patternUsername = Pattern.compile("[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}");
 
     public Message validateEmail(String email) {
         if (email == null || email.isEmpty()) {
@@ -70,9 +68,7 @@ public class Validator {
             return EMPTY_PASSWORD.getMessage();
         }
 
-        final Matcher matcher = patternPassword.matcher(password);
-
-        if (!matcher.matches()) {
+        if (password.length() < PASSWORD_MIN_LENGTH) {
             return BAD_PASSWORD.getMessage();
         }
 

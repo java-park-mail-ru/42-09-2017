@@ -22,17 +22,18 @@ import static ru.mail.park.controllers.messages.MessageResources.*;
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private final UserService userService;
+    private final Validator validator;
 
     private static final String SESSION_ATTR = "user_info";
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, Validator validator) {
         this.userService = userService;
+        this.validator = validator;
     }
 
     @PostMapping("signup")
     public ResponseEntity<Message> signup(@RequestBody User userSignupInfo) {
         Message validateResult;
-        Validator validator = new Validator(userService);
 
         validateResult = validator.validateUsername(userSignupInfo.getUsername());
         if (validateResult != null) {
@@ -56,7 +57,6 @@ public class UserController {
     @PostMapping("update")
     public ResponseEntity<Message> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
         Message validateResult;
-        Validator validator = new Validator(userService);
 
         String username = (String) httpSession.getAttribute(SESSION_ATTR);
         if (username == null) {

@@ -25,6 +25,10 @@ public class User {
         this.password = password;
     }
 
+    public User(User user) {
+        this(user.getUsername(), user.getEmail(), user.getPassword());
+    }
+
     public String getUsername() {
         return username;
     }
