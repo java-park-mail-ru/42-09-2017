@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Service
 public class UserService {
-    private Map<String, User> userMap;
+    private static Map<String, User> userMap;
 
     public UserService() {
         userMap = new HashMap<>();
@@ -46,11 +46,11 @@ public class UserService {
         return userMap.get(username);
     }
 
-    public boolean hasUsername(String username) {
+    public static boolean hasUsername(String username) {
         return userMap.containsKey(username);
     }
 
-    public boolean hasEmail(String email) {
+    public static boolean hasEmail(String email) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (entry.getValue().getEmail().equals(email)) {
                 return true;

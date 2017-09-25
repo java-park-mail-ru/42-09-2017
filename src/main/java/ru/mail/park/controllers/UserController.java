@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.controllers.messages.UserMessage;
 import ru.mail.park.controllers.validators.Validator;
 import ru.mail.park.view.View;
@@ -15,89 +16,101 @@ import ru.mail.park.services.UserService;
 
 import javax.servlet.http.HttpSession;
 
-import static ru.mail.park.controllers.messages.MessageResources.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @CrossOrigin(origins = "https://sand42box.herokuapp.com")
 @RestController
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private final UserService userService;
-    private final Validator validator;
 
     private static final String SESSION_ATTR = "user_info";
 
-    public UserController(UserService userService, Validator validator) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.validator = validator;
     }
 
     @PostMapping("signup")
-    public ResponseEntity<Message> signup(@RequestBody User userSignupInfo) {
+    public ResponseEntity<List<Message>> signup(@RequestBody User userSignupInfo) {
         Message validateResult;
+        List<Message> responseList = new ArrayList<>();
 
-        validateResult = validator.validateUsername(userSignupInfo.getUsername());
+        validateResult = Validator.validateUsername(userSignupInfo.getUsername());
         if (validateResult != null) {
-            return ResponseEntity.badRequest().body(validateResult);
+            responseList.add(validateResult);
         }
 
-        validateResult = validator.validateEmail(userSignupInfo.getEmail());
+        validateResult = Validator.validateEmail(userSignupInfo.getEmail());
         if (validateResult != null) {
-            return ResponseEntity.badRequest().body(validateResult);
+            responseList.add(validateResult);
         }
 
-        validateResult = validator.validatePassword(userSignupInfo.getPassword());
+        validateResult = Validator.validatePassword(userSignupInfo.getPassword());
         if (validateResult != null) {
-            return ResponseEntity.badRequest().body(validateResult);
+            responseList.add(validateResult);
+        }
+
+        if (!responseList.isEmpty()) {
+            return ResponseEntity.badRequest().body(responseList);
         }
 
         userService.addUser(userSignupInfo);
-        return ResponseEntity.ok(SIGNED_UP.getMessage());
+        responseList.add(new Message(MessageConstants.SIGNED_UP));
+        return ResponseEntity.ok(responseList);
     }
 
     @PostMapping("update")
-    public ResponseEntity<Message> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
+    public ResponseEntity<List<Message>> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
         Message validateResult;
+        List<Message> responseList = new ArrayList<>();
 
         String username = (String) httpSession.getAttribute(SESSION_ATTR);
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED.getMessage());
+            responseList.add(new Message(MessageConstants.UNAUTHORIZED));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseList);
         }
 
         if (userUpdateInfo.getUsername() != null) {
-            validateResult = validator.validateUsername(userUpdateInfo.getUsername());
+            validateResult = Validator.validateUsername(userUpdateInfo.getUsername());
             if (validateResult != null) {
-                return ResponseEntity.badRequest().body(validateResult);
+                responseList.add(validateResult);
             }
         }
         if (userUpdateInfo.getEmail() != null) {
-            validateResult = validator.validateEmail(userUpdateInfo.getEmail());
+            validateResult = Validator.validateEmail(userUpdateInfo.getEmail());
             if (validateResult != null) {
-                return ResponseEntity.badRequest().body(validateResult);
+                responseList.add(validateResult);
             }
         }
         if (userUpdateInfo.getOldPassword() != null) {
             final String oldPassword = userUpdateInfo.getOldPassword();
             if (userService.checkUserAndPassword(username, oldPassword) == null) {
-                return ResponseEntity.badRequest().body(BAD_OLD_PASSWORD.getMessage());
+                responseList.add(new Message(MessageConstants.BAD_OLD_PASSWORD));
             }
             if (userUpdateInfo.getPassword() != null) {
                 final String newPassword = userUpdateInfo.getPassword();
-                validateResult = validator.validatePassword(newPassword);
+                validateResult = Validator.validatePassword(newPassword);
                 if (validateResult != null) {
-                    return ResponseEntity.badRequest().body(validateResult);
+                    responseList.add(validateResult);
                 }
             } else {
-                return ResponseEntity.badRequest().body(EMPTY_PASSWORD.getMessage());
+                responseList.add(new Message(MessageConstants.EMPTY_PASSWORD));
             }
         } else if (userUpdateInfo.getPassword() != null) {
-            return ResponseEntity.badRequest().body(EMPTY_OLD_PASSWORD.getMessage());
+            responseList.add(new Message(MessageConstants.EMPTY_OLD_PASSWORD));
+        }
+
+        if (!responseList.isEmpty()) {
+            return ResponseEntity.badRequest().body(responseList);
         }
 
         userService.updateUser(username, userUpdateInfo);
         if (userUpdateInfo.getUsername() != null) {
             httpSession.setAttribute(SESSION_ATTR, userUpdateInfo.getUsername());
         }
-        return ResponseEntity.ok(UPDATED.getMessage());
+        responseList.add(new Message(MessageConstants.UPDATED));
+        return ResponseEntity.ok(responseList);
     }
 
     @GetMapping("me")
@@ -115,19 +128,19 @@ public class UserController {
     public ResponseEntity<Message> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
         final User user = userService.checkUserAndPassword(userSigninInfo.getLogin(), userSigninInfo.getPassword());
         if (user == null) {
-            return ResponseEntity.badRequest().body(BAD_LOGIN_DATA.getMessage());
+            return ResponseEntity.badRequest().body(new Message(MessageConstants.BAD_LOGIN_DATA));
         }
         httpSession.setAttribute(SESSION_ATTR, user.getUsername());
-        return ResponseEntity.ok(LOGGED_IN.getMessage());
+        return ResponseEntity.ok(new Message(MessageConstants.LOGGED_IN));
     }
 
     @GetMapping("logout")
     public ResponseEntity<Message> logout(HttpSession httpSession) {
         if (httpSession.getAttribute(SESSION_ATTR) == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message(MessageConstants.UNAUTHORIZED));
         }
         httpSession.invalidate();
-        return ResponseEntity.ok(LOGGED_OUT.getMessage());
+        return ResponseEntity.ok(new Message(MessageConstants.LOGGED_OUT));
     }
 
 }
