@@ -24,24 +24,6 @@ public class Validator {
     );
     private static Pattern patternUsername = Pattern.compile("[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}");
 
-    public Message validateEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return new Message(MessageConstants.EMPTY_EMAIL);
-        }
-
-        final Matcher matcher = patternEmail.matcher(email);
-
-        if (!matcher.matches()) {
-            return new Message(MessageConstants.BAD_EMAIL);
-        }
-
-        if (userService.hasEmail(email)) {
-            return new Message(MessageConstants.EXISTS_EMAIL);
-        }
-
-        return null;
-    }
-
     public Message validateUsername(String username) {
         if (username == null || username.isEmpty()) {
             return new Message(MessageConstants.EMPTY_USERNAME);
@@ -59,6 +41,24 @@ public class Validator {
 
         if (userService.hasUsername(username)) {
             return new Message(MessageConstants.EXISTS_USERNAME);
+        }
+
+        return null;
+    }
+
+    public Message validateEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return new Message(MessageConstants.EMPTY_EMAIL);
+        }
+
+        final Matcher matcher = patternEmail.matcher(email);
+
+        if (!matcher.matches()) {
+            return new Message(MessageConstants.BAD_EMAIL);
+        }
+
+        if (userService.hasEmail(email)) {
+            return new Message(MessageConstants.EXISTS_EMAIL);
         }
 
         return null;
