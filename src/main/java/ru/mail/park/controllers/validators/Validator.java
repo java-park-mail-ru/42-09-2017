@@ -1,7 +1,6 @@
 package ru.mail.park.controllers.validators;
 
 import org.springframework.stereotype.Service;
-import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.services.UserService;
 
@@ -24,53 +23,53 @@ public class Validator {
     );
     private static Pattern patternUsername = Pattern.compile("[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}");
 
-    public Message validateUsername(String username) {
+    public String validateUsername(String username) {
         if (username == null || username.isEmpty()) {
-            return new Message(MessageConstants.EMPTY_USERNAME);
+            return MessageConstants.EMPTY_USERNAME;
         }
 
         if (username.length() < USERNAME_MIN_LENGTH) {
-            return new Message(MessageConstants.SHORT_USERNAME);
+            return MessageConstants.SHORT_USERNAME;
         }
 
         final Matcher matcher = patternUsername.matcher(username);
 
         if (!matcher.matches()) {
-            return new Message(MessageConstants.BAD_USERNAME);
+            return MessageConstants.BAD_USERNAME;
         }
 
         if (userService.hasUsername(username)) {
-            return new Message(MessageConstants.EXISTS_USERNAME);
+            return MessageConstants.EXISTS_USERNAME;
         }
 
         return null;
     }
 
-    public Message validateEmail(String email) {
+    public String validateEmail(String email) {
         if (email == null || email.isEmpty()) {
-            return new Message(MessageConstants.EMPTY_EMAIL);
+            return MessageConstants.EMPTY_EMAIL;
         }
 
         final Matcher matcher = patternEmail.matcher(email);
 
         if (!matcher.matches()) {
-            return new Message(MessageConstants.BAD_EMAIL);
+            return MessageConstants.BAD_EMAIL;
         }
 
         if (userService.hasEmail(email)) {
-            return new Message(MessageConstants.EXISTS_EMAIL);
+            return MessageConstants.EXISTS_EMAIL;
         }
 
         return null;
     }
 
-    public static Message validatePassword(String password) {
+    public static String validatePassword(String password) {
         if (password == null || password.isEmpty()) {
-            return new Message(MessageConstants.EMPTY_PASSWORD);
+            return MessageConstants.EMPTY_PASSWORD;
         }
 
         if (password.length() < PASSWORD_MIN_LENGTH) {
-            return new Message(MessageConstants.BAD_PASSWORD);
+            return MessageConstants.BAD_PASSWORD;
         }
 
         return null;
