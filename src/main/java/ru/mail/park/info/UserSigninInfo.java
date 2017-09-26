@@ -9,8 +9,8 @@ public class UserSigninInfo {
 
     @JsonCreator
     public UserSigninInfo(
-            @JsonProperty(value = "login", required = true) String login,
-            @JsonProperty(value = "password", required = true) String password
+            @JsonProperty("login") String login,
+            @JsonProperty("password") String password
     ) {
         this.login = login;
         this.password = password;

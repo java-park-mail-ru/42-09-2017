@@ -24,11 +24,13 @@ import java.util.List;
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private final UserService userService;
+    private final Validator validator;
 
     private static final String SESSION_ATTR = "user_info";
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, Validator validator) {
         this.userService = userService;
+        this.validator = validator;
     }
 
     @PostMapping("signup")
@@ -36,12 +38,12 @@ public class UserController {
         Message validateResult;
         List<Message> responseList = new ArrayList<>();
 
-        validateResult = Validator.validateUsername(userSignupInfo.getUsername());
+        validateResult = validator.validateUsername(userSignupInfo.getUsername());
         if (validateResult != null) {
             responseList.add(validateResult);
         }
 
-        validateResult = Validator.validateEmail(userSignupInfo.getEmail());
+        validateResult = validator.validateEmail(userSignupInfo.getEmail());
         if (validateResult != null) {
             responseList.add(validateResult);
         }
@@ -72,13 +74,13 @@ public class UserController {
         }
 
         if (userUpdateInfo.getUsername() != null) {
-            validateResult = Validator.validateUsername(userUpdateInfo.getUsername());
+            validateResult = validator.validateUsername(userUpdateInfo.getUsername());
             if (validateResult != null) {
                 responseList.add(validateResult);
             }
         }
         if (userUpdateInfo.getEmail() != null) {
-            validateResult = Validator.validateEmail(userUpdateInfo.getEmail());
+            validateResult = validator.validateEmail(userUpdateInfo.getEmail());
             if (validateResult != null) {
                 responseList.add(validateResult);
             }
@@ -126,6 +128,13 @@ public class UserController {
 
     @PostMapping("login")
     public ResponseEntity<Message> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
+        if (userSigninInfo.getLogin() == null || userSigninInfo.getLogin().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Message(MessageConstants.EMPTY_USERNAME));
+        }
+        if (userSigninInfo.getPassword() == null || userSigninInfo.getPassword().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Message(MessageConstants.EMPTY_PASSWORD));
+        }
+
         final User user = userService.checkUserAndPassword(userSigninInfo.getLogin(), userSigninInfo.getPassword());
         if (user == null) {
             return ResponseEntity.badRequest().body(new Message(MessageConstants.BAD_LOGIN_DATA));

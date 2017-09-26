@@ -1,5 +1,6 @@
 package ru.mail.park.services;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.models.User;
@@ -9,13 +10,17 @@ import java.util.Map;
 
 @Service
 public class UserService {
-    private static Map<String, User> userMap;
+    private Map<String, User> userMap;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService() {
+    public UserService(PasswordEncoder passwordEncoder) {
         userMap = new HashMap<>();
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User addUser(User userSignupInfo) {
+        String passwordEncoded = passwordEncoder.encode(userSignupInfo.getPassword());
+        userSignupInfo.setPassword(passwordEncoded);
         User user = new User(userSignupInfo);
         userMap.put(userSignupInfo.getUsername(), user);
         return user;
@@ -36,7 +41,7 @@ public class UserService {
         }
 
         if (passwordNew != null) {
-            user.setPassword(passwordNew);
+            user.setPassword(passwordEncoder.encode(passwordNew));
         }
 
         return user;
@@ -46,11 +51,11 @@ public class UserService {
         return userMap.get(username);
     }
 
-    public static boolean hasUsername(String username) {
+    public boolean hasUsername(String username) {
         return userMap.containsKey(username);
     }
 
-    public static boolean hasEmail(String email) {
+    public boolean hasEmail(String email) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (entry.getValue().getEmail().equals(email)) {
                 return true;
@@ -68,7 +73,7 @@ public class UserService {
             }
         }
         if (userFound != null) {
-            if (password.equals(userFound.getPassword())) {
+            if (passwordEncoder.matches(password, userFound.getPassword())) {
                 return userFound;
             }
         }

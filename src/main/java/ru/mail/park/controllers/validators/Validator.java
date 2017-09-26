@@ -1,5 +1,6 @@
 package ru.mail.park.controllers.validators;
 
+import org.springframework.stereotype.Service;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.services.UserService;
@@ -7,16 +8,23 @@ import ru.mail.park.services.UserService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Service
 public class Validator {
     private static final Integer USERNAME_MIN_LENGTH = 3;
     private static final Integer PASSWORD_MIN_LENGTH = 6;
+
+    private final UserService userService;
+
+    public Validator(UserService userService) {
+        this.userService = userService;
+    }
 
     private static Pattern patternEmail = Pattern.compile(
             "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$"
     );
     private static Pattern patternUsername = Pattern.compile("[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}");
 
-    public static Message validateEmail(String email) {
+    public Message validateEmail(String email) {
         if (email == null || email.isEmpty()) {
             return new Message(MessageConstants.EMPTY_EMAIL);
         }
@@ -27,14 +35,14 @@ public class Validator {
             return new Message(MessageConstants.BAD_EMAIL);
         }
 
-        if (UserService.hasEmail(email)) {
+        if (userService.hasEmail(email)) {
             return new Message(MessageConstants.EXISTS_EMAIL);
         }
 
         return null;
     }
 
-    public static Message validateUsername(String username) {
+    public Message validateUsername(String username) {
         if (username == null || username.isEmpty()) {
             return new Message(MessageConstants.EMPTY_USERNAME);
         }
@@ -49,7 +57,7 @@ public class Validator {
             return new Message(MessageConstants.BAD_USERNAME);
         }
 
-        if (UserService.hasUsername(username)) {
+        if (userService.hasUsername(username)) {
             return new Message(MessageConstants.EXISTS_USERNAME);
         }
 
