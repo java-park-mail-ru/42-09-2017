@@ -1,0 +1,292 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Rest api for the best js game ever",
+    "version" : "1.0.0",
+    "title" : "bestJsGame",
+    "contact" : { }
+  },
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/api/auth/signup" : {
+      "post" : {
+        "summary" : "Signup New User",
+        "description" : "Signup Method",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "type" : "object",
+            "required" : [ "confirmation", "email", "password", "username" ],
+            "properties" : {
+              "username" : {
+                "type" : "string",
+                "description" : "users username"
+              },
+              "email" : {
+                "type" : "string",
+                "description" : "users email"
+              },
+              "password" : {
+                "type" : "string",
+                "description" : "users password"
+              },
+              "confirmation" : {
+                "type" : "string",
+                "description" : "users password confirmation"
+              }
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "description" : "Description of error",
+                  "enum" : [ "SUCCESS" ]
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid data",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "description" : "Description of error",
+                  "enum" : [ "EMAIL_FIELD_EMPTY", "EMAIL_FIELD_BAD", "USERNAME_FIELD_EMPTY", "USERNAME_FIELD_BAD", "USERNAME_FIELD_TOO_SHORT", "PASSWORD_FIELD_EMPTY", "PASSWORD_FIELD_BAD" ]
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Status 409",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "description" : "Description of error",
+                  "enum" : [ "EMAIL_ALREADY_EXISTS", "USERNAME_ALREADY_EXISTS" ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login" : {
+      "post" : {
+        "summary" : "Authentication User",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "type" : "object",
+            "required" : [ "password", "username" ],
+            "properties" : {
+              "username" : {
+                "type" : "string"
+              },
+              "password" : {
+                "type" : "string"
+              }
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "schema" : {
+              "required" : [ "error", "session_id" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "enum" : [ "SUCCESS" ]
+                },
+                "user" : {
+                  "required" : [ "username" ],
+                  "type" : "object",
+                  "properties" : {
+                    "username" : {
+                      "type" : "string"
+                    },
+                    "email" : {
+                      "type" : "string"
+                    }
+                  }
+                },
+                "session_id" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Status 401",
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "enum" : [ "USERNAME_OR_PASSWORD_WRONG" ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me" : {
+      "post" : {
+        "summary" : "Check user session",
+        "description" : "Authentication user by session_id",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "type" : "object"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "schema" : {
+              "required" : [ "user" ],
+              "type" : "object",
+              "properties" : {
+                "user" : {
+                  "required" : [ "username" ],
+                  "type" : "object",
+                  "properties" : {
+                    "username" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Status 401",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "enum" : [ "SESSIONID_HAS_EXPIRED" ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/update" : {
+      "post" : {
+        "summary" : "Update user info",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "type" : "object",
+            "properties" : {
+              "user" : {
+                "type" : "object",
+                "properties" : {
+                  "username" : {
+                    "type" : "string"
+                  },
+                  "email" : {
+                    "type" : "string"
+                  },
+                  "old_password" : {
+                    "type" : "string"
+                  },
+                  "new_password" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "enum" : [ "UPDATED_OK" ]
+                },
+                "user" : {
+                  "required" : [ "email", "username" ],
+                  "type" : "object",
+                  "properties" : {
+                    "username" : {
+                      "type" : "string"
+                    },
+                    "email" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Status 409",
+            "schema" : {
+              "required" : [ "error" ],
+              "type" : "object",
+              "properties" : {
+                "error" : {
+                  "type" : "string",
+                  "enum" : [ "EMAIL_FIELD_BAD", "EMAIL_ALREADY_EXISTS", "USERNAME_FIELD_BAD", "USERNAME_FIELD_TOO_SHORT", "USERNAME_ALREADY_EXISTS", "PASSWORD_CONFLICT" ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout" : {
+      "post" : {
+        "summary" : "Logout session",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200"
+          }
+        }
+      }
+    }
+  }
+}
