@@ -19,7 +19,10 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "https://sand42box.herokuapp.com")
+@CrossOrigin(origins = { "https://sand42box.herokuapp.com",
+        "https://nightly-42.herokuapp.com",
+        "https://master-42.herokuapp.com" }
+        )
 @RestController
 @RequestMapping(path = "/api/auth")
 public class UserController {
