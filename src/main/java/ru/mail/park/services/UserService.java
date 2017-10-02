@@ -19,9 +19,9 @@ public class UserService {
     }
 
     public User addUser(User userSignupInfo) {
-        String passwordEncoded = passwordEncoder.encode(userSignupInfo.getPassword());
+        final String passwordEncoded = passwordEncoder.encode(userSignupInfo.getPassword());
         userSignupInfo.setPassword(passwordEncoded);
-        User user = new User(userSignupInfo);
+        final User user = new User(userSignupInfo);
         userMap.put(userSignupInfo.getUsername(), user);
         return user;
     }

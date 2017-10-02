@@ -15,6 +15,7 @@ import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.services.UserService;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,29 +38,7 @@ public class UserController {
     }
 
     @PostMapping("signup")
-    public ResponseEntity<Message<?>> signup(@RequestBody User userSignupInfo) {
-        String validateResult;
-        List<String> responseList = new ArrayList<>();
-
-        validateResult = validator.validateUsername(userSignupInfo.getUsername());
-        if (validateResult != null) {
-            responseList.add(validateResult);
-        }
-
-        validateResult = validator.validateEmail(userSignupInfo.getEmail());
-        if (validateResult != null) {
-            responseList.add(validateResult);
-        }
-
-        validateResult = Validator.validatePassword(userSignupInfo.getPassword());
-        if (validateResult != null) {
-            responseList.add(validateResult);
-        }
-
-        if (!responseList.isEmpty()) {
-            return ResponseEntity.badRequest().body(new Message<>(responseList));
-        }
-
+    public ResponseEntity<Message<?>> signup(@Valid @RequestBody User userSignupInfo) {
         userService.addUser(userSignupInfo);
         return ResponseEntity.ok(new Message<>(MessageConstants.SIGNED_UP));
     }
