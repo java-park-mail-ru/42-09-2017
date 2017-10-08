@@ -1,12 +1,10 @@
 package ru.mail.park.controllers.messages;
 
 public class MessageConstants {
-    public static final String SIGNED_UP = "SIGNED_UP";
-    public static final String UPDATED = "UPDATED";
-    public static final String LOGGED_IN = "LOGGED_IN";
     public static final String LOGGED_OUT = "LOGGED_OUT";
 
     public static final String UNAUTHORIZED = "NOT_AUTHORIZED";
+    public static final String AUTHORIZED = "ALREADY_AUTHORIZED";
     public static final String BAD_LOGIN_DATA = "LOGIN_DATA_BAD";
     public static final String BAD_USERNAME = "USERNAME_FIELD_BAD";
     public static final String BAD_EMAIL = "EMAIL_FIELD_BAD";

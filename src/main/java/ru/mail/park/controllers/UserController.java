@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.controllers.messages.UserMessage;
 import ru.mail.park.controllers.validators.Validator;
 import ru.mail.park.view.View;
 import ru.mail.park.info.UserUpdateInfo;
@@ -38,14 +37,20 @@ public class UserController {
     }
 
     @PostMapping("signup")
-    public ResponseEntity<Message<?>> signup(@Valid @RequestBody User userSignupInfo) {
-        userService.addUser(userSignupInfo);
-        return ResponseEntity.ok(new Message<>(MessageConstants.SIGNED_UP));
+    public ResponseEntity<?> signup(@Valid @RequestBody User userSignupInfo, HttpSession httpSession) {
+        String username = (String) httpSession.getAttribute(SESSION_ATTR);
+        if (username != null) {
+            return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
+        }
+
+        User user = userService.addUser(userSignupInfo);
+        httpSession.setAttribute(SESSION_ATTR, user.getUsername());
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("update")
     @JsonView(View.SummaryWithMessage.class)
-    public ResponseEntity<? extends Message<?>> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
+    public ResponseEntity<?> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
         String validateResult;
         List<String> responseList = new ArrayList<>();
 
@@ -92,7 +97,7 @@ public class UserController {
         if (userUpdateInfo.getUsername() != null) {
             httpSession.setAttribute(SESSION_ATTR, userUpdateInfo.getUsername());
         }
-        return ResponseEntity.ok(new UserMessage<>(MessageConstants.UPDATED, user));
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("me")
@@ -103,11 +108,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        return ResponseEntity.ok(new UserMessage<>(null, userService.getByUsername(username)));
+        return ResponseEntity.ok(userService.getByUsername(username));
     }
 
     @PostMapping("login")
-    public ResponseEntity<Message<?>> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
+    public ResponseEntity<?> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
         List<String> responseList = new ArrayList<>();
 
         if (userSigninInfo.getLogin() == null || userSigninInfo.getLogin().isEmpty()) {
@@ -127,8 +132,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(new Message<>(responseList));
         }
         httpSession.setAttribute(SESSION_ATTR, user.getUsername());
-        responseList.add(MessageConstants.LOGGED_IN);
-        return ResponseEntity.ok(new Message<>(responseList));
+        return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("logout")
