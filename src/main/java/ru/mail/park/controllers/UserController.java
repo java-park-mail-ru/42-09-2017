@@ -43,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok(new Message<>(MessageConstants.SIGNED_UP));
     }
 
-    @PostMapping("update")
+    @PutMapping("update")
     @JsonView(View.SummaryWithMessage.class)
     public ResponseEntity<? extends Message<?>> update(@RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
         String validateResult;
@@ -123,7 +123,7 @@ public class UserController {
         return ResponseEntity.ok(new Message<>(MessageConstants.LOGGED_IN));
     }
 
-    @GetMapping("logout")
+    @DeleteMapping("logout")
     public ResponseEntity<Message<String>> logout(HttpSession httpSession) {
         if (httpSession.getAttribute(SESSION_ATTR) == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message<>(MessageConstants.UNAUTHORIZED));
