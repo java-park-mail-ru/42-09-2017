@@ -107,20 +107,28 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<Message<String>> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
+    public ResponseEntity<Message<?>> login(@RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
+        List<String> responseList = new ArrayList<>();
+
         if (userSigninInfo.getLogin() == null || userSigninInfo.getLogin().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Message<>(MessageConstants.EMPTY_USERNAME));
+            responseList.add(MessageConstants.EMPTY_USERNAME);
         }
         if (userSigninInfo.getPassword() == null || userSigninInfo.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Message<>(MessageConstants.EMPTY_PASSWORD));
+            responseList.add(MessageConstants.EMPTY_PASSWORD);
+        }
+
+        if (!responseList.isEmpty()) {
+            return ResponseEntity.badRequest().body(new Message<>(responseList));
         }
 
         final User user = userService.checkUserAndPassword(userSigninInfo.getLogin(), userSigninInfo.getPassword());
         if (user == null) {
-            return ResponseEntity.badRequest().body(new Message<>(MessageConstants.BAD_LOGIN_DATA));
+            responseList.add(MessageConstants.BAD_LOGIN_DATA);
+            return ResponseEntity.badRequest().body(new Message<>(responseList));
         }
         httpSession.setAttribute(SESSION_ATTR, user.getUsername());
-        return ResponseEntity.ok(new Message<>(MessageConstants.LOGGED_IN));
+        responseList.add(MessageConstants.LOGGED_IN);
+        return ResponseEntity.ok(new Message<>(responseList));
     }
 
     @DeleteMapping("logout")
