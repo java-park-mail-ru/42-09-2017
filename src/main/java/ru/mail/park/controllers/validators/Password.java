@@ -1,18 +1,17 @@
 package ru.mail.park.controllers.validators;
 
+import ru.mail.park.controllers.messages.MessageConstants;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = NotExistsValidator.class)
+@Constraint(validatedBy = PasswordValidator.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NotExists {
-    String field() default "";
-
-    @SuppressWarnings("unused")
-    String message() default "";
+public @interface Password {
+    String message() default MessageConstants.BAD_PASSWORD;
 
     @SuppressWarnings("unused")
     Class<?>[] groups() default {};

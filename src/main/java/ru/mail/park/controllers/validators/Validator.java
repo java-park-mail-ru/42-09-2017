@@ -2,7 +2,7 @@ package ru.mail.park.controllers.validators;
 
 import org.springframework.stereotype.Service;
 import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.services.UserService;
+import ru.mail.park.services.dao.UserDao;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,10 +12,10 @@ public class Validator {
     private static final Integer USERNAME_MIN_LENGTH = 3;
     private static final Integer PASSWORD_MIN_LENGTH = 6;
 
-    private final UserService userService;
+    private final UserDao userDao;
 
-    public Validator(UserService userService) {
-        this.userService = userService;
+    public Validator(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     private static Pattern patternEmail = Pattern.compile(
@@ -38,7 +38,7 @@ public class Validator {
             return MessageConstants.BAD_USERNAME;
         }
 
-        if (userService.hasUsername(username)) {
+        if (userDao.hasUsername(username)) {
             return MessageConstants.EXISTS_USERNAME;
         }
 
@@ -56,7 +56,7 @@ public class Validator {
             return MessageConstants.BAD_EMAIL;
         }
 
-        if (userService.hasEmail(email)) {
+        if (userDao.hasEmail(email)) {
             return MessageConstants.EXISTS_EMAIL;
         }
 

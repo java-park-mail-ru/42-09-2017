@@ -1,8 +1,9 @@
-package ru.mail.park.models;
+package ru.mail.park.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.hibernate.validator.constraints.NotBlank;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.controllers.validators.NotExists;
 import ru.mail.park.info.constants.Constants;
@@ -12,14 +13,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class User {
+public class UserDTO {
     @NotNull(message = MessageConstants.EMPTY_USERNAME)
     @Size(
             min = Constants.USERNAME_MIN_LENGTH,
             message = MessageConstants.SHORT_USERNAME
     )
     @Pattern(
-            regexp = "[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}",
+            regexp = Constants.USERNAME_REGEXP,
             message = MessageConstants.BAD_USERNAME
     )
     @NotExists(
@@ -29,9 +30,9 @@ public class User {
     @JsonView(View.Summary.class)
     private String username;
 
-    @NotNull(message = MessageConstants.EMPTY_EMAIL)
+    @NotBlank(message = MessageConstants.EMPTY_EMAIL)
     @Pattern(
-            regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$",
+            regexp = Constants.EMAIL_REGEXP,
             message = MessageConstants.BAD_EMAIL
     )
     @NotExists(
@@ -48,8 +49,14 @@ public class User {
     )
     private String password;
 
+    public UserDTO() {
+        this.username = "";
+        this.email = "";
+        this.password = "";
+    }
+
     @JsonCreator
-    private User(
+    public UserDTO(
             @JsonProperty("username") String username,
             @JsonProperty("email") String email,
             @JsonProperty("password") String password
@@ -59,7 +66,7 @@ public class User {
         this.password = password;
     }
 
-    public User(User user) {
+    public UserDTO(UserDTO user) {
         this(user.getUsername(), user.getEmail(), user.getPassword());
     }
 
@@ -79,6 +86,7 @@ public class User {
         this.email = email;
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return password;
     }

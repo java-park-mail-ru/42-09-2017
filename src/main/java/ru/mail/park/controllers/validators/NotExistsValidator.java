@@ -1,16 +1,16 @@
 package ru.mail.park.controllers.validators;
 
-import ru.mail.park.services.UserService;
+import ru.mail.park.services.dao.UserDao;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class NotExistsValidator implements ConstraintValidator<NotExists, String> {
-    private final UserService userService;
+    private final UserDao userDao;
     private String field;
 
-    NotExistsValidator(UserService userService) {
-        this.userService = userService;
+    NotExistsValidator(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Override
@@ -22,9 +22,9 @@ public class NotExistsValidator implements ConstraintValidator<NotExists, String
     public boolean isValid(String login,
                            ConstraintValidatorContext cxt) {
         if (field.equals("username")) {
-            return !userService.hasUsername(login);
+            return !userDao.hasUsername(login);
         } else if (field.equals("email")) {
-            return !userService.hasEmail(login);
+            return !userDao.hasEmail(login);
         }
         return false;
     }
