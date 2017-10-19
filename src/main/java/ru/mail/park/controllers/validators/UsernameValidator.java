@@ -1,6 +1,5 @@
 package ru.mail.park.controllers.validators;
 
-import com.sun.istack.internal.Nullable;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.info.constants.Constants;
 
