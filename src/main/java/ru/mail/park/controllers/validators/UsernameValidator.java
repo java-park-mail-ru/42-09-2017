@@ -12,7 +12,7 @@ public class UsernameValidator extends Validator {
     private static Pattern pattern = Pattern.compile(Constants.USERNAME_REGEXP);
 
     @Override
-    public <T> String validate(Object obj, @Nullable HttpSession httpSession, @Nullable boolean nullable) {
+    public <T> String validate(Object obj, HttpSession httpSession, boolean nullable) {
         String username = (String) obj;
 
         if (!(!nullable && username == null) && username != null) {
