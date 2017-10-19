@@ -108,6 +108,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.heroku.sdk</groupId>
+                <artifactId>heroku-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <configuration>
+                    <appName>back42end</appName>
+                    <processTypes>
+                        <web>java -jar target/42.jar</web>
+                    </processTypes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
