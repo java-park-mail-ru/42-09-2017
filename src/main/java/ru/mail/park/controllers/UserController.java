@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.controllers.domain.User;
 import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.controllers.validators.Validator;
+import ru.mail.park.controllers.validators.CValidatorChain;
+import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.dto.UserDTO;
 import ru.mail.park.info.UserSigninInfo;
@@ -24,32 +25,34 @@ import java.util.List;
 
 @CrossOrigin(origins = { "https://sand42box.herokuapp.com",
         "https://nightly-42.herokuapp.com",
-        "https://master-42.herokuapp.com" }
-        )
+        "https://master-42.herokuapp.com"
+})
 @RestController
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private final UserDao userDao;
-    private final Validator validator;
+    private final CValidatorChain validatorChain;
     private ModelMapper modelMapper;
 
     private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(
             UserDao userDao,
-            Validator validator,
+            CValidatorChain validatorChain,
             ModelMapper modelMapper
     ) {
         this.userDao = userDao;
-        this.validator = validator;
+        this.validatorChain = validatorChain;
         this.modelMapper = modelMapper;
     }
 
     @PostMapping("signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody UserDTO userSignupInfo, HttpSession httpSession) {
+    public ResponseEntity<?> signup(@RequestBody UserDTO userSignupInfo, HttpSession httpSession) {
         if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
+
+        validatorChain.validate(userSignupInfo, httpSession);
 
         User user = modelMapper.map(userSignupInfo, User.class);
         userDao.createUser(user);
@@ -60,7 +63,6 @@ public class UserController {
 
     @PutMapping("update")
     public ResponseEntity<?> update(@Valid @RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
-        String validateResult;
         List<String> responseList = new ArrayList<>();
 
         Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
@@ -68,42 +70,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message<>(MessageConstants.UNAUTHORIZED));
         }
 
-        User user = userDao.findUserById(id);
-
-        if (userUpdateInfo.getUsername() != null) {
-            validateResult = validator.validateUsername(userUpdateInfo.getUsername());
-            if (validateResult != null) {
-                responseList.add(validateResult);
-            }
-        }
-        if (userUpdateInfo.getEmail() != null) {
-            validateResult = validator.validateEmail(userUpdateInfo.getEmail());
-            if (validateResult != null) {
-                responseList.add(validateResult);
-            }
-        }
-        if (userUpdateInfo.getOldPassword() != null) {
-            final String oldPassword = userUpdateInfo.getOldPassword();
-            if (!userDao.checkUserPassword(user, oldPassword)) {
-                responseList.add(MessageConstants.BAD_OLD_PASSWORD);
-            }
-            if (userUpdateInfo.getPassword() != null) {
-                final String newPassword = userUpdateInfo.getPassword();
-                validateResult = Validator.validatePassword(newPassword);
-                if (validateResult != null) {
-                    responseList.add(validateResult);
-                }
-            } else {
-                responseList.add(MessageConstants.EMPTY_PASSWORD);
-            }
-        } else if (userUpdateInfo.getPassword() != null) {
+        validatorChain.validate(userUpdateInfo, httpSession);
+        if (userUpdateInfo.getOldPassword() != null && userUpdateInfo.getPassword() == null) {
+            responseList.add(MessageConstants.EMPTY_PASSWORD);
+            throw new ControllerValidationException(responseList);
+        } else if (userUpdateInfo.getOldPassword() == null && userUpdateInfo.getPassword() != null) {
             responseList.add(MessageConstants.EMPTY_OLD_PASSWORD);
+            throw new ControllerValidationException(responseList);
         }
 
-        if (!responseList.isEmpty()) {
-            return ResponseEntity.badRequest().body(new Message<>(responseList));
-        }
-
+        User user = userDao.findUserById(id);
         userDao.updateUser(user, userUpdateInfo);
         return ResponseEntity
                 .ok(modelMapper.map(user, UserDTO.class));

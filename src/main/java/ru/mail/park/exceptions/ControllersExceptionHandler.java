@@ -23,4 +23,11 @@ public class ControllersExceptionHandler {
         }
         return ResponseEntity.badRequest().body(new Message<>(response));
     }
+
+    @ExceptionHandler(ControllerValidationException.class)
+    public ResponseEntity<Message<?>> validHandler(ControllerValidationException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new Message<>(ex.getResponseList()));
+    }
 }

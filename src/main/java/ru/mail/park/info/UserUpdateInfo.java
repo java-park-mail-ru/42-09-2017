@@ -2,42 +2,12 @@ package ru.mail.park.info;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.controllers.validators.NotExists;
-import ru.mail.park.controllers.validators.CPassword;
-import ru.mail.park.info.constants.Constants;
-
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import ru.mail.park.controllers.validators.CValidator;
 
 public class UserUpdateInfo {
-    @Size(
-            min = Constants.USERNAME_MIN_LENGTH,
-            message = MessageConstants.SHORT_USERNAME
-    )
-    @Pattern(
-            regexp = Constants.USERNAME_REGEXP,
-            message = MessageConstants.BAD_USERNAME
-    )
-    @NotExists(
-            field = "username",
-            message = MessageConstants.EXISTS_USERNAME
-    )
     private final String username;
-
-    @Pattern(
-            regexp = Constants.EMAIL_REGEXP,
-            message = MessageConstants.BAD_EMAIL
-    )
-    @NotExists(
-            field = "email",
-            message = MessageConstants.EXISTS_EMAIL
-    )
     private final String email;
-
     private final String oldPassword;
-
-    @CPassword
     private final String password;
 
     @JsonCreator
@@ -54,18 +24,22 @@ public class UserUpdateInfo {
         this.password = password;
     }
 
+    @CValidator(fieldName = "username", nullable = true)
     public String getUsername() {
         return username;
     }
 
+    @CValidator(fieldName = "email", nullable = true)
     public String getEmail() {
         return email;
     }
 
+    @CValidator(fieldName = "oldPassword", nullable = true)
     public String getOldPassword() {
         return oldPassword;
     }
 
+    @CValidator(fieldName = "password", nullable = true)
     public String getPassword() {
         return password;
     }
