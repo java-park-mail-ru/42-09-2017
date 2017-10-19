@@ -22,7 +22,7 @@ public class CValidatorChain {
         this.applicationContext = applicationContext;
     }
 
-    public <T> void validate(Object obj, @Nullable HttpSession httpSession) {
+    public <T> void validate(Object obj, HttpSession httpSession) {
         Method[] methods = obj.getClass().getMethods();
         List<String> responseList = new ArrayList<>();
         for (Method method : methods) {
