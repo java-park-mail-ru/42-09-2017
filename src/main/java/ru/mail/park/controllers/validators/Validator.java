@@ -2,7 +2,7 @@ package ru.mail.park.controllers.validators;
 
 import org.springframework.stereotype.Service;
 import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.services.dao.UserDao;
+import ru.mail.park.services.UserDao;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

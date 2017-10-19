@@ -13,7 +13,8 @@ import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.dto.UserDTO;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.controllers.messages.Message;
-import ru.mail.park.services.dao.UserDao;
+import ru.mail.park.info.constants.Constants;
+import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -34,8 +35,6 @@ public class UserController {
 
     private Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private static final String SESSION_ATTR = "user_info";
-
     public UserController(
             UserDao userDao,
             Validator validator,
@@ -48,13 +47,13 @@ public class UserController {
 
     @PostMapping("signup")
     public ResponseEntity<?> signup(@Valid @RequestBody UserDTO userSignupInfo, HttpSession httpSession) {
-        if (httpSession.getAttribute(SESSION_ATTR) != null) {
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
 
         User user = modelMapper.map(userSignupInfo, User.class);
         userDao.createUser(user);
-        httpSession.setAttribute(SESSION_ATTR, user.getId());
+        httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
                 .ok(modelMapper.map(user, UserDTO.class));
     }
@@ -64,7 +63,7 @@ public class UserController {
         String validateResult;
         List<String> responseList = new ArrayList<>();
 
-        Long id = (Long) httpSession.getAttribute(SESSION_ATTR);
+        Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
         if (id == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message<>(MessageConstants.UNAUTHORIZED));
         }
@@ -112,7 +111,7 @@ public class UserController {
 
     @GetMapping("me")
     public ResponseEntity<?> me(HttpSession httpSession) {
-        Long id = (Long) httpSession.getAttribute(SESSION_ATTR);
+        Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
         if (id == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -133,14 +132,14 @@ public class UserController {
                     .badRequest()
                     .body(new Message<>(responseList));
         }
-        httpSession.setAttribute(SESSION_ATTR, user.getId());
+        httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
                 .ok(modelMapper.map(user, UserDTO.class));
     }
 
     @DeleteMapping("logout")
     public ResponseEntity<Message<String>> logout(HttpSession httpSession) {
-        if (httpSession.getAttribute(SESSION_ATTR) == null) {
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new Message<>(MessageConstants.UNAUTHORIZED));

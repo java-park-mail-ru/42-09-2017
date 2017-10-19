@@ -1,6 +1,6 @@
 package ru.mail.park.controllers.validators;
 
-import ru.mail.park.services.dao.UserDao;
+import ru.mail.park.services.UserDao;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

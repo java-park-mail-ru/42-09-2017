@@ -7,10 +7,10 @@ import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = PasswordValidator.class)
+@Constraint(validatedBy = CPasswordValidator.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Password {
+public @interface CPassword {
     String message() default MessageConstants.BAD_PASSWORD;
 
     @SuppressWarnings("unused")

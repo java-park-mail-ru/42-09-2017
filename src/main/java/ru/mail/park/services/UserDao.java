@@ -5,18 +5,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.controllers.domain.User;
 import ru.mail.park.info.UserUpdateInfo;
-import ru.mail.park.services.dao.UserDao;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 @Service
 @Transactional
-public class UserDaoImpl implements UserDao {
+public class UserDao {
     private final PasswordEncoder passwordEncoder;
     private EntityManager em;
 
-    public UserDaoImpl(
+    public UserDao(
             PasswordEncoder passwordEncoder,
             EntityManager em
     ) {
@@ -24,7 +23,6 @@ public class UserDaoImpl implements UserDao {
         this.em = em;
     }
 
-    @Override
     public User createUser(User userData) {
         final String passwordEncoded = passwordEncoder.encode(userData.getPassword());
         userData.setPassword(passwordEncoded);
@@ -32,7 +30,6 @@ public class UserDaoImpl implements UserDao {
         return userData;
     }
 
-    @Override
     public User updateUser(User user, UserUpdateInfo userData) {
         final String username = userData.getUsername();
         final String email = userData.getEmail();
@@ -50,17 +47,14 @@ public class UserDaoImpl implements UserDao {
         return user;
     }
 
-    @Override
     public boolean checkUserPassword(User user, String password) {
         return passwordEncoder.matches(password, user.getPassword());
     }
 
-    @Override
     public User findUserById(Long id) {
         return em.find(User.class, id);
     }
 
-    @Override
     public User findUserByUsername(String username) {
         try {
             return em.createQuery("select u from User as u where username=:username", User.class)
@@ -71,7 +65,6 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
-    @Override
     public User findUserByEmail(String email) {
         try {
             return em.createQuery("select u from User as u where email=:email", User.class)
@@ -82,7 +75,6 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
-    @Override
     public boolean hasUsername(String username) {
         Long count = em.createQuery("select count(id) from User where username=:username", Long.class)
                 .setParameter("username", username)
@@ -90,7 +82,6 @@ public class UserDaoImpl implements UserDao {
         return count > 0;
     }
 
-    @Override
     public boolean hasEmail(String email) {
         Long count = em.createQuery("select count(id) from User where email=:email", Long.class)
                 .setParameter("email", email)

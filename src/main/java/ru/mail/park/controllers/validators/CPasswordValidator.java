@@ -5,10 +5,9 @@ import ru.mail.park.info.constants.Constants;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class PasswordValidator implements ConstraintValidator<Password, Object> {
+public class CPasswordValidator implements ConstraintValidator<CPassword, Object> {
     @Override
-    public void initialize(Password constraintAnnotation) {
-
+    public void initialize(CPassword constraintAnnotation) {
     }
 
     @Override

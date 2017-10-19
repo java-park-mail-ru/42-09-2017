@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.controllers.validators.NotExists;
-import ru.mail.park.controllers.validators.Password;
+import ru.mail.park.controllers.validators.CPassword;
 import ru.mail.park.info.constants.Constants;
 
 import javax.validation.constraints.Pattern;
@@ -37,7 +37,7 @@ public class UserUpdateInfo {
 
     private final String oldPassword;
 
-    @Password
+    @CPassword
     private final String password;
 
     @JsonCreator

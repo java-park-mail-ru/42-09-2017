@@ -49,17 +49,15 @@ public class UserDTO {
     )
     private String password;
 
+    @JsonCreator
     public UserDTO() {
-        this.username = "";
-        this.email = "";
-        this.password = "";
+
     }
 
-    @JsonCreator
     public UserDTO(
-            @JsonProperty("username") String username,
-            @JsonProperty("email") String email,
-            @JsonProperty("password") String password
+            String username,
+            String email,
+            String password
     ) {
         this.username = username;
         this.email = email;
@@ -74,6 +72,7 @@ public class UserDTO {
         return username;
     }
 
+    @JsonProperty("username")
     public void setUsername(String username) {
         this.username = username;
     }
@@ -82,6 +81,7 @@ public class UserDTO {
         return email;
     }
 
+    @JsonProperty("email")
     public void setEmail(String email) {
         this.email = email;
     }
@@ -91,6 +91,7 @@ public class UserDTO {
         return password;
     }
 
+    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }

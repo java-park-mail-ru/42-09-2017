@@ -16,14 +16,7 @@ public class User {
     private Long scores;
     private Integer level;
 
-    public User() {
-        this.id = 0L;
-        this.username = "";
-        this.email = "";
-        this.password = "";
-        this.scores = 0L;
-        this.level = 0;
-    }
+    public User() { }
 
     public Long getId() {
         return id;
