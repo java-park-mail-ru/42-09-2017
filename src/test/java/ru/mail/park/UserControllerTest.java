@@ -46,11 +46,12 @@ public class UserControllerTest {
     private ModelMapper modelMapper;
 
     private User user;
+    private static UserDTO userDTO = new UserDTO("testuser", "testemail@example.com", "testpassword");;
 
     @Before
     public void setup() {
         user = modelMapper.map(
-                new UserDTO("testuser", "testemail@example.com", "testpassword"),
+                userDTO,
                 User.class
         );
         userDao.createUser(user);
@@ -138,27 +139,39 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testLogin_Success() throws Exception {
+        mockMvc
+                .perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(
+                                new UserSigninInfo(userDTO.getUsername(), userDTO.getPassword()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("username")
+                        .value(userDTO.getUsername()))
+                .andExpect(jsonPath("email")
+                        .value(userDTO.getEmail()));
+    }
+
+    @Test
     public void testLogin_UserNotExists() throws Exception {
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new UserSigninInfo("userNotExists", "testpass"))))
+                        .content(mapper.writeValueAsString(new UserSigninInfo("userNotExists", userDTO.getPassword()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message")
                         .value(MessageConstants.BAD_LOGIN_DATA));
     }
 
-//    @Test
-//    public void testLogin_Success() throws Exception {
-//        mockMvc
-//                .perform(post("/api/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(mapper.writeValueAsString(
-//                                new UserSigninInfo(user.getUsername(), user.getPassword()))))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("username")
-//                        .value(user.getUsername()))
-//                .andExpect(jsonPath("email")
-//                        .value(user.getEmail()));
-//    }
+    @Test
+    public void testLogin_BadLoginData() throws Exception {
+        mockMvc
+                .perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(
+                                new UserSigninInfo(userDTO.getUsername(), "wrongpass"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message")
+                        .value(MessageConstants.BAD_LOGIN_DATA));
+    }
 }
