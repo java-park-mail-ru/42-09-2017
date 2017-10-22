@@ -1,16 +1,16 @@
 services:
-  - postgresql
+- postgresql
 before_script:
-  - psql -c "create user artur with superuser password 'user';" -U postgres
-  - psql -c "create database technopark;" -U postgres
-  - psql -c "grant all on database technopark to artur;" -U postgres
+- psql -c "create user artur with superuser password 'user';" -U postgres
+- psql -c "create database technopark;" -U postgres
+- psql -c "grant all on database technopark to artur;" -U postgres
 language: java
-#deploy:
-#  skip_cleanup: true
-#  provider: heroku
-#  api_key:
-#    secure: IdHIuTeqfb1AkT198roZOfSBZP5VjQY3jQno7WH6GHdokQyM0pudsAnldqDqCmREGO+ZQDlaaiftbgKFC9+RAzMzmq/DVQmWmSEtQyp7gH1o6jYjY90cpEixR402V6yAaoq7yhMzmTFJo8XARrgz6+75IPqrtKRrH4B4map1XMdnqtUBFJ4pH2EBZ4pII36mKp5oJN5DxZxDrKQBVJSF4k+ngXCVp3zM8ZtgqYW3/bkwbCciXDVHBUN9SaRoKiqP/V+S6hWL6KUA2TGjqfJIy5BErzrx5CLc/YX4WetmAhdLwiyTWf9dFcXL7OZNdZZ0yPFYnM0J01dmdcUsnUReoUfR9kKypoCEatyrZ1P4iVunAzCsCqvzBVtZgN0v58ZUQT5wPUpihTJSe88UmDxxvmnMqpDib6nqWhlhBEvjd0dklMgTjXtzp24BqOV3HTwV5hbZEQtEGX6YDOSo7ld/QZO7Ffjgx7NOjF/P819XbhvM+tU4xWuHP0bp2+2ncaBpnfezaj+BynNt/SXuRvZ+9V7XevyV6ApfdFTNl8eYIpjdGavoHtk0+cqeGaSHfVc/ioqfsupH35UdaJZTeyeh/OVZaMkap+XWiusr2EDRF0nBj/C6W2Taa9suOpmbhxcDf422oSIXazmohEUA6zokELF4neTCCzswvRSAFKs3bLY=
-#  app: back42end
-#  on:
-#    repo: java-park-mail-ru/42-09-2017
-#    branch: develop
+deploy:
+  skip_cleanup: true
+  provider: heroku
+  api_key:
+    secure: otiNKO2p8NzFJzWe0pmm0e1FI7fBBSL2L8FYmt6lWzjMJI7P5o1X/QL99V3wV+kDAeA2SObdgrr/ILfEZcogzeEsq6Exy8p7wYn2ArTXhO1YG3LPj7XubQbm8sjinUK2HfoPl4KqKu9o2znk1fxKFZdknyVHF8cwOPsA2ndshFVeGf81ApjwX3aYCq7/9xUVx4QjNEhoD+vvcs9KAZwfB+XetI0szYLwH2ojVMTMvaF8NWzj9czSFjeGof9bRRYFL7yq7LxX/SpWZVZlQkuccr1lDL1+3MNBmED0qN2DIjtj8DGz709h/t4sTyIWt+2fdQow+YpQAY45LoR6T3gqPidEvkLGVPepe20EA6wBs/j+Hgl9Et/uGwlR6s+pkzYgMFb9+L0SV+Wr/FuCe65DkX4GEGQFw28xEapfCc4evpitcZsbejWzGQfkCpCUS8WKnIC0hH+hhfvJ/6+027ElMA3dYS8RHwAx8QF4alDTnbiUJt1q/rUzhI1CtHMzZc4BAC0s9k7ZY/611Z2ZivEDoiE/pOAcgmWAKYVFn55Ik66yocu43HOD/o9l2ejfzSpq/wZZ5gsdRK2Mz363Qi+CRZxf3aZypDPo7XZGVHR70foUBDWFoN5YkQnV2E80XejjbxFyqAGxkw+TGMgtONspDTdaO5zoIWL+MlPu3FQicxU=
+  app: back42end
+  on:
+    repo: java-park-mail-ru/42-09-2017
+    branch: develop
