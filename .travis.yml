@@ -5,12 +5,3 @@ before_script:
 - psql -c "create database technopark;" -U postgres
 - psql -c "grant all on database technopark to artur;" -U postgres
 language: java
-#deploy:
-#  skip_cleanup: true
-#  provider: heroku
-#  api_key:
-#    secure: mA/t5vfAFSTSvrmNwxR+qNGpuIc7VMATHvCgZZ6zIB6yvqZ2eIyoQwMr4Q5vrBjew+t4m/QwCM3deCkXwj2iWMKUVzATiqH/WHr+mS7p5x1d/h7lZvqU1OktoKw34vZKuQ+1ocof7CyPehXU+peFZhpeAy66SXJlYNzQHLeaFnqQghIAoWjGc/jud0hI/uz8EDNyQbfSAiNFOq6gNC2khQPr6+8AQNMwb0adzssk5Yv7ROyWPvMIQ7+CSfcUc/BNMXPjU4xtgOWFHk/S7wZLflT89Nj7pfUnIPcU2NiC0zpICyK7ys3xXnbF3efZakIxmGQwmCi6Zu4KDs+L9HQR7cODVjN3HWhMdG1yTW38Q8ujGkKVQ/BjGQI60Xfl5c9wfqcmk+Cpao7/P7Yi3zdghqUvZ18v4Ed4eKz94hsBcGjf0OAwyOtrc5eqzRfUEtW0wsOv+Z+9S0pPN3/w+RibL1q1Ajr6/kkYRRSNhXZ2Lf3IQ9MMr4KfrAqeDFbaM9kFrc4MzHSZQC77gzulnF8kkFjB/5b++OQTByWF/6Zn4+HJv4qceUgRMmJmi9mXcgMdd825YBaNjK0zUV4m3R8xag3vH4ltB1EqKKb9PN6qm88TQc6s121eZreb/vPhfg2fC67TsyOOSS8CFjNW82DBKcaeCWsS68JxiRkCK3HJXAQ=
-#  app: back42end
-#  on:
-#    repo: java-park-mail-ru/42-09-2017
-#    branch: develop
