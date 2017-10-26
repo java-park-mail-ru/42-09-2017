@@ -30,6 +30,8 @@ public class UsernameValidator extends Validator {
             if (getUserDao().hasUsername(username)) {
                 return MessageConstants.EXISTS_USERNAME;
             }
+        } else if (!nullable) {
+            return MessageConstants.EMPTY_USERNAME;
         }
         return null;
     }

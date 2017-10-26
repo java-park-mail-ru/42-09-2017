@@ -1,6 +1,5 @@
 package ru.mail.park.controllers;
 
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.mail.park.controllers.domain.User;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.controllers.validators.CValidatorChain;
+import ru.mail.park.dto.helpers.UserHelper;
 import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.dto.UserDTO;
@@ -23,7 +23,8 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = { "https://sand42box.herokuapp.com",
+@CrossOrigin(origins = {
+        "https://sand42box.herokuapp.com",
         "https://nightly-42.herokuapp.com",
         "https://master-42.herokuapp.com"
 })
@@ -32,18 +33,15 @@ import java.util.List;
 public class UserController {
     private final UserDao userDao;
     private final CValidatorChain validatorChain;
-    private ModelMapper modelMapper;
 
     private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(
             UserDao userDao,
-            CValidatorChain validatorChain,
-            ModelMapper modelMapper
+            CValidatorChain validatorChain
     ) {
         this.userDao = userDao;
         this.validatorChain = validatorChain;
-        this.modelMapper = modelMapper;
     }
 
     @PostMapping("signup")
@@ -54,11 +52,11 @@ public class UserController {
 
         validatorChain.validate(userSignupInfo, httpSession);
 
-        User user = modelMapper.map(userSignupInfo, User.class);
+        User user = UserHelper.fromDto(userSignupInfo);
         userDao.createUser(user);
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
-                .ok(modelMapper.map(user, UserDTO.class));
+                .ok(UserHelper.toDto(user));
     }
 
     @PutMapping("update")
@@ -82,7 +80,7 @@ public class UserController {
         User user = userDao.findUserById(id);
         userDao.updateUser(user, userUpdateInfo);
         return ResponseEntity
-                .ok(modelMapper.map(user, UserDTO.class));
+                .ok(UserHelper.toDto(user));
     }
 
     @GetMapping("me")
@@ -92,7 +90,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         return ResponseEntity
-                .ok(modelMapper.map(userDao.findUserById(id), UserDTO.class));
+                .ok(UserHelper.toDto(userDao.findUserById(id)));
     }
 
     @PostMapping("login")
@@ -110,7 +108,7 @@ public class UserController {
         }
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
-                .ok(modelMapper.map(user, UserDTO.class));
+                .ok(UserHelper.toDto(user));
     }
 
     @DeleteMapping("logout")

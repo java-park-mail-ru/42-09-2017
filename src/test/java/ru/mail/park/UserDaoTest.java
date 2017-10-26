@@ -4,7 +4,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -12,10 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
@@ -31,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.controllers.domain.User;
 import ru.mail.park.controllers.messages.MessageConstants;
 import ru.mail.park.dto.UserDTO;
+import ru.mail.park.dto.helpers.UserHelper;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.info.constants.Constants;
@@ -50,18 +48,12 @@ public class UserDaoTest {
     @Autowired
     private ObjectMapper mapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     private User user;
     private static UserDTO userDTO = new UserDTO("testuser", "testemail@example.com", "testpassword");;
 
     @Before
     public void setup() {
-        user = modelMapper.map(
-                userDTO,
-                User.class
-        );
+        user = UserHelper.fromDto(userDTO);
         userDao.createUser(user);
     }
 

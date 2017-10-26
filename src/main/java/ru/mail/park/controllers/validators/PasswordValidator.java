@@ -18,6 +18,8 @@ public class PasswordValidator extends Validator {
             if (password.length() < PASSWORD_MIN_LENGTH) {
                 return MessageConstants.BAD_PASSWORD;
             }
+        } else if (!nullable) {
+            return MessageConstants.EMPTY_PASSWORD;
         }
         return null;
     }

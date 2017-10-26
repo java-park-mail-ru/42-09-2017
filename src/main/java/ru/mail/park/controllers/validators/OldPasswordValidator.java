@@ -14,6 +14,8 @@ public class OldPasswordValidator extends Validator {
             if (!getUserDao().checkUserPassword(getUserDao().findUserById(id), oldPassword)) {
                 return MessageConstants.BAD_OLD_PASSWORD;
             }
+        } else if (!nullable) {
+            return MessageConstants.EMPTY_OLD_PASSWORD;
         }
         return null;
     }

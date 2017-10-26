@@ -3,35 +3,18 @@ package ru.mail.park.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 public class MapMetaDto {
     private Integer id;
     private String name;
     private Integer level;
     private Integer timer;
-    private Timestamp created;
+    private Integer rating;
+    private Date created;
     private String preview;
     private Integer playedTimes;
     private Integer players;
-
-    public MapMetaDto(
-            String name,
-            Integer level,
-            Integer timer,
-            Timestamp created,
-            String preview,
-            Integer playedTimes,
-            Integer players
-    ) {
-        this.name = name;
-        this.level = level;
-        this.timer = timer;
-        this.created = created;
-        this.preview = preview;
-        this.playedTimes = playedTimes;
-        this.players = players;
-    }
 
     @JsonCreator
     public MapMetaDto() {
@@ -58,8 +41,13 @@ public class MapMetaDto {
         return timer;
     }
 
+    @JsonProperty("rating")
+    public Integer getRating() {
+        return rating;
+    }
+
     @JsonProperty("created")
-    public Timestamp getCreated() {
+    public Date getCreated() {
         return created;
     }
 
@@ -80,5 +68,37 @@ public class MapMetaDto {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public void setTimer(Integer timer) {
+        this.timer = timer;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public void setPreview(String preview) {
+        this.preview = preview;
+    }
+
+    public void setPlayedTimes(Integer playedTimes) {
+        this.playedTimes = playedTimes;
+    }
+
+    public void setPlayers(Integer players) {
+        this.players = players;
     }
 }

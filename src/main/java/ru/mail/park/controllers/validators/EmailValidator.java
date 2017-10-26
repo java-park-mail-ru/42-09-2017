@@ -27,6 +27,8 @@ public class EmailValidator extends Validator {
             if (getUserDao().hasEmail(email)) {
                 return MessageConstants.EXISTS_EMAIL;
             }
+        } else if (!nullable) {
+            return MessageConstants.EMPTY_EMAIL;
         }
         return null;
     }

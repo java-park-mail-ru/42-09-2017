@@ -48,4 +48,9 @@ public class GameDao {
             return new ArrayList<>();
         }
     }
+
+    public MapMeta createMap(MapMeta mapMeta) {
+        em.persist(mapMeta);
+        return mapMeta;
+    }
 }

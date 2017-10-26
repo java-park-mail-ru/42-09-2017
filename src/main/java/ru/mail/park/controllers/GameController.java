@@ -1,10 +1,8 @@
 package ru.mail.park.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.mail.park.dto.MapMetaDto;
 import ru.mail.park.dto.helpers.MapMetaHelper;
 import ru.mail.park.services.GameDao;
@@ -28,6 +26,15 @@ public class GameController {
         return ResponseEntity
                 .ok(MapMetaHelper.toDto(
                         gameDao.getMaps(sort, page)
+                ));
+    }
+
+    @PutMapping("maps/create")
+    public ResponseEntity<MapMetaDto> createMap(@RequestBody MapMetaDto mapMetaDto) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(MapMetaHelper.toDto(
+                        gameDao.createMap(MapMetaHelper.fromDto(mapMetaDto))
                 ));
     }
 }

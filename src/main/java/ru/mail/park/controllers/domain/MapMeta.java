@@ -1,7 +1,7 @@
 package ru.mail.park.controllers.domain;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.sql.Date;
 
 @Entity
 @Table(name = "map_meta")
@@ -12,31 +12,14 @@ public class MapMeta {
     private String name;
     private Integer level;
     private Integer timer;
-    private Timestamp created;
+    private Integer rating;
+    private Date created;
     private String preview;
     private Integer playedTimes;
     private Integer players;
 
     public MapMeta() {
 
-    }
-
-    public MapMeta(
-            String name,
-            Integer level,
-            Integer timer,
-            Timestamp created,
-            String preview,
-            Integer playedTimes,
-            Integer players
-    ) {
-        this.name = name;
-        this.level = level;
-        this.timer = timer;
-        this.created = created;
-        this.preview = preview;
-        this.playedTimes = playedTimes;
-        this.players = players;
     }
 
     public Integer getId() {
@@ -55,7 +38,11 @@ public class MapMeta {
         return timer;
     }
 
-    public Timestamp getCreated() {
+    public Integer getRating() {
+        return rating;
+    }
+
+    public Date getCreated() {
         return created;
     }
 
@@ -73,5 +60,37 @@ public class MapMeta {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public void setTimer(Integer timer) {
+        this.timer = timer;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public void setPreview(String preview) {
+        this.preview = preview;
+    }
+
+    public void setPlayedTimes(Integer playedTimes) {
+        this.playedTimes = playedTimes;
+    }
+
+    public void setPlayers(Integer players) {
+        this.players = players;
     }
 }
