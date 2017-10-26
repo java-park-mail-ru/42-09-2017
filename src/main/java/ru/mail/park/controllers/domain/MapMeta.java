@@ -22,7 +22,6 @@ public class MapMeta {
     }
 
     public MapMeta(
-            Integer id,
             String name,
             Integer level,
             Integer timer,
@@ -31,7 +30,6 @@ public class MapMeta {
             Integer playedTimes,
             Integer players
     ) {
-        this.id = id;
         this.name = name;
         this.level = level;
         this.timer = timer;
@@ -71,5 +69,9 @@ public class MapMeta {
 
     public Integer getPlayers() {
         return players;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

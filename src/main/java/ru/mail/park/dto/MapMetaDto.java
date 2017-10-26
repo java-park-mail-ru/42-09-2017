@@ -16,7 +16,6 @@ public class MapMetaDto {
     private Integer players;
 
     public MapMetaDto(
-            Integer id,
             String name,
             Integer level,
             Integer timer,
@@ -25,7 +24,6 @@ public class MapMetaDto {
             Integer playedTimes,
             Integer players
     ) {
-        this.id = id;
         this.name = name;
         this.level = level;
         this.timer = timer;
@@ -78,5 +76,9 @@ public class MapMetaDto {
     @JsonProperty("players")
     public Integer getPlayers() {
         return players;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

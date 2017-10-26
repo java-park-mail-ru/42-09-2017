@@ -4,7 +4,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.controllers.domain.MapMeta;
-import ru.mail.park.info.constants.Constants;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;

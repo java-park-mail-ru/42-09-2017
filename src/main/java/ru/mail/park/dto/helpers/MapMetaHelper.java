@@ -8,8 +8,7 @@ import java.util.List;
 
 public class MapMetaHelper {
     public static MapMetaDto toDto(MapMeta mapMeta) {
-        return new MapMetaDto(
-                mapMeta.getId(),
+        MapMetaDto mapMetaDto = new MapMetaDto(
                 mapMeta.getName(),
                 mapMeta.getLevel(),
                 mapMeta.getTimer(),
@@ -18,6 +17,8 @@ public class MapMetaHelper {
                 mapMeta.getPlayedTimes(),
                 mapMeta.getPlayers()
         );
+        mapMetaDto.setId(mapMeta.getId());
+        return mapMetaDto;
     }
 
     public static List<MapMetaDto> toDto(List<MapMeta> mapMetaList) {
@@ -29,8 +30,7 @@ public class MapMetaHelper {
     }
 
     public static MapMeta fromDto(MapMetaDto mapMetaDto) {
-        return new MapMeta(
-                mapMetaDto.getId(),
+        MapMeta mapMeta =  new MapMeta(
                 mapMetaDto.getName(),
                 mapMetaDto.getLevel(),
                 mapMetaDto.getTimer(),
@@ -39,6 +39,8 @@ public class MapMetaHelper {
                 mapMetaDto.getPlayedTimes(),
                 mapMetaDto.getPlayers()
         );
+        mapMeta.setId(mapMetaDto.getId());
+        return mapMeta;
     }
 
     public static List<MapMeta> fromDto(List<MapMetaDto> mapMetaDtoList) {
