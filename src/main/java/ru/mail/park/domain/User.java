@@ -1,4 +1,4 @@
-package ru.mail.park.controllers.domain;
+package ru.mail.park.domain;
 
 import javax.persistence.*;
 

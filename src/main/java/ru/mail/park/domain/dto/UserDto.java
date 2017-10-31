@@ -1,60 +1,76 @@
-package ru.mail.park.info;
+package ru.mail.park.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 import ru.mail.park.controllers.validators.constraints.CSize;
 import ru.mail.park.info.constants.MessageConstants;
-import ru.mail.park.controllers.validators.constraints.CNotBlank;
 import ru.mail.park.controllers.validators.constraints.NotExists;
 import ru.mail.park.info.constants.Constants;
 
 import javax.validation.constraints.Pattern;
 
-public class UserUpdateInfo {
-    @CNotBlank(message = MessageConstants.EMPTY_USERNAME)
+public class UserDto {
+    @NotBlank(message = MessageConstants.EMPTY_USERNAME)
     @CSize(min = Constants.USERNAME_MIN_LENGTH, message = MessageConstants.SHORT_USERNAME)
     @Pattern(regexp = Constants.USERNAME_REGEXP, message = MessageConstants.BAD_USERNAME)
     @NotExists(field = "username", message = MessageConstants.EXISTS_USERNAME)
-    private final String username;
+    private String username;
 
-    @CNotBlank(message = MessageConstants.EMPTY_EMAIL)
+    @NotBlank(message = MessageConstants.EMPTY_EMAIL)
     @Email(message = MessageConstants.BAD_EMAIL)
     @NotExists(field = "email", message = MessageConstants.EXISTS_EMAIL)
-    private final String email;
-    private final String oldPassword;
+    private String email;
 
-    @CNotBlank(message = MessageConstants.EMPTY_PASSWORD)
+    @NotBlank(message = MessageConstants.EMPTY_PASSWORD)
     @CSize(min = Constants.PASSWORD_MIN_LENGTH, message = MessageConstants.BAD_PASSWORD)
-    private final String password;
+    private String password;
 
     @JsonCreator
-    public UserUpdateInfo(
-        @JsonProperty("username") String username,
-        @JsonProperty("email") String email,
-        @JsonProperty("oldPassword") String oldPassword,
-        @JsonProperty("password") String password
+    public UserDto() {
+
+    }
+
+    public UserDto(
+            String username,
+            String email,
+            String password
     ) {
         this.username = username;
         this.email = email;
-        this.oldPassword = oldPassword;
-
         this.password = password;
+    }
+
+    public UserDto(UserDto user) {
+        this(user.getUsername(), user.getEmail(), user.getPassword());
     }
 
     public String getUsername() {
         return username;
     }
 
+    @JsonProperty("username")
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getEmail() {
         return email;
     }
 
-    public String getOldPassword() {
-        return oldPassword;
+    @JsonProperty("email")
+    public void setEmail(String email) {
+        this.email = email;
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return password;
+    }
+
+    @JsonProperty("password")
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -1,4 +1,4 @@
-package ru.mail.park.dto;
+package ru.mail.park.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,6 +7,7 @@ import java.sql.Date;
 
 public class MapMetaDto {
     private Integer id;
+    private Integer mapId;
     private String name;
     private Integer level;
     private Integer timer;
@@ -24,6 +25,11 @@ public class MapMetaDto {
     @JsonProperty("id")
     public Integer getId() {
         return id;
+    }
+
+    @JsonProperty("mapId")
+    public Integer getMapId() {
+        return mapId;
     }
 
     @JsonProperty("name")
@@ -68,6 +74,10 @@ public class MapMetaDto {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setMapId(Integer mapId) {
+        this.mapId = mapId;
     }
 
     public void setName(String name) {

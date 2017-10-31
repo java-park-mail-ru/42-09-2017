@@ -1,10 +1,10 @@
-create extension if not exists citext with schema public;
+CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
 
-create table player(
-  id serial primary key,
-  username citext unique not null,
-  email citext unique not null,
-  password text not null,
-  scores bigint default 0,
-  level int default 0
+CREATE TABLE player (
+  id       SERIAL PRIMARY KEY,
+  username CITEXT UNIQUE NOT NULL,
+  email    CITEXT UNIQUE NOT NULL,
+  password TEXT          NOT NULL,
+  scores   BIGINT DEFAULT 0,
+  level    INT    DEFAULT 0
 );

@@ -3,7 +3,7 @@ package ru.mail.park.services;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.mail.park.controllers.domain.User;
+import ru.mail.park.domain.User;
 import ru.mail.park.info.UserUpdateInfo;
 
 import javax.persistence.EntityManager;

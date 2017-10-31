@@ -5,13 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.controllers.domain.User;
-import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.controllers.validators.CValidatorChain;
-import ru.mail.park.dto.helpers.UserHelper;
+import ru.mail.park.domain.User;
+import ru.mail.park.info.constants.MessageConstants;
+import ru.mail.park.domain.dto.helpers.UserHelper;
 import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.UserUpdateInfo;
-import ru.mail.park.dto.UserDTO;
+import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.info.constants.Constants;
@@ -32,25 +31,20 @@ import java.util.List;
 @RequestMapping(path = "/api/auth")
 public class UserController {
     private final UserDao userDao;
-    private final CValidatorChain validatorChain;
 
     private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(
-            UserDao userDao,
-            CValidatorChain validatorChain
+            UserDao userDao
     ) {
         this.userDao = userDao;
-        this.validatorChain = validatorChain;
     }
 
     @PostMapping("signup")
-    public ResponseEntity<?> signup(@RequestBody UserDTO userSignupInfo, HttpSession httpSession) {
+    public ResponseEntity<?> signup(@Valid @RequestBody UserDto userSignupInfo, HttpSession httpSession) {
         if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
-
-        validatorChain.validate(userSignupInfo, httpSession);
 
         User user = UserHelper.fromDto(userSignupInfo);
         userDao.createUser(user);
@@ -68,16 +62,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message<>(MessageConstants.UNAUTHORIZED));
         }
 
-        validatorChain.validate(userUpdateInfo, httpSession);
-        if (userUpdateInfo.getOldPassword() != null && userUpdateInfo.getPassword() == null) {
+        String oldPassword = userUpdateInfo.getOldPassword();
+        String password = userUpdateInfo.getPassword();
+
+        User user = userDao.findUserById(id);
+
+        if (oldPassword != null && password == null) {
             responseList.add(MessageConstants.EMPTY_PASSWORD);
-            throw new ControllerValidationException(responseList);
-        } else if (userUpdateInfo.getOldPassword() == null && userUpdateInfo.getPassword() != null) {
+        } else if (oldPassword == null && password != null) {
             responseList.add(MessageConstants.EMPTY_OLD_PASSWORD);
+        } else if (oldPassword != null && !userDao.checkUserPassword(user, oldPassword)) {
+            responseList.add(MessageConstants.BAD_OLD_PASSWORD);
+        }
+        if (!responseList.isEmpty()) {
             throw new ControllerValidationException(responseList);
         }
 
-        User user = userDao.findUserById(id);
         userDao.updateUser(user, userUpdateInfo);
         return ResponseEntity
                 .ok(UserHelper.toDto(user));
@@ -95,17 +95,15 @@ public class UserController {
 
     @PostMapping("login")
     public ResponseEntity<?> login(@Valid @RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
-        List<String> responseList = new ArrayList<>();
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
+            return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
+        }
+
         User user = userDao.findUserByUsername(userSigninInfo.getLogin());
         if (user == null) {
             user = userDao.findUserByEmail(userSigninInfo.getLogin());
         }
-        if (user == null || !userDao.checkUserPassword(user, userSigninInfo.getPassword())) {
-            responseList.add(MessageConstants.BAD_LOGIN_DATA);
-            return ResponseEntity
-                    .badRequest()
-                    .body(new Message<>(responseList));
-        }
+
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
                 .ok(UserHelper.toDto(user));

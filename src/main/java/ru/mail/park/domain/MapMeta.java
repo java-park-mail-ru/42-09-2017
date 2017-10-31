@@ -1,4 +1,4 @@
-package ru.mail.park.controllers.domain;
+package ru.mail.park.domain;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -9,6 +9,8 @@ public class MapMeta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @OneToOne//(targetEntity = MapData.class)
+    private MapData map;
     private String name;
     private Integer level;
     private Integer timer;
@@ -24,6 +26,10 @@ public class MapMeta {
 
     public Integer getId() {
         return id;
+    }
+
+    public MapData getMap() {
+        return map;
     }
 
     public String getName() {
@@ -60,6 +66,10 @@ public class MapMeta {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setMap(MapData map) {
+        this.map = map;
     }
 
     public void setName(String name) {

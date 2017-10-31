@@ -1,7 +1,7 @@
-package ru.mail.park.dto.helpers;
+package ru.mail.park.domain.dto.helpers;
 
-import ru.mail.park.controllers.domain.MapMeta;
-import ru.mail.park.dto.MapMetaDto;
+import ru.mail.park.domain.MapMeta;
+import ru.mail.park.domain.dto.MapMetaDto;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -12,6 +12,7 @@ public class MapMetaHelper {
     public static MapMetaDto toDto(MapMeta mapMeta) {
         MapMetaDto mapMetaDto = new MapMetaDto();
         mapMetaDto.setId(mapMeta.getId());
+        mapMetaDto.setMapId(mapMeta.getMap().getId());
         mapMetaDto.setName(mapMeta.getName());
         mapMetaDto.setLevel(mapMeta.getLevel());
         mapMetaDto.setTimer(mapMeta.getTimer());

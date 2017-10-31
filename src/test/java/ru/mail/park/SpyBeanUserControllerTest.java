@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.mail.park.controllers.domain.User;
-import ru.mail.park.dto.UserDTO;
+import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.services.UserDao;
 
@@ -47,17 +47,17 @@ public class SpyBeanUserControllerTest {
 
         doReturn(user).when(userDao).findUserByUsername(anyString());
 
-        ResponseEntity<UserDTO> loginResp = restTemplate.postForEntity(
+        ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
                 "/api/auth/login",
                 new UserSigninInfo("foo", "bar"),
-                UserDTO.class
+                UserDto.class
         );
         assertEquals(HttpStatus.OK, loginResp.getStatusCode());
         List<String> cookies = loginResp.getHeaders().get("Set-Cookie");
         assertNotNull(cookies);
         assertFalse(cookies.isEmpty());
 
-        UserDTO userResp = loginResp.getBody();
+        UserDto userResp = loginResp.getBody();
         assertNotNull(user);
 
         assertEquals("foo", userResp.getUsername());

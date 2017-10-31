@@ -1,14 +1,21 @@
 package ru.mail.park.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.dto.MapMetaDto;
-import ru.mail.park.dto.helpers.MapMetaHelper;
+import ru.mail.park.domain.dto.MapRequest;
+import ru.mail.park.domain.dto.MapMetaDto;
+import ru.mail.park.domain.dto.helpers.MapMetaHelper;
 import ru.mail.park.services.GameDao;
 
 import java.util.List;
 
+@CrossOrigin(origins = {
+        "https://sand42box.herokuapp.com",
+        "https://nightly-42.herokuapp.com",
+        "https://master-42.herokuapp.com"
+})
 @RestController
 @RequestMapping("api")
 public class GameController {
@@ -30,11 +37,21 @@ public class GameController {
     }
 
     @PutMapping("maps/create")
-    public ResponseEntity<MapMetaDto> createMap(@RequestBody MapMetaDto mapMetaDto) {
+    public ResponseEntity<MapMetaDto> createMap(@RequestBody MapRequest mapRequest) throws JsonProcessingException {
+        MapMetaDto mapMetaDto = MapMetaHelper.toDto(
+                gameDao.createMap(
+                        mapRequest.getMapData(),
+                        MapMetaHelper.fromDto(mapRequest.getMapMeta()))
+        );
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(MapMetaHelper.toDto(
-                        gameDao.createMap(MapMetaHelper.fromDto(mapMetaDto))
-                ));
+                .body(mapMetaDto);
+    }
+
+    @GetMapping(value = "maps/{id}/get", produces = "application/json")
+    public ResponseEntity<String> getMap(@PathVariable Integer id) {
+        return ResponseEntity
+                .ok(gameDao.getMap(id));
     }
 }

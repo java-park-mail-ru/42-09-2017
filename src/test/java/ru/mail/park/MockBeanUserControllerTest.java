@@ -10,8 +10,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.mail.park.controllers.domain.User;
-import ru.mail.park.dto.UserDTO;
+import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.services.UserDao;
 
@@ -44,17 +44,17 @@ public class MockBeanUserControllerTest {
         when(userDao.findUserByUsername(anyString())).thenReturn(user);
         when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(true);
 
-        ResponseEntity<UserDTO> loginResp = restTemplate.postForEntity(
+        ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
                 "/api/auth/login",
                 new UserSigninInfo("foo", "bar"),
-                UserDTO.class
+                UserDto.class
         );
         assertEquals(HttpStatus.OK, loginResp.getStatusCode());
         List<String> cookies = loginResp.getHeaders().get("Set-Cookie");
         assertNotNull(cookies);
         assertFalse(cookies.isEmpty());
 
-        UserDTO userResp = loginResp.getBody();
+        UserDto userResp = loginResp.getBody();
         assertNotNull(user);
 
         assertEquals("foo", userResp.getUsername());

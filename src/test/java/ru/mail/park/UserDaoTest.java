@@ -25,10 +25,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.transaction.annotation.Transactional;
-import ru.mail.park.controllers.domain.User;
-import ru.mail.park.controllers.messages.MessageConstants;
-import ru.mail.park.dto.UserDTO;
-import ru.mail.park.dto.helpers.UserHelper;
+import ru.mail.park.domain.User;
+import ru.mail.park.info.constants.MessageConstants;
+import ru.mail.park.domain.dto.UserDto;
+import ru.mail.park.domain.dto.helpers.UserHelper;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.info.constants.Constants;
@@ -49,11 +49,11 @@ public class UserDaoTest {
     private ObjectMapper mapper;
 
     private User user;
-    private static UserDTO userDTO = new UserDTO("testuser", "testemail@example.com", "testpassword");;
+    private static UserDto userDto = new UserDto("testuser", "testemail@example.com", "testpassword");;
 
     @Before
     public void setup() {
-        user = UserHelper.fromDto(userDTO);
+        user = UserHelper.fromDto(userDto);
         userDao.createUser(user);
     }
 
@@ -154,12 +154,12 @@ public class UserDaoTest {
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(
-                                new UserSigninInfo(userDTO.getUsername(), userDTO.getPassword()))))
+                                new UserSigninInfo(userDto.getUsername(), userDto.getPassword()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("username")
-                        .value(userDTO.getUsername()))
+                        .value(userDto.getUsername()))
                 .andExpect(jsonPath("email")
-                        .value(userDTO.getEmail()));
+                        .value(userDto.getEmail()));
 
         verify(userDao).findUserByUsername(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
@@ -170,10 +170,10 @@ public class UserDaoTest {
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new UserSigninInfo("userNotExists", userDTO.getPassword()))))
+                        .content(mapper.writeValueAsString(new UserSigninInfo("userNotExists", userDto.getPassword()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message")
-                        .value(MessageConstants.BAD_LOGIN_DATA));
+                        .value(MessageConstants.USERNAME_NOT_EXISTS));
 
         verify(userDao).findUserByUsername(anyString());
         verify(userDao).findUserByEmail(anyString());
@@ -185,10 +185,10 @@ public class UserDaoTest {
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(
-                                new UserSigninInfo(userDTO.getUsername(), "wrongpass"))))
+                                new UserSigninInfo(userDto.getUsername(), "wrongpass"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message")
-                        .value(MessageConstants.BAD_LOGIN_DATA));
+                        .value(MessageConstants.PASSWORD_WRONG));
 
         verify(userDao).findUserByUsername(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
