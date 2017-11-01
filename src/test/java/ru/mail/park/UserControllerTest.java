@@ -139,6 +139,7 @@ public class UserControllerTest {
         userTest.setUsername("login");
         userTest.setEmail("email");
 
+        when(userDao.hasUsername(anyString())).thenReturn(true);
         when(userDao.findUserByUsername(anyString())).thenReturn(userTest);
         when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(true);
         mockMvc
@@ -155,8 +156,8 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_UserNotExists() throws Exception {
-        when(userDao.findUserByUsername(anyString())).thenReturn(null);
-        when(userDao.findUserByEmail(anyString())).thenReturn(null);
+        when(userDao.hasUsername(anyString())).thenReturn(false);
+        when(userDao.hasEmail(anyString())).thenReturn(false);
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,6 +169,7 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_BadLoginData() throws Exception {
+        when(userDao.hasUsername(anyString())).thenReturn(true);
         when(userDao.findUserByUsername(anyString())).thenReturn(new User());
         when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(false);
         mockMvc

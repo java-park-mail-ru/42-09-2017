@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -45,6 +46,7 @@ public class SpyBeanUserControllerTest {
         user.setUsername("foo");
         user.setPassword(passwordEncoder.encode("bar"));
 
+        doReturn(true).when(userDao).hasUsername(anyString());
         doReturn(user).when(userDao).findUserByUsername(anyString());
 
         ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
@@ -61,6 +63,7 @@ public class SpyBeanUserControllerTest {
         assertNotNull(user);
 
         assertEquals("foo", userResp.getUsername());
-        verify(userDao).findUserByUsername(anyString());
+        verify(userDao).hasUsername(anyString());
+        verify(userDao, times(2)).findUserByUsername(anyString());
     }
 }

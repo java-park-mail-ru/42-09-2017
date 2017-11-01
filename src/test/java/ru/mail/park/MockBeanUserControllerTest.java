@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -41,6 +42,7 @@ public class MockBeanUserControllerTest {
         user.setId(1L);
         user.setUsername("foo");
 
+        when(userDao.hasUsername(anyString())).thenReturn(true);
         when(userDao.findUserByUsername(anyString())).thenReturn(user);
         when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(true);
 
@@ -58,7 +60,8 @@ public class MockBeanUserControllerTest {
         assertNotNull(user);
 
         assertEquals("foo", userResp.getUsername());
-        verify(userDao).findUserByUsername(anyString());
+        verify(userDao).hasUsername(anyString());
+        verify(userDao, times(2)).findUserByUsername(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
     }
 }

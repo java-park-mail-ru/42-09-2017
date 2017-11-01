@@ -3,6 +3,7 @@ package ru.mail.park;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -161,7 +162,7 @@ public class UserDaoTest {
                 .andExpect(jsonPath("email")
                         .value(userDto.getEmail()));
 
-        verify(userDao).findUserByUsername(anyString());
+        verify(userDao, times(2)).findUserByUsername(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
     }
 
