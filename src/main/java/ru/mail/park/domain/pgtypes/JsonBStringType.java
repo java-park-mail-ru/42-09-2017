@@ -16,7 +16,7 @@ public class JsonBStringType implements UserType {
 
     @Override
     public int[] sqlTypes() {
-        return new int[] {Types.VARCHAR};
+        return new int[] {Types.OTHER};
     }
 
     @Override

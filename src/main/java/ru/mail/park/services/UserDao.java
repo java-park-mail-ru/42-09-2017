@@ -57,7 +57,7 @@ public class UserDao {
 
     public User findUserByUsername(String username) {
         try {
-            return em.createQuery("select u from User as u where username=:username", User.class)
+            return em.createQuery("select u from User as u where lower(username)=lower(:username)", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -67,7 +67,7 @@ public class UserDao {
 
     public User findUserByEmail(String email) {
         try {
-            return em.createQuery("select u from User as u where email=:email", User.class)
+            return em.createQuery("select u from User as u where lower(email)=lower(:email)", User.class)
                     .setParameter("email", email)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -76,14 +76,14 @@ public class UserDao {
     }
 
     public boolean hasUsername(String username) {
-        Long count = em.createQuery("select count(id) from User where username=:username", Long.class)
+        Long count = em.createQuery("select count(id) from User where lower(username)=lower(:username)", Long.class)
                 .setParameter("username", username)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean hasEmail(String email) {
-        Long count = em.createQuery("select count(id) from User where email=:email", Long.class)
+        Long count = em.createQuery("select count(id) from User where lower(email)=lower(:email)", Long.class)
                 .setParameter("email", email)
                 .getSingleResult();
         return count > 0;
