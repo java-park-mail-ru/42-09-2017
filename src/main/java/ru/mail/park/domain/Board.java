@@ -1,6 +1,7 @@
 package ru.mail.park.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -9,9 +10,8 @@ import ru.mail.park.domain.pgtypes.JsonBStringType;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "map_data")
 @TypeDef(name = "JsonBStringType", typeClass = JsonBStringType.class)
-public class MapData {
+public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -19,8 +19,11 @@ public class MapData {
     @Type(type = "JsonBStringType")
     private String data;
 
+    @OneToOne(mappedBy = "board")
+    private BoardMeta meta;
+
     @JsonCreator
-    public MapData() {
+    public Board() {
 
     }
 
@@ -39,5 +42,14 @@ public class MapData {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    @JsonIgnore
+    public BoardMeta getMeta() {
+        return meta;
+    }
+
+    public void setMeta(BoardMeta meta) {
+        this.meta = meta;
     }
 }

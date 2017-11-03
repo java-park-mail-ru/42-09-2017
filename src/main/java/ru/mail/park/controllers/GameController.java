@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.domain.dto.MapRequest;
-import ru.mail.park.domain.dto.MapMetaDto;
-import ru.mail.park.domain.dto.helpers.MapMetaHelper;
+import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.domain.dto.BoardMetaDto;
+import ru.mail.park.domain.dto.helpers.BoardMetaHelper;
 import ru.mail.park.services.GameDao;
 
 import java.util.List;
@@ -14,10 +14,12 @@ import java.util.List;
 @CrossOrigin(origins = {
         "https://sand42box.herokuapp.com",
         "https://nightly-42.herokuapp.com",
-        "https://master-42.herokuapp.com"
+        "https://master-42.herokuapp.com",
+        "http://localhost",
+        "http://127.0.0.1"
 })
 @RestController
-@RequestMapping("api")
+@RequestMapping(value = "api/game", produces = "application/json")
 public class GameController {
     private final GameDao gameDao;
 
@@ -25,33 +27,54 @@ public class GameController {
         this.gameDao = gameDao;
     }
 
+    /* ToDo: 03.11.2017 Use sessions and not allow everybody to do it */
+
     @GetMapping("maps/get")
-    public ResponseEntity<List<MapMetaDto>> getMaps(
+    public ResponseEntity<List<BoardMetaDto>> getMaps(
             @PathVariable(value = "sort", required = false) String sort,
             @PathVariable(value = "page", required = false) Integer page
     ) {
         return ResponseEntity
-                .ok(MapMetaHelper.toDto(
-                        gameDao.getMaps(sort, page)
+                .ok(BoardMetaHelper.toDto(
+                        gameDao.getBoards(sort, page)
                 ));
     }
 
-    @PutMapping("maps/create")
-    public ResponseEntity<MapMetaDto> createMap(@RequestBody MapRequest mapRequest) throws JsonProcessingException {
-        MapMetaDto mapMetaDto = MapMetaHelper.toDto(
-                gameDao.createMap(
-                        mapRequest.getMapData(),
-                        MapMetaHelper.fromDto(mapRequest.getMapMeta()))
+    @PostMapping("map/{name}/create")
+    public ResponseEntity<BoardMetaDto> createMap(
+            @PathVariable String name, @RequestBody BoardRequest boardRequest
+    ) throws JsonProcessingException {
+        boardRequest.getBoardMetaDto().setName(name);
+        BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
+                gameDao.createBoard(
+                        boardRequest.getBoardDataMap(),
+                        BoardMetaHelper.fromDto(boardRequest.getBoardMetaDto()))
         );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(mapMetaDto);
+                .body(boardMetaDto);
     }
 
-    @GetMapping(value = "maps/{id}/get", produces = "application/json")
+    @PutMapping("map/{id}")
+    public ResponseEntity<BoardMetaDto> updateMap(
+            @PathVariable Integer id, @RequestBody BoardRequest boardRequest
+    ) {
+        BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
+                gameDao.updateBoard(
+                        id,
+                        boardRequest.getBoardDataMap(),
+                        BoardMetaHelper.fromDto(boardRequest.getBoardMetaDto())
+                )
+        );
+
+        return ResponseEntity
+                .ok(boardMetaDto);
+    }
+
+    @GetMapping("map/{id}")
     public ResponseEntity<String> getMap(@PathVariable Integer id) {
         return ResponseEntity
-                .ok(gameDao.getMap(id));
+                .ok(gameDao.getBoard(id));
     }
 }

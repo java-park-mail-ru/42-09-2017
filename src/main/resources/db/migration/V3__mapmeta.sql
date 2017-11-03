@@ -1,6 +1,6 @@
-CREATE TABLE map_meta (
+CREATE TABLE board_meta (
   id           SERIAL PRIMARY KEY,
-  map_id       INT,
+  board_id     INT,
   name         TEXT UNIQUE,
   level        INT,
   timer        INT,
@@ -9,5 +9,5 @@ CREATE TABLE map_meta (
   preview      TEXT,
   played_times INT  DEFAULT 0,
   players      INT  DEFAULT 1,
-  FOREIGN KEY (map_id) REFERENCES map_data (id)
+  FOREIGN KEY (board_id) REFERENCES board (id)
 )

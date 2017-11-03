@@ -1,13 +1,15 @@
-package ru.mail.park.domain.dto;
+package ru.mail.park.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import javax.persistence.*;
 import java.sql.Date;
 
-public class MapMetaDto {
+@Entity
+public class BoardMeta {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer mapId;
+    @OneToOne
+    private Board board;
     private String name;
     private Integer level;
     private Integer timer;
@@ -17,57 +19,46 @@ public class MapMetaDto {
     private Integer playedTimes;
     private Integer players;
 
-    @JsonCreator
-    public MapMetaDto() {
+    public BoardMeta() {
 
     }
 
-    @JsonProperty("id")
     public Integer getId() {
         return id;
     }
 
-    @JsonProperty("mapId")
-    public Integer getMapId() {
-        return mapId;
+    public Board getBoard() {
+        return board;
     }
 
-    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
-    @JsonProperty("level")
     public Integer getLevel() {
         return level;
     }
 
-    @JsonProperty("timer")
     public Integer getTimer() {
         return timer;
     }
 
-    @JsonProperty("rating")
     public Integer getRating() {
         return rating;
     }
 
-    @JsonProperty("created")
     public Date getCreated() {
         return created;
     }
 
-    @JsonProperty("preview")
     public String getPreview() {
         return preview;
     }
 
-    @JsonProperty("playedTimes")
     public Integer getPlayedTimes() {
         return playedTimes;
     }
 
-    @JsonProperty("players")
     public Integer getPlayers() {
         return players;
     }
@@ -76,8 +67,8 @@ public class MapMetaDto {
         this.id = id;
     }
 
-    public void setMapId(Integer mapId) {
-        this.mapId = mapId;
+    public void setBoard(Board board) {
+        this.board = board;
     }
 
     public void setName(String name) {

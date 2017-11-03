@@ -1,16 +1,13 @@
-package ru.mail.park.domain;
+package ru.mail.park.domain.dto;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.sql.Date;
 
-@Entity
-@Table(name = "map_meta")
-public class MapMeta {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BoardMetaDto {
     private Integer id;
-    @OneToOne//(targetEntity = MapData.class)
-    private MapData map;
+    private Integer mapId;
     private String name;
     private Integer level;
     private Integer timer;
@@ -20,46 +17,57 @@ public class MapMeta {
     private Integer playedTimes;
     private Integer players;
 
-    public MapMeta() {
+    @JsonCreator
+    public BoardMetaDto() {
 
     }
 
+    @JsonProperty("id")
     public Integer getId() {
         return id;
     }
 
-    public MapData getMap() {
-        return map;
+    @JsonProperty("mapId")
+    public Integer getMapId() {
+        return mapId;
     }
 
+    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
+    @JsonProperty("level")
     public Integer getLevel() {
         return level;
     }
 
+    @JsonProperty("timer")
     public Integer getTimer() {
         return timer;
     }
 
+    @JsonProperty("rating")
     public Integer getRating() {
         return rating;
     }
 
+    @JsonProperty("created")
     public Date getCreated() {
         return created;
     }
 
+    @JsonProperty("preview")
     public String getPreview() {
         return preview;
     }
 
+    @JsonProperty("playedTimes")
     public Integer getPlayedTimes() {
         return playedTimes;
     }
 
+    @JsonProperty("players")
     public Integer getPlayers() {
         return players;
     }
@@ -68,8 +76,8 @@ public class MapMeta {
         this.id = id;
     }
 
-    public void setMap(MapData map) {
-        this.map = map;
+    public void setMapId(Integer mapId) {
+        this.mapId = mapId;
     }
 
     public void setName(String name) {
