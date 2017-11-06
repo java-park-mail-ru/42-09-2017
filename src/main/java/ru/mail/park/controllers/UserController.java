@@ -89,7 +89,7 @@ public class UserController {
     public ResponseEntity<?> me(HttpSession httpSession) {
         Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
         if (id == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageConstants.UNAUTHORIZED);
         }
         return ResponseEntity
                 .ok(UserHelper.toDto(userDao.findUserById(id)));
