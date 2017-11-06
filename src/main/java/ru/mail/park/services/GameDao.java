@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
+import ru.mail.park.domain.dto.BoardRequest;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static ru.mail.park.info.constants.Constants.MAPS_ON_PAGE;
 
@@ -68,24 +68,26 @@ public class GameDao {
         }
     }
 
-    public BoardMeta createBoard(Map<String, Object> boardDataMap, BoardMeta boardMeta) throws JsonProcessingException {
+    public BoardMeta createBoard(BoardRequest.Data boardData, BoardMeta boardMeta) throws JsonProcessingException {
         Board board = new Board();
-        board.setData(MAPPER.writeValueAsString(boardDataMap));
+        LOGGER.warn(MAPPER.writeValueAsString(boardData.getBodies()));
+        LOGGER.warn(MAPPER.writeValueAsString(boardData.getJoints()));
+        board.setData(MAPPER.writeValueAsString(boardData));
         em.persist(board);
         boardMeta.setBoard(board);
         em.persist(boardMeta);
         return boardMeta;
     }
 
-    public BoardMeta updateBoard(Integer id, Map<String, Object> boardDataMap, BoardMeta boardMeta) {
+    public BoardMeta updateBoard(Integer id, BoardRequest.Data boardData, BoardMeta boardMeta) {
         Board board = em.find(Board.class, id);
         if (board == null) {
             /* ToDo: 03.11.2017 Throw NotFoundException */
             return null;
         }
         try {
-            if (boardDataMap != null) {
-                board.setData(MAPPER.writeValueAsString(boardDataMap));
+            if (boardData != null) {
+                board.setData(MAPPER.writeValueAsString(boardData));
             }
             if (boardMeta != null) {
                 updateBoardMeta(board.getMeta(), boardMeta);

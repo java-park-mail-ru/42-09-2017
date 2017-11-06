@@ -22,4 +22,10 @@ public class MessageConstants {
 
     public static final String USERNAME_NOT_EXISTS = "USERNAME_NOT_EXISTS";
     public static final String PASSWORD_WRONG = "PASSWORD_WRONG";
+
+
+    public static final String BODIES_LIST_EMPTY = "BODIES_LIST_EMPTY";
+    public static final String BOARD_META_EMPTY = "BOARD_META_EMPTY";
+    public static final String BOARD_DATA_EMPTY = "BOARD_DATA_EMPTY";
+    public static final String REQUIRED_FIELD_EMPTY = "REQUIRED_FIELD_EMPTY";
 }

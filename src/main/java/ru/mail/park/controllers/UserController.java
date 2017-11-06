@@ -26,8 +26,8 @@ import java.util.List;
         "https://sand42box.herokuapp.com",
         "https://nightly-42.herokuapp.com",
         "https://master-42.herokuapp.com",
-        "http://localhost",
-        "http://127.0.0.1"
+        "http://localhost:8080",
+        "http://127.0.0.1:8080"
 })
 @RestController
 @RequestMapping(path = "/api/auth")
