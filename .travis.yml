@@ -3,7 +3,7 @@ addons:
 services:
 - postgresql
 before_script:
-- psql -c "create user artur with superuser password 'user';" -U postgres
+- psql -c "create user docker with superuser password 'docker';" -U postgres
 - psql -c "create database technopark;" -U postgres
-- psql -c "grant all on database technopark to artur;" -U postgres
+- psql -c "grant all on database technopark to docker;" -U postgres
 language: java
