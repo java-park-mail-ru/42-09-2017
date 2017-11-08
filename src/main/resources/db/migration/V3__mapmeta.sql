@@ -1,5 +1,5 @@
 CREATE TABLE board_meta (
-  id           SERIAL PRIMARY KEY,
+  id           BIGSERIAL PRIMARY KEY,
   board_id     INT,
   name         TEXT UNIQUE,
   level        INT,

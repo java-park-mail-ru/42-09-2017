@@ -74,7 +74,7 @@ public class UserDao {
         return user;
     }
 
-    private List<String> checkIfExists(String login) {
+    public List<String> checkIfExists(String login) {
         List<String> errors = new ArrayList<>();
         if (!hasUsername(login) && !hasEmail(login)) {
             errors.add(MessageConstants.USERNAME_NOT_EXISTS);
@@ -82,12 +82,12 @@ public class UserDao {
         return errors;
     }
 
-    private List<String> checkIfNotExists(String username, String email) {
+    public List<String> checkIfNotExists(String username, String email) {
         List<String> errors = new ArrayList<>();
-        if (hasUsername(username)) {
+        if (username != null && hasUsername(username)) {
             errors.add(MessageConstants.EXISTS_USERNAME);
         }
-        if (hasEmail(email)) {
+        if (email != null && hasEmail(email)) {
             errors.add(MessageConstants.EXISTS_EMAIL);
         }
         return errors;

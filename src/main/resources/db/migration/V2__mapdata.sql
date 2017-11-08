@@ -1,4 +1,4 @@
 CREATE TABLE board(
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   data jsonb NOT NULL
 );

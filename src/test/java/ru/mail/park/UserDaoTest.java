@@ -72,8 +72,12 @@ public class UserDaoTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message").value("USERNAME_ALREADY_EXISTS"));
 
-        verify(userDao).hasUsername(anyString());
-        verify(userDao).hasEmail(anyString());
+        // Two invocations for each because there is createUser(User.class) invocation
+        // (and so validation) in @Before method above
+        verify(userDao, times(2)).createUser(any(User.class));
+        verify(userDao, times(2)).checkIfNotExists(anyString(), anyString());
+        verify(userDao, times(2)).hasUsername(anyString());
+        verify(userDao, times(2)).hasEmail(anyString());
     }
 
 
@@ -91,8 +95,12 @@ public class UserDaoTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message").value("EMAIL_ALREADY_EXISTS"));
 
-        verify(userDao).hasUsername(anyString());
-        verify(userDao).hasEmail(anyString());
+        // Two invocations for each because there is createUser(User.class) invocation
+        // (and so validation) in @Before method above
+        verify(userDao, times(2)).createUser(any(User.class));
+        verify(userDao, times(2)).checkIfNotExists(anyString(), anyString());
+        verify(userDao, times(2)).hasUsername(anyString());
+        verify(userDao, times(2)).hasEmail(anyString());
     }
 
     @SuppressWarnings("Duplicates")
@@ -144,9 +152,12 @@ public class UserDaoTest {
                 .andExpect(jsonPath("email")
                         .value(user.getEmail()));
 
-        verify(userDao).hasUsername(anyString());
         verify(userDao).findUserById(anyLong());
         verify(userDao).updateUser(any(User.class), any(UserUpdateInfo.class));
+        verify(userDao).checkIfNotExists(anyString(), anyString());
+        // Two invocations because there is createUser(User.class) invocation
+        // (and so validation) in @Before method above
+        verify(userDao, times(2)).hasUsername(anyString());
     }
 
     @Test
@@ -162,7 +173,7 @@ public class UserDaoTest {
                 .andExpect(jsonPath("email")
                         .value(userDto.getEmail()));
 
-        verify(userDao, times(2)).findUserByUsername(anyString());
+        verify(userDao).findUserByUsername(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
     }
 
@@ -176,8 +187,10 @@ public class UserDaoTest {
                 .andExpect(jsonPath("message")
                         .value(MessageConstants.USERNAME_NOT_EXISTS));
 
-        verify(userDao).findUserByUsername(anyString());
-        verify(userDao).findUserByEmail(anyString());
+        // Two invocations for each because there is createUser(User.class) invocation
+        // (and so validation) in @Before method above
+        verify(userDao, times(2)).hasUsername(anyString());
+        verify(userDao, times(2)).hasEmail(anyString());
     }
 
     @Test

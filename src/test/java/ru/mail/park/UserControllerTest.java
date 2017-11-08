@@ -3,6 +3,7 @@ package ru.mail.park;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,11 +26,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.User;
+import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.info.constants.Constants;
 import ru.mail.park.services.UserDao;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -52,8 +57,11 @@ public class UserControllerTest {
         user.setEmail("testemail2@example.com");
         user.setPassword("testpass");
 
-        when(userDao.hasUsername(anyString())).thenReturn(true);
-        when(userDao.hasEmail(anyString())).thenReturn(false);
+        List<String> errors = new ArrayList<>();
+        errors.add(MessageConstants.EXISTS_USERNAME);
+
+        doThrow(new ControllerValidationException(errors)).when(userDao).createUser(any(User.class));
+
         mockMvc
                 .perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,8 +79,11 @@ public class UserControllerTest {
         user.setEmail("testemail@example.com");
         user.setPassword("testpass");
 
-        when(userDao.hasUsername(anyString())).thenReturn(false);
-        when(userDao.hasEmail(anyString())).thenReturn(true);
+        List<String> errors = new ArrayList<>();
+        errors.add(MessageConstants.EXISTS_EMAIL);
+
+        doThrow(new ControllerValidationException(errors)).when(userDao).createUser(any(User.class));
+
         mockMvc
                 .perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -139,9 +150,8 @@ public class UserControllerTest {
         userTest.setUsername("login");
         userTest.setEmail("email");
 
-        when(userDao.hasUsername(anyString())).thenReturn(true);
-        when(userDao.findUserByUsername(anyString())).thenReturn(userTest);
-        when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(true);
+        when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenReturn(userTest);
+
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -156,8 +166,11 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_UserNotExists() throws Exception {
-        when(userDao.hasUsername(anyString())).thenReturn(false);
-        when(userDao.hasEmail(anyString())).thenReturn(false);
+        List<String> errors = new ArrayList<>();
+        errors.add(MessageConstants.USERNAME_NOT_EXISTS);
+
+        when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenThrow(new ControllerValidationException(errors));
+
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -169,9 +182,11 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_BadLoginData() throws Exception {
-        when(userDao.hasUsername(anyString())).thenReturn(true);
-        when(userDao.findUserByUsername(anyString())).thenReturn(new User());
-        when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(false);
+        List<String> errors = new ArrayList<>();
+        errors.add(MessageConstants.PASSWORD_WRONG);
+
+        when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenThrow(new ControllerValidationException(errors));
+
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
