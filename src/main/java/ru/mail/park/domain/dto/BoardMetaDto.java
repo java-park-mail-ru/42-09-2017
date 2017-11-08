@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.sql.Date;
 
 public class BoardMetaDto {
-    private Integer id;
-    private Integer mapId;
+    private Long id;
+    private Long mapId;
     private String name;
     private Integer level;
     private Integer timer;
@@ -23,12 +23,12 @@ public class BoardMetaDto {
     }
 
     @JsonProperty("id")
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
     @JsonProperty("mapId")
-    public Integer getMapId() {
+    public Long getMapId() {
         return mapId;
     }
 
@@ -72,11 +72,11 @@ public class BoardMetaDto {
         return players;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public void setMapId(Integer mapId) {
+    public void setMapId(Long mapId) {
         this.mapId = mapId;
     }
 

@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.mechanics.WorldParser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +61,7 @@ public class GameDao {
         }
     }
 
-    public String getBoard(Integer id) {
+    public String getBoard(Long id) {
         try {
             Board board = em.find(Board.class, id);
             return board.getData();
@@ -79,7 +81,7 @@ public class GameDao {
         return boardMeta;
     }
 
-    public BoardMeta updateBoard(Integer id, BoardRequest.Data boardData, BoardMeta boardMeta) {
+    public BoardMeta updateBoard(Long id, BoardRequest.Data boardData, BoardMeta boardMeta) {
         Board board = em.find(Board.class, id);
         if (board == null) {
             /* ToDo: 03.11.2017 Throw NotFoundException */
@@ -113,6 +115,16 @@ public class GameDao {
         }
         if (metaNew.getPreview() != null) {
             boardMeta.setPreview(metaNew.getPreview());
+        }
+    }
+
+    public void initializeWorld(Long mapId) {
+        Board board = em.find(Board.class, mapId);
+        try {
+            BoardRequest.Data bodiesInfo = MAPPER.readValue(board.getData(), BoardRequest.Data.class);
+            WorldParser.initWorld(bodiesInfo.getBodies(), bodiesInfo.getJoints());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

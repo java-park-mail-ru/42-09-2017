@@ -41,7 +41,7 @@ public class BoardRequest {
         this.boardData = boardData;
     }
 
-    public class Data {
+    public static class Data {
         @NotEmpty(message = MessageConstants.BODIES_LIST_EMPTY)
         @Valid
         private List<GBody> bodies;

@@ -1,15 +1,19 @@
 package ru.mail.park.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.domain.Board;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.domain.dto.BoardMetaDto;
 import ru.mail.park.domain.dto.helpers.BoardMetaHelper;
+import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.services.GameDao;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(origins = {
@@ -23,6 +27,7 @@ import java.util.List;
 @RequestMapping(value = "api/game", produces = "application/json")
 public class GameController {
     private final GameDao gameDao;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public GameController(GameDao gameDao) {
         this.gameDao = gameDao;
@@ -59,7 +64,7 @@ public class GameController {
 
     @PutMapping("map/{id}")
     public ResponseEntity<BoardMetaDto> updateMap(
-            @PathVariable Integer id, @Valid @RequestBody BoardRequest boardRequest
+            @PathVariable Long id, @Valid @RequestBody BoardRequest boardRequest
     ) {
         BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
                 gameDao.updateBoard(
@@ -74,8 +79,26 @@ public class GameController {
     }
 
     @GetMapping("map/{id}")
-    public ResponseEntity<String> getMap(@PathVariable Integer id) {
+    public ResponseEntity<String> getMap(@PathVariable Long id) {
         return ResponseEntity
                 .ok(gameDao.getBoard(id));
+    }
+
+    @PostMapping("map/{id}/run")
+    public ResponseEntity<String> runMap(@PathVariable Long id) {
+        BoardRequest.Data data = null;
+        try {
+            data = MAPPER.readValue(gameDao.getBoard(id), BoardRequest.Data.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .badRequest()
+                    .body("bad");
+        }
+
+        WorldParser.initWorld(data.getBodies(), data.getJoints());
+        WorldParser.run();
+        return ResponseEntity
+                .ok("good");
     }
 }

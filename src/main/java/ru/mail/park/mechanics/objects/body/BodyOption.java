@@ -1,25 +1,22 @@
 package ru.mail.park.mechanics.objects.body;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import ru.mail.park.info.constants.MessageConstants;
+
+import javax.validation.constraints.NotNull;
 
 public class BodyOption {
-    private int type;
     private boolean sensor;
-    private float density;
-    private float friction;
-    private float restitution;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Float density;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Float friction;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Float restitution;
 
     @JsonCreator
     public BodyOption() {
 
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     public boolean isSensor() {
@@ -30,27 +27,27 @@ public class BodyOption {
         this.sensor = sensor;
     }
 
-    public float getDensity() {
+    public Float getDensity() {
         return density;
     }
 
-    public void setDensity(float density) {
+    public void setDensity(Float density) {
         this.density = density;
     }
 
-    public float getFriction() {
+    public Float getFriction() {
         return friction;
     }
 
-    public void setFriction(float friction) {
+    public void setFriction(Float friction) {
         this.friction = friction;
     }
 
-    public float getRestitution() {
+    public Float getRestitution() {
         return restitution;
     }
 
-    public void setRestitution(float restitution) {
+    public void setRestitution(Float restitution) {
         this.restitution = restitution;
     }
 }

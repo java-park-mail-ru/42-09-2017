@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.jbox2d.common.Vec2;
 import ru.mail.park.info.constants.MessageConstants;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class BodyInnerData {
     @JsonIgnoreProperties({ "valid" })
     private Vec2 size;
     private Float radius;
-    private float angle;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Float angle;
+    private ComplexBodyConfig config;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    @Valid
     private BodyOption option;
     @JsonIgnoreProperties({ "valid" })
     private Vec2 position;
@@ -38,12 +42,20 @@ public class BodyInnerData {
         this.radius = radius;
     }
 
-    public float getAngle() {
+    public Float getAngle() {
         return angle;
     }
 
-    public void setAngle(float angle) {
+    public void setAngle(Float angle) {
         this.angle = angle;
+    }
+
+    public ComplexBodyConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(ComplexBodyConfig config) {
+        this.config = config;
     }
 
     public BodyOption getOption() {
