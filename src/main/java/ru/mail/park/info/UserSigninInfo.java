@@ -2,9 +2,13 @@ package ru.mail.park.info;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.NotBlank;
+import ru.mail.park.info.constants.MessageConstants;
 
 public class UserSigninInfo {
+    @NotBlank(message = MessageConstants.EMPTY_USERNAME)
     private final String login;
+    @NotBlank(message = MessageConstants.EMPTY_PASSWORD)
     private final String password;
 
     @JsonCreator
