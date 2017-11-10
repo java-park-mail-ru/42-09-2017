@@ -12,6 +12,7 @@ addons:
       - sshpass
      
 addons:
+  sshpass
   postgresql: "9.6"
 
 services:
