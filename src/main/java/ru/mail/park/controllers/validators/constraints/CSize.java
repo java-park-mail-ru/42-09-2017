@@ -12,12 +12,18 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * The difference to {@link javax.validation.constraints.Size}
+ * is that zero length values are getting ignored
+ *
+ * @author Artur Ahadov
+ */
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = { CSizeValidator.class })
 public @interface CSize {
-    String message() default "{javax.validation.constraints.Size.message}";
+    String message() default "";
 
     Class<?>[] groups() default { };
 
