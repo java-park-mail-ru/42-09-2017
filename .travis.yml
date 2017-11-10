@@ -5,3 +5,26 @@ env:
   - secure: NBDokDFiRDg5WB/BJKcuBVdsOCzXYWqULugrT4xxHBd7iyRAE61RWM7ljTLdPNiHxaF/rHDpaJ3VaIVKg3nA67jzErNjZQeIISNZre+5CGQ+oRQABazf/WC8XtaEzl5h9328GbNyYBUtW8VvIB9FwbLx+ZpB5wxmfsi47FeZK4r9lmrxoAyyDCsQQTAmn0PZPWuTzcM3uhxkvcqWdKRXbctCETEzWvuHP5DnQsr6Uo6o8ViPy5OS/ANwmjbEYABOLKF8FzdoeI3YLO3547NTCYi6UFGIF1S1yQB92NeWLE89C+wx4Gw0grMx7PLI1oFca9vywlGvFIUF1hG1rlsfabSNkGsU+gn8Wvf4h9uXZ/6M+294ZDfZVcEcU7vbElZYuIF/xfVFMh8mrmjo7ds7n+vYcVhVnrFq/t56Nu4JAmNYz31vglFiFvVYuSk/w2ZsDEXB8HYqlThEnocfG3r67tEZOOHSLMcrGyA80Ikhl54DCACj9/5bvHeVuBhINi6HpRpd1iHg4JCIn9Vj+2tFfEyk/I0iJOuNISwg4gJSJ1DHrLSfXcgKBDo59g1b+UtAOfy1LD4Kuzstsv1qiZVtkNA8Iuw1V4EyPjkgOBV8cRpJ4pFjMLSakbrOFRDM2n3HrO6glSplXN0TF84/SOwfb3qc35Vav3j228mpEyvarvM=
   - secure: gBnKazEVxMWYsU7omL2g5d6Muc6AvF5ICBdesIEtkyrFtku0pBwbkoGD9CEM6fkrThZUvs/WbeBOPlvRcoz1l0dmJADNBDax767K2DXPa6e+04gSaQr6sXbKQOUGy3/++/kzytOc9yn2L/FG1APgj3b3dcqm8RgUH9E31YVPZfuuOgZpQac3Jksj5yAMcKMuKbdQHJoy6l071rOvCRFkRT8W3N+iAivOYtG6Ty5Jbh+lHJegWvzg0kMb9IpHxeGmAbxHGEKMCF8d4RctbcC+Lrl/Oqu3xrXrdin/0m+9WGFQrEvWTcGiYCg357kLvguMn95bKfITxoWcZJHebHMXtVW7pHRZv/vvUeMcwdXLXisSiRE2a7nWzlsRNyIo9F1aI1Y8EhdvLAGIIZk2Md+W9qtYuBb7xvsA8SDAoU0kOe/Be/MHDbIWSqO0xYN81CNSziFSVW/4i1XT7aqBTmfbtZ/gZzp+Ts5QJEzJfTSB+1WQVzpExP6BteB/8Dt1bTqOGgdFja8Tr+9QFZHUpuVw1dfQE3DQ/CrQAtLsOb3dY8rsVBAYVydlxmUVyy4XgwJkdmavzQ8vpafhqZB2v++PEenYUDSccfxj7WhFZeZ6Q2miYjE5oXXM3vPI3L23pv3O20/B5utMM3QNJVIdf834dM6yR0tbVWQ4GRQOBdqI2hg=
   - secure: t/SayRr+rFJTOh4kem6i2BMtpYAkA5+vkhPsBkKqbtp/urZs/lxDWPd9AbyxkP6j1DAANhlC3bpWiPTCe5FPF9qwLcDopHR/ZgixiFXh9S5eYWYDD+NckgjYY29ONPWbvjzFcNwFr6KF+hrsWQEJXxmrdXdDr6CeZPfyDqKUcTgSuupmrD8CF0mXfzUNm3YUMD1KCnBdZOxS3EtYKVBiu6VqCZ46ll2jbeKFrNhg6M1wZggglKaJcVE+ssuvIXu7bChc2sbKVI61VU4P06i7lbWdnOEAfxfWqPQIEFjHj6E30WmRb3Zibty8S4stEkwEeSekuwTqUPCIM6i2tUyVCQqXSU7xhu/OMCquppVq8Sq81aZbsURkTdtNm1GyMULtIkG+8Ep235tRxLT54jtjWpXICubo/ifP7BzYF/qR0ZujJf5RMecCg9Z/Q/tM7laX2vsgw1EeLQtEtw/zGVptgPN8ko1/7BqKfpQSlUBPD8DmmtHM2b5jkZ8rQp+KrIHqyiH5Hi601Q8E7NkS7BvwBFljGz/3kj/9d3Npw1DJdVyHCTKg9otUTZIyfoHzaq45MwPZiiVuzI8dBYwuu4K2l1lE8RqvVDUhhYyXDfnFjxs7w0ZLEeTUu01uiHgJexTtEX6BAzAc6loP9eb1yMvW61Vgt9eQyepldvj4y2rejRQ=
+  
+addons:
+  apt:
+    packages:
+      - sshpass
+     
+addons:
+  postgresql: "9.6"
+
+services:
+- postgresql
+
+before_script:
+- psql -c "create user docker with superuser password 'docker';" -U postgres
+- psql -c "create database technopark;" -U postgres
+- psql -c "grant all on database technopark to docker;" -U postgres
+
+after_success:
+    - mkdir build
+    - mv * build
+    - tar -czf package.tgz build
+    - export SSHPASS=/home/project
+    - sshpass -e scp package.tgz fourtytwo@194.87.110.17:/home/project
