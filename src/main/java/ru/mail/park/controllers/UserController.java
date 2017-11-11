@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.domain.dto.helpers.UserHelper;
-import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.info.UserSigninInfo;
@@ -57,7 +56,7 @@ public class UserController {
 
     @PutMapping("update")
     public ResponseEntity<?> update(@Valid @RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
-        List<String> responseList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
 
         Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
         if (id == null) {
@@ -70,14 +69,14 @@ public class UserController {
         User user = userDao.findUserById(id);
 
         if (oldPassword != null && password == null) {
-            responseList.add(MessageConstants.EMPTY_PASSWORD);
+            errors.add(MessageConstants.EMPTY_PASSWORD);
         } else if (oldPassword == null && password != null) {
-            responseList.add(MessageConstants.EMPTY_OLD_PASSWORD);
+            errors.add(MessageConstants.EMPTY_OLD_PASSWORD);
         } else if (oldPassword != null && !userDao.checkUserPassword(user, oldPassword)) {
-            responseList.add(MessageConstants.BAD_OLD_PASSWORD);
+            errors.add(MessageConstants.BAD_OLD_PASSWORD);
         }
-        if (!responseList.isEmpty()) {
-            throw new ControllerValidationException(responseList);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(new Message<>(errors));
         }
 
         userDao.updateUser(user, userUpdateInfo);
@@ -101,10 +100,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
 
-        User user = userDao.findUserByUsername(userSigninInfo.getLogin());
-        if (user == null) {
-            user = userDao.findUserByEmail(userSigninInfo.getLogin());
-        }
+        User user = userDao.prepareSignIn(userSigninInfo);
 
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity

@@ -15,6 +15,7 @@ import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.info.UserSigninInfo;
 import ru.mail.park.services.UserDao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.assertFalse;
@@ -42,9 +43,7 @@ public class MockBeanUserControllerTest {
         user.setId(1L);
         user.setUsername("foo");
 
-        when(userDao.hasUsername(anyString())).thenReturn(true);
-        when(userDao.findUserByUsername(anyString())).thenReturn(user);
-        when(userDao.checkUserPassword(any(User.class), anyString())).thenReturn(true);
+        when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenReturn(user);
 
         ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
                 "/api/auth/login",
@@ -60,8 +59,6 @@ public class MockBeanUserControllerTest {
         assertNotNull(user);
 
         assertEquals("foo", userResp.getUsername());
-        verify(userDao).hasUsername(anyString());
-        verify(userDao, times(2)).findUserByUsername(anyString());
-        verify(userDao).checkUserPassword(any(User.class), anyString());
+        verify(userDao).prepareSignIn(any(UserSigninInfo.class));
     }
 }

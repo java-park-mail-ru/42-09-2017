@@ -64,6 +64,6 @@ public class SpyBeanUserControllerTest {
 
         assertEquals("foo", userResp.getUsername());
         verify(userDao).hasUsername(anyString());
-        verify(userDao, times(2)).findUserByUsername(anyString());
+        verify(userDao).findUserByUsername(anyString());
     }
 }
