@@ -13,13 +13,13 @@ import ru.mail.park.services.GameDao;
 import javax.validation.Valid;
 import java.util.List;
 
-@CrossOrigin(origins = {
-        "https://sand42box.herokuapp.com",
-        "https://nightly-42.herokuapp.com",
-        "https://master-42.herokuapp.com",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080"
-})
+//@CrossOrigin(origins = {
+//        "https://sand42box.herokuapp.com",
+//        "https://nightly-42.herokuapp.com",
+//        "https://master-42.herokuapp.com",
+//        "http://localhost:8080",
+//        "http://127.0.0.1:8080"
+//})
 @RestController
 @RequestMapping(value = "api/game", produces = "application/json")
 public class GameController {
