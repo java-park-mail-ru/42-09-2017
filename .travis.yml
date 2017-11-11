@@ -18,7 +18,7 @@ before_script:
 language: java
 after_success:
     - mkdir build
-    - mv * build
+    - ls -a | grep -v build | xargs -I{} mv {} build
     - tar -czf package.tgz build
     - export SSHPASS=/home/project
-    - sshpass -e scp package.tgz fourtytwo@194.87.110.17:/home/project
+    - sshpass -e scp package.tgz $DEPLOY_USER@$DEPLOY_HOST:/home/project
