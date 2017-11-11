@@ -1,5 +1,7 @@
 package ru.mail.park.websocket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -15,6 +17,7 @@ public class SocketHandler extends TextWebSocketHandler {
     private final UserDao userDao;
     private final WebSocketService webSocketService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketHandler.class);
     public static final CloseStatus ACCESS_DENIED = new CloseStatus(4500, "Not logged in");
 
     public SocketHandler(UserDao userDao, WebSocketService webSocketService) {
@@ -26,10 +29,12 @@ public class SocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
         if (id == null || userDao.findUserById(id) == null) {
+            LOGGER.warn("Access denied");
             closeSession(session, ACCESS_DENIED);
             return;
         }
         webSocketService.registerUser(id, session);
+        LOGGER.info("Registered");
     }
 
     @Override
@@ -37,11 +42,13 @@ public class SocketHandler extends TextWebSocketHandler {
         Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
 
         if (id == null || userDao.findUserById(id) == null) {
+            LOGGER.warn("Message is not handled");
             closeSession(session, ACCESS_DENIED);
             return;
         }
         String response = "WebSocket message to Danya";
         session.sendMessage(new TextMessage(response));
+        LOGGER.info("Message is sent");
     }
 
     private void closeSession(WebSocketSession webSocketSession, CloseStatus closeStatus) {
