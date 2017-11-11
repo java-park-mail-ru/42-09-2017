@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.mechanics.objects.body.GBody;
-import ru.mail.park.mechanics.objects.GJoint;
+import ru.mail.park.mechanics.objects.joint.GJoint;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

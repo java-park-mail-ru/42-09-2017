@@ -10,11 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.dto.BoardRequest;
-import ru.mail.park.mechanics.WorldParser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,13 +116,13 @@ public class GameDao {
         }
     }
 
-    public void initializeWorld(Long mapId) {
-        Board board = em.find(Board.class, mapId);
-        try {
-            BoardRequest.Data bodiesInfo = MAPPER.readValue(board.getData(), BoardRequest.Data.class);
-            WorldParser.initWorld(bodiesInfo.getBodies(), bodiesInfo.getJoints());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void initializeWorld(Long mapId) {
+//        Board board = em.find(Board.class, mapId);
+//        try {
+//            BoardRequest.Data bodiesInfo = MAPPER.readValue(board.getData(), BoardRequest.Data.class);
+//            WorldParser.initWorld(bodiesInfo.getBodies(), bodiesInfo.getJoints());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

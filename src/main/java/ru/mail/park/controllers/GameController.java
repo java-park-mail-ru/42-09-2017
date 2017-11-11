@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.domain.Board;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.domain.dto.BoardMetaDto;
 import ru.mail.park.domain.dto.helpers.BoardMetaHelper;
-import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.services.GameDao;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(origins = {
@@ -84,21 +81,21 @@ public class GameController {
                 .ok(gameDao.getBoard(id));
     }
 
-    @PostMapping("map/{id}/run")
-    public ResponseEntity<String> runMap(@PathVariable Long id) {
-        BoardRequest.Data data = null;
-        try {
-            data = MAPPER.readValue(gameDao.getBoard(id), BoardRequest.Data.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity
-                    .badRequest()
-                    .body("bad");
-        }
-
-        WorldParser.initWorld(data.getBodies(), data.getJoints());
-        WorldParser.run();
-        return ResponseEntity
-                .ok("good");
-    }
+//    @PostMapping("map/{id}/run")
+//    public ResponseEntity<String> runMap(@PathVariable Long id) {
+//        BoardRequest.Data data = null;
+//        try {
+//            data = MAPPER.readValue(gameDao.getBoard(id), BoardRequest.Data.class);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body("bad");
+//        }
+//
+//        WorldParser.initWorld(data.getBodies(), data.getJoints());
+//        WorldParser.run();
+//        return ResponseEntity
+//                .ok("good");
+//    }
 }
