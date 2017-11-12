@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class ComplexBodyConfig {
     private Float bottomLength;
-    private Float wallWidth;
+    private Float wallThickness;
     private Float height;
 
     @JsonCreator
@@ -20,12 +20,12 @@ public class ComplexBodyConfig {
         this.bottomLength = bottomLength;
     }
 
-    public Float getWallWidth() {
-        return wallWidth;
+    public Float getWallThickness() {
+        return wallThickness;
     }
 
-    public void setWallWidth(Float wallWidth) {
-        this.wallWidth = wallWidth;
+    public void setWallThickness(Float wallThickness) {
+        this.wallThickness = wallThickness;
     }
 
     public Float getHeight() {
