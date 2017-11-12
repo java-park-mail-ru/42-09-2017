@@ -155,7 +155,7 @@ public class WorldParser {
         float bottomLength;
         float height;
         try {
-            wallWidth = config.getWallWidth();
+            wallWidth = config.getWallThickness();
             bottomLength = config.getBottomLength();
             height = config.getHeight();
         } catch (NullPointerException e) {
