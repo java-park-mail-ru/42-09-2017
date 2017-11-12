@@ -136,7 +136,7 @@ public class WorldParser {
         }
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = new PolygonShape();
-        ((PolygonShape) fixDef.shape).setAsBox(size.x, size.y);
+        ((PolygonShape) fixDef.shape).setAsBox(size.x / 2, size.y / 2);
         body.createFixture(fixDef);
     }
 
