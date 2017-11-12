@@ -29,5 +29,7 @@ public class MessageConstants {
     public static final String BOARD_DATA_EMPTY = "BOARD_DATA_EMPTY";
     public static final String REQUIRED_FIELD_EMPTY = "REQUIRED_FIELD_EMPTY";
 
+    public static final String BOARD_EXISTS = "BOARD_ALREADY_EXISTS";
+
     public static final String TYPE_OUT_OF_BOUNDS = "TYPE_OUT_OF_BOUNDS";
 }

@@ -2,6 +2,8 @@ package ru.mail.park.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ import java.util.List;
 public class GameController {
     private final GameDao gameDao;
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
     public GameController(GameDao gameDao) {
         this.gameDao = gameDao;
     }
@@ -58,6 +60,7 @@ public class GameController {
                         BoardMetaHelper.fromDto(boardRequest.getBoardMetaDto()))
         );
 
+        LOGGER.info("Map has been created");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(boardMetaDto);

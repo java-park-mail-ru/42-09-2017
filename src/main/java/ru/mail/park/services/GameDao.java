@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.exceptions.ControllerValidationException;
+import ru.mail.park.info.constants.MessageConstants;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -68,7 +70,27 @@ public class GameDao {
         }
     }
 
+    private boolean hasName(String name) {
+        try {
+            Long count = em.createQuery("select count(id) from BoardMeta where name = :name", Long.class)
+                    .setParameter("name", name)
+                    .getSingleResult();
+            if (count == 0) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (NoResultException e) {
+            return false;
+        }
+    }
+
     public BoardMeta createBoard(BoardRequest.Data boardData, BoardMeta boardMeta) throws JsonProcessingException {
+        if (hasName(boardMeta.getName())) {
+            List<String> errors = new ArrayList<>();
+            errors.add(MessageConstants.BOARD_EXISTS);
+            throw new ControllerValidationException(errors);
+        }
         Board board = new Board();
         LOGGER.warn(MAPPER.writeValueAsString(boardData.getBodies()));
         LOGGER.warn(MAPPER.writeValueAsString(boardData.getJoints()));
