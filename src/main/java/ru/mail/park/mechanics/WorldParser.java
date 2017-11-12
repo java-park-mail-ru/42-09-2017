@@ -177,13 +177,13 @@ public class WorldParser {
         FixtureDef fixDefDown = new FixtureDef();
         fixDefDown.shape = new PolygonShape();
         ((PolygonShape) fixDefDown.shape).setAsBox(bottomLength / 2, wallWidth / 2,
-                new Vec2(0, (height - wallWidth) / 2), 0);
+                new Vec2(0, - (height - wallWidth) / 2), 0);
         body.createFixture(fixDefDown);
 
         FixtureDef fixDefSensor = new FixtureDef();
         fixDefSensor.shape = new PolygonShape();
         ((PolygonShape) fixDefSensor.shape).setAsBox(bottomLength / 2, (height - wallWidth) / 2,
-                new Vec2(0f, -wallWidth / 2), 0);
+                new Vec2(0f, wallWidth / 2), 0);
         fixDefSensor.isSensor = gBody.getBody().getData().getOption().isSensor();
         body.createFixture(fixDefSensor);
     }
