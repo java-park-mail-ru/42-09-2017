@@ -16,7 +16,7 @@ public class SensorListener implements ContactListener {
         int keyA = contact.getFixtureA().getFilterData().categoryBits;
         int keyB = contact.getFixtureB().getFilterData().categoryBits;
 
-        if (keyA == keyB && keyA != 0x0001) {
+        if (keyA == 0x0002 && keyA == 0x0002) {
             LOGGER.warn("CONTACT");
             WorldParser.setCalculation(false);
         }
