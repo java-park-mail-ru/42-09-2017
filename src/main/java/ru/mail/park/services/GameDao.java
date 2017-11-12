@@ -64,6 +64,7 @@ public class GameDao {
     public String getBoard(Long id) {
         try {
             Board board = em.find(Board.class, id);
+            LOGGER.info("Found board with id " + id.toString());
             return board.getData();
         } catch (NoResultException e) {
             return null;
@@ -98,6 +99,7 @@ public class GameDao {
         em.persist(board);
         boardMeta.setBoard(board);
         em.persist(boardMeta);
+        LOGGER.info("Board created with id " + board.getId().toString());
         return boardMeta;
     }
 

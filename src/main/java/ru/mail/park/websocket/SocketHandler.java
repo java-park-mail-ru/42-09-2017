@@ -36,35 +36,37 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
-        if (id == null || userDao.findUserById(id) == null) {
-            LOGGER.warn("Access denied");
-            closeSession(session, ACCESS_DENIED);
-            return;
-        }
-        webSocketService.registerUser(id, session);
-        LOGGER.info("Registered");
+//        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+//        if (id == null || userDao.findUserById(id) == null) {
+//            LOGGER.warn("Access denied");
+//            closeSession(session, ACCESS_DENIED);
+//            return;
+//        }
+//        webSocketService.registerUser(id, session);
+        LOGGER.info("CONNECTED");
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
-
-        if (id == null || userDao.findUserById(id) == null) {
-            LOGGER.warn("Message is not handled");
-            closeSession(session, ACCESS_DENIED);
-            return;
-        }
-
+//        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+//
+//        if (id == null || userDao.findUserById(id) == null) {
+//            LOGGER.warn("Message is not handled");
+//            closeSession(session, ACCESS_DENIED);
+//            return;
+//        }
+        LOGGER.info("Message received");
         String textMessage = message.getPayload();
         ClientSnap snap;
         if (textMessage.equals("start")) {
             WorldParser.run();
-            session.sendMessage(new TextMessage("started"));
+            session.sendMessage(new TextMessage("STARTED"));
+            LOGGER.info("Simulation started");
             return;
         } else {
             try {
                 snap = mapper.readValue(message.getPayload(), ClientSnap.class);
+                LOGGER.debug(message.getPayload());
             } catch (IOException e) {
                 LOGGER.error("Wrong format");
                 session.sendMessage(new TextMessage("WrongFormat"));
@@ -73,6 +75,7 @@ public class SocketHandler extends TextWebSocketHandler {
         }
 
         List<BodyDiff> bodyDiffs = snap.getBodies();
+        LOGGER.info("Got changes");
 
         for (BodyDiff bodyDiff : bodyDiffs) {
             Map<Long, BodyDiff> serverDiffs = WorldParser.getDiffsPerFrame().get(bodyDiff.getId());
@@ -96,6 +99,7 @@ public class SocketHandler extends TextWebSocketHandler {
         }
         try {
             webSocketSession.close(status);
+            LOGGER.error("Connection is closed");
         } catch (IOException e) {
             e.printStackTrace();
         }

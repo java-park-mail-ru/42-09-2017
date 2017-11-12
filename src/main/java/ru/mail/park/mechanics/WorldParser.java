@@ -56,6 +56,8 @@ public class WorldParser {
     }
 
     public static void initWorld(List<GBody> bodies, List<GJoint> joints) {
+        LOGGER.info("World initialization started");
+
         for (GBody gBody : bodies) {
 
             BodyDef bodyDef = new BodyDef();
@@ -69,7 +71,7 @@ public class WorldParser {
                 dynamicBodies.put(gBody.getId(), body);
             }
 
-            LOGGER.info("Body created with options: " +
+            LOGGER.info("   Body created with options: " +
                     bodyDef.type.toString() + ", " +
                     bodyDef.position.toString() + ", " +
                     String.valueOf(bodyDef.angle));
@@ -78,15 +80,15 @@ public class WorldParser {
             switch (type) {
                 case "rect":
                     rectCreator(body, gBody.getBody().getData().getSize());
-                    LOGGER.info("Rectangle created");
+                    LOGGER.info("   Rectangle created");
                     break;
                 case "circle":
                     circleCreator(body, gBody.getBody().getData().getRadius());
-                    LOGGER.info("Circle created");
+                    LOGGER.info("   Circle created");
                     break;
                 case "bucket":
                     bucketCreator(body, gBody.getBody().getData().getConfig(), gBody);
-                    LOGGER.info("Bucket created");
+                    LOGGER.info("   Bucket created");
                     break;
             }
 
@@ -115,7 +117,7 @@ public class WorldParser {
                         fixture.getFilterData().categoryBits = 0x0001;
                     }
                 }
-                LOGGER.info("Fixture created with properties: " +
+                LOGGER.info("   Fixture created with properties: " +
                         String.valueOf(fixture.m_isSensor) + ", " +
                         String.valueOf(fixture.m_density) + ", " +
                         String.valueOf(fixture.m_friction) + ", " +

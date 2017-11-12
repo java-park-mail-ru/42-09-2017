@@ -13,11 +13,11 @@ public class SensorListener implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        LOGGER.warn("CONTACT");
         int keyA = contact.getFixtureA().getFilterData().categoryBits;
         int keyB = contact.getFixtureB().getFilterData().categoryBits;
 
         if (keyA == keyB && keyA != 0x0001) {
+            LOGGER.warn("CONTACT");
             WorldParser.setCalculation(false);
         }
     }
