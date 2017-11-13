@@ -58,6 +58,9 @@ public class WorldParser implements Runnable {
             afterTime = System.nanoTime();
 
             sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
+            if (sleepTime < 0) {
+                sleepTime = 0;
+            }
             try {
                 LOGGER.info(String.valueOf(sleepTime));
                 Thread.sleep(sleepTime);
