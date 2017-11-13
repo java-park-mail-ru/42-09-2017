@@ -27,18 +27,20 @@ public class WorldParser {
     private static Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
 
     public static void run() {
-        long start = System.nanoTime();
-        long current;
+        long startTime = System.nanoTime();
+        long beforeTime = startTime;
+        long afterTime, sleepTime;
         long frameNumber = 0;
         LOGGER.warn("Start running");
         while (calculation) {
-            current = System.nanoTime();
-            if ((current - start) > 90_000_000_000L) {
+
+            if ((beforeTime - startTime) > 30000000000L) {
                 calculation = false;
                 LOGGER.error("Running timeout");
-
             }
+
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
+
             world.step(1/60f, 10, 10);
 
             frameNumber++;
@@ -52,6 +54,16 @@ public class WorldParser {
                 bodyDiff.setAngle(body.getAngle());
                 bodyDiffMap.put(frameNumber, bodyDiff);
             }
+            afterTime = System.nanoTime();
+
+            sleepTime = (1000000000 / 80 - (afterTime - beforeTime)) / 1000000;
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                LOGGER.error("Sleep interrupted");
+            }
+
+            beforeTime = System.nanoTime();
         }
         LOGGER.warn("Running completed");
     }
