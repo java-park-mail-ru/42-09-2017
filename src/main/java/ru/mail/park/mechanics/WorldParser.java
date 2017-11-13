@@ -59,8 +59,8 @@ public class WorldParser implements Runnable {
 
             sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
             try {
-                Thread.sleep(sleepTime);
                 LOGGER.info(String.valueOf(sleepTime));
+                Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 LOGGER.error("Sleep interrupted");
             }
