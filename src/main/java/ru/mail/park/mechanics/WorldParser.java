@@ -56,7 +56,7 @@ public class WorldParser {
             }
             afterTime = System.nanoTime();
 
-            sleepTime = (1000000000 / 80 - (afterTime - beforeTime)) / 1000000;
+            sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
             try {
                 Thread.sleep(sleepTime);
 		LOGGER.info(String.valueOf(sleepTime));
