@@ -59,6 +59,7 @@ public class WorldParser {
             sleepTime = (1000000000 / 80 - (afterTime - beforeTime)) / 1000000;
             try {
                 Thread.sleep(sleepTime);
+		LOGGER.info(String.valueOf(sleepTime));
             } catch (InterruptedException e) {
                 LOGGER.error("Sleep interrupted");
             }
