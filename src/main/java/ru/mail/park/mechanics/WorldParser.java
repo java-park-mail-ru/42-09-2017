@@ -57,6 +57,9 @@ public class WorldParser {
 
     public static void initWorld(List<GBody> bodies, List<GJoint> joints) {
         LOGGER.info("World initialization started");
+        gameBodies = new ConcurrentHashMap<>();
+        dynamicBodies = new ConcurrentHashMap<>();
+        diffsPerFrame = new ConcurrentHashMap<>();
 
         for (GBody gBody : bodies) {
 
@@ -69,6 +72,7 @@ public class WorldParser {
             gameBodies.put(gBody.getId(), body);
             if (bodyDef.type == BodyType.DYNAMIC) {
                 dynamicBodies.put(gBody.getId(), body);
+                diffsPerFrame.put(gBody.getId(), new ConcurrentHashMap<>());
             }
 
             LOGGER.info("   Body created with options: " +

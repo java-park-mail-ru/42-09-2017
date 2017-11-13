@@ -90,6 +90,12 @@ public class SocketHandler extends TextWebSocketHandler {
         LOGGER.info("Message is sent");
     }
 
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        super.afterConnectionClosed(session, status);
+        LOGGER.warn("CLOSED");
+    }
+
     private void closeSession(WebSocketSession webSocketSession, CloseStatus closeStatus) {
         CloseStatus status;
         if (closeStatus == null) {
