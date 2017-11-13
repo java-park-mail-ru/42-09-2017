@@ -38,6 +38,7 @@ public class WorldParser {
                 LOGGER.error("Running timeout");
 
             }
+            LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
             world.step(1/60f, 10, 10);
 
             frameNumber++;
