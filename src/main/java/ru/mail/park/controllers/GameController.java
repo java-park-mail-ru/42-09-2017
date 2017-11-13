@@ -88,7 +88,7 @@ public class GameController {
                 .ok(gameDao.getBoard(id));
     }
 
-    @PostMapping("map/{id}/init")
+    @GetMapping("map/{id}/init")
     public ResponseEntity<String> runMap(@PathVariable Long id) {
         BoardRequest.Data data = null;
         try {
@@ -100,7 +100,9 @@ public class GameController {
                     .body("bad");
         }
 
-        WorldParser.initWorld(data.getBodies(), data.getJoints());
+        WorldParser worldParser = new WorldParser();
+        worldParser.initWorld(data.getBodies(), data.getJoints());
+        gameDao.registerParser(worldParser);
         return ResponseEntity
                 .ok("good");
     }

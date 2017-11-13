@@ -12,6 +12,7 @@ import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.exceptions.ControllerValidationException;
 import ru.mail.park.info.constants.MessageConstants;
+import ru.mail.park.mechanics.WorldParser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -31,6 +32,16 @@ public class GameDao {
 
     public GameDao(EntityManager em) {
         this.em = em;
+    }
+
+    private List<WorldParser> worldParsers = new ArrayList<>();
+
+    public void registerParser(WorldParser worldParser) {
+        worldParsers.add(worldParser);
+    }
+
+    public WorldParser getLastParser() {
+        return worldParsers.get(worldParsers.size() - 1);
     }
 
     public List<BoardMeta> getBoards(@Nullable String sort, @Nullable Integer page) {

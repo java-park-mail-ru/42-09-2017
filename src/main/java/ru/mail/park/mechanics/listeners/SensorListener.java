@@ -6,10 +6,17 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.mail.park.mechanics.WorldParser;
+import ru.mail.park.services.GameDao;
 
 public class SensorListener implements ContactListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorListener.class);
+    private final WorldParser worldParser;
+
+    public SensorListener(WorldParser worldParser) {
+        this.worldParser = worldParser;
+    }
 
     @Override
     public void beginContact(Contact contact) {
@@ -18,7 +25,7 @@ public class SensorListener implements ContactListener {
 
         if (keyA == 0x0002 && keyB == 0x0002) {
             LOGGER.warn("CONTACT");
-            WorldParser.setCalculation(false);
+            worldParser.setCalculation(false);
         }
     }
 

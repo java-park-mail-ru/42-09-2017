@@ -17,16 +17,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WorldParser {
+public class WorldParser implements Runnable {
 
-    private static boolean calculation = true;
-    private static World world = new World(new Vec2(0f, -10f));
+    private boolean calculation = true;
+    private World world = new World(new Vec2(0f, -10f));
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldParser.class);
-    private static Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
-    private static Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
-    private static Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
+    private Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
+    private Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
+    private Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
 
-    public static void run() {
+    @Override
+    public void run() {
         long startTime = System.nanoTime();
         long beforeTime = startTime;
         long afterTime, sleepTime;
@@ -41,7 +42,7 @@ public class WorldParser {
 
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
 
-            world.step(1/60f, 10, 10);
+            world.step(1 / 60f, 10, 10);
 
             frameNumber++;
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
@@ -59,7 +60,7 @@ public class WorldParser {
             sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
             try {
                 Thread.sleep(sleepTime);
-		LOGGER.info(String.valueOf(sleepTime));
+                LOGGER.info(String.valueOf(sleepTime));
             } catch (InterruptedException e) {
                 LOGGER.error("Sleep interrupted");
             }
@@ -69,7 +70,7 @@ public class WorldParser {
         LOGGER.warn("Running completed");
     }
 
-    public static void initWorld(List<GBody> bodies, List<GJoint> joints) {
+    public void initWorld(List<GBody> bodies, List<GJoint> joints) {
         LOGGER.info("World initialization started");
         gameBodies = new ConcurrentHashMap<>();
         dynamicBodies = new ConcurrentHashMap<>();
@@ -80,8 +81,8 @@ public class WorldParser {
             BodyDef bodyDef = new BodyDef();
             bodyDef.type = BodyType.values()[gBody.getType()];
             Vec2 position = gBody.getBody().getData().getPosition();
-            bodyDef.position = new Vec2(position.x, - position.y);
-            bodyDef.angle = - gBody.getBody().getData().getAngle();
+            bodyDef.position = new Vec2(position.x, -position.y);
+            bodyDef.angle = -gBody.getBody().getData().getAngle();
             Body body = world.createBody(bodyDef);
             gameBodies.put(gBody.getId(), body);
             if (bodyDef.type == BodyType.DYNAMIC) {
@@ -143,12 +144,12 @@ public class WorldParser {
                         String.valueOf(fixture.m_filter.categoryBits)
                 );
             }
-            world.setContactListener(new SensorListener());
+            world.setContactListener(new SensorListener(this));
         }
         LOGGER.warn("All bodies created");
     }
 
-    public static void rectCreator(Body body, Vec2 size) {
+    public void rectCreator(Body body, Vec2 size) {
         if (size == null) {
             throw new RuntimeException("Size is null");
         }
@@ -158,7 +159,7 @@ public class WorldParser {
         body.createFixture(fixDef);
     }
 
-    public static void circleCreator(Body body, Float radius) {
+    public void circleCreator(Body body, Float radius) {
         if (radius == null) {
             throw new RuntimeException("Radius is null");
         }
@@ -168,7 +169,7 @@ public class WorldParser {
         body.createFixture(fixDef);
     }
 
-    public static void bucketCreator(Body body, ComplexBodyConfig config, GBody gBody) {
+    public void bucketCreator(Body body, ComplexBodyConfig config, GBody gBody) {
         float wallWidth;
         float bottomLength;
         float height;
@@ -195,7 +196,7 @@ public class WorldParser {
         FixtureDef fixDefDown = new FixtureDef();
         fixDefDown.shape = new PolygonShape();
         ((PolygonShape) fixDefDown.shape).setAsBox(bottomLength / 2, wallWidth / 2,
-                new Vec2(0, - (height - wallWidth) / 2), 0);
+                new Vec2(0, -(height - wallWidth) / 2), 0);
         body.createFixture(fixDefDown);
 
         FixtureDef fixDefSensor = new FixtureDef();
@@ -206,35 +207,35 @@ public class WorldParser {
         body.createFixture(fixDefSensor);
     }
 
-    public static boolean isCalculation() {
+    public boolean isCalculation() {
         return calculation;
     }
 
-    public static void setCalculation(boolean calculation) {
-        WorldParser.calculation = calculation;
+    public void setCalculation(boolean calculation) {
+        this.calculation = calculation;
     }
 
-    public static Map<Long, Body> getGameBodies() {
+    public Map<Long, Body> getGameBodies() {
         return gameBodies;
     }
 
-    public static void setGameBodies(Map<Long, Body> gameBodies) {
-        WorldParser.gameBodies = gameBodies;
+    public void setGameBodies(Map<Long, Body> gameBodies) {
+        this.gameBodies = gameBodies;
     }
 
-    public static Map<Long, Body> getDynamicBodies() {
+    public Map<Long, Body> getDynamicBodies() {
         return dynamicBodies;
     }
 
-    public static void setDynamicBodies(Map<Long, Body> dynamicBodies) {
-        WorldParser.dynamicBodies = dynamicBodies;
+    public void setDynamicBodies(Map<Long, Body> dynamicBodies) {
+        this.dynamicBodies = dynamicBodies;
     }
 
-    public static Map<Long, ConcurrentHashMap<Long, BodyDiff>> getDiffsPerFrame() {
+    public Map<Long, ConcurrentHashMap<Long, BodyDiff>> getDiffsPerFrame() {
         return diffsPerFrame;
     }
 
-    public static void setDiffsPerFrame(Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame) {
-        WorldParser.diffsPerFrame = diffsPerFrame;
+    public void setDiffsPerFrame(Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame) {
+        this.diffsPerFrame = diffsPerFrame;
     }
 }
