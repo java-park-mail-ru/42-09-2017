@@ -63,10 +63,10 @@ public class SocketHandler extends TextWebSocketHandler {
         ClientSnap snap;
         WorldParser worldParser = gameDao.getLastParser();
         if (textMessage.equals("start")) {
-            session.sendMessage(new TextMessage("STARTED"));
             Thread thread = new Thread(worldParser);
             thread.start();
             LOGGER.info("Simulation started");
+            session.sendMessage(new TextMessage("STARTED"));
             return;
         } else {
             try {
