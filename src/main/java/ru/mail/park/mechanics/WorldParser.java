@@ -35,7 +35,7 @@ public class WorldParser implements Runnable {
         LOGGER.warn("Start running");
         while (calculation) {
 
-            if ((beforeTime - startTime) > 5000000000L) {
+            if ((beforeTime - startTime) > 3000000000L) {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }
@@ -49,6 +49,7 @@ public class WorldParser implements Runnable {
                 BodyDiff bodyDiff = new BodyDiff();
                 bodyDiff.setId(bodyId);
                 bodyDiff.setPosition(body.getPosition());
+                LOGGER.error(String.valueOf(bodyDiff.getPosition().y));
                 bodyDiff.setAngle(body.getAngle());
                 bodyDiffMap.put(frameNumber, bodyDiff);
             }
