@@ -53,8 +53,7 @@ public class WorldParser implements Runnable {
                 bodyDiff.setId(bodyId);
                 bodyDiff.setPosition(body.getPosition());
                 bodyDiff.setAngle(body.getAngle());
-		long frameNumber1 = frameNumber;
-                bodyDiffMap.put(frameNumber1, bodyDiff);
+                bodyDiffMap.putIfAbsent(frameNumber, bodyDiff);
                 try {
                     LOGGER.error(mapper.writeValueAsString(bodyDiffMap.get(1L)));
                 } catch (JsonProcessingException ignore) {
