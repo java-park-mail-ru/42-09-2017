@@ -1,5 +1,7 @@
 package ru.mail.park.mechanics;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -25,6 +27,7 @@ public class WorldParser implements Runnable {
     private Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
     private Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
     private Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void run() {
@@ -51,7 +54,10 @@ public class WorldParser implements Runnable {
                 bodyDiff.setPosition(body.getPosition());
                 bodyDiff.setAngle(body.getAngle());
                 bodyDiffMap.put(frameNumber, bodyDiff);
-                LOGGER.error(String.valueOf(bodyDiffMap.get(1L)));
+                try {
+                    LOGGER.error(mapper.writeValueAsString(bodyDiffMap.get(1L)));
+                } catch (JsonProcessingException ignore) {
+                }
 
             }
             world.step(1 / 60f, 10, 10);
