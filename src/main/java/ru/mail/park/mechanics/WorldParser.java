@@ -38,7 +38,7 @@ public class WorldParser implements Runnable {
         LOGGER.warn("Start running");
         while (calculation) {
 
-            if ((beforeTime - startTime) > 3000000000L) {
+            if ((beforeTime - startTime) > 50000000000L) {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }
