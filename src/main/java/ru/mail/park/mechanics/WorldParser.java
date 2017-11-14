@@ -77,6 +77,12 @@ public class WorldParser implements Runnable {
             beforeTime = System.nanoTime();
         }
         LOGGER.warn("Running completed");
+        for (Map.Entry<Long, BodyDiff> entry : diffsPerFrame.get(1L).entrySet()) {
+            try {
+                LOGGER.error(mapper.writeValueAsString(entry.getValue()));
+            } catch (JsonProcessingException e) {
+            }
+        }
     }
 
     public void initWorld(List<GBody> bodies, List<GJoint> joints) {
