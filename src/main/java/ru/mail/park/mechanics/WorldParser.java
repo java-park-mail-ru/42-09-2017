@@ -49,9 +49,10 @@ public class WorldParser implements Runnable {
                 BodyDiff bodyDiff = new BodyDiff();
                 bodyDiff.setId(bodyId);
                 bodyDiff.setPosition(body.getPosition());
-                LOGGER.error(String.valueOf(bodyDiff.getPosition().y));
                 bodyDiff.setAngle(body.getAngle());
                 bodyDiffMap.put(frameNumber, bodyDiff);
+                LOGGER.error(String.valueOf(bodyDiffMap.get(1L)));
+
             }
             world.step(1 / 60f, 10, 10);
             afterTime = System.nanoTime();
