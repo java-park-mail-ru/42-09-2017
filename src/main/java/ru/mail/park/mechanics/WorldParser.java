@@ -38,7 +38,7 @@ public class WorldParser implements Runnable {
         LOGGER.warn("Start running");
         while (calculation) {
 
-            if ((beforeTime - startTime) > 3000000000L) {
+            if ((beforeTime - startTime) > 1000000000L) {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }
@@ -56,6 +56,7 @@ public class WorldParser implements Runnable {
                 bodyDiffMap.put(frameNumber, bodyDiff);
                 try {
                     LOGGER.error(mapper.writeValueAsString(bodyDiffMap.get(1L)));
+                    LOGGER.error("  size: " + bodyDiffMap.size());
                 } catch (JsonProcessingException ignore) {
                 }
 
