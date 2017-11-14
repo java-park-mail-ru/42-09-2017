@@ -49,11 +49,12 @@ public class WorldParser implements Runnable {
                 long bodyId = bodyEntry.getKey();
                 Body body = bodyEntry.getValue();
                 Map<Long, BodyDiff> bodyDiffMap = diffsPerFrame.get(bodyId);
-                BodyDiff bodyDiff = new BodyDiff();
-                bodyDiff.setId(bodyId);
-                bodyDiff.setPosition(body.getPosition());
-                bodyDiff.setAngle(body.getAngle());
-                bodyDiffMap.putIfAbsent(frameNumber, bodyDiff);
+                bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
+                    BodyDiff bodyDiff = new BodyDiff();
+                    bodyDiff.setPosition(body.getPosition());
+                    bodyDiff.setAngle(body.getAngle());
+                    return bodyDiff;
+                });
                 try {
                     LOGGER.error(mapper.writeValueAsString(bodyDiffMap.get(1L)));
                 } catch (JsonProcessingException ignore) {
