@@ -58,7 +58,7 @@ public class SocketHandler extends TextWebSocketHandler {
 //            closeSession(session, ACCESS_DENIED);
 //            return;
 //        }
-        LOGGER.info("Message received");
+//        LOGGER.info("Message received");
         String textMessage = message.getPayload();
         ClientSnap snap;
         WorldParser worldParser = gameDao.getLastParser();
@@ -83,11 +83,13 @@ public class SocketHandler extends TextWebSocketHandler {
         LOGGER.info("Got changes");
 
         for (BodyDiff bodyDiff : bodyDiffs) {
-            LOGGER.warn("   body #" + bodyDiff.getId().toString());
+            LOGGER.warn("   clent: " + mapper.writeValueAsString(bodyDiff));
+//            LOGGER.warn("   body #" + bodyDiff.getId().toString());
             Map<Long, BodyDiff> serverDiffs = worldParser.getDiffsPerFrame().get(bodyDiff.getId());
-            LOGGER.warn("   frame #" + snap.getFrame().toString());
-            LOGGER.warn("   fnumber " + String.valueOf(serverDiffs.size()));
+//            LOGGER.warn("   frame #" + snap.getFrame().toString());
+//            LOGGER.warn("   fnumber " + String.valueOf(serverDiffs.size()));
             BodyDiff serverDiff = serverDiffs.get(snap.getFrame());
+            LOGGER.info("   server: " + mapper.writeValueAsString(serverDiff));
             Vec2 serverPos = new Vec2(serverDiff.getPosition().x, - serverDiff.getPosition().y);
             float serverAngle = - serverDiff.getAngle();
             bodyDiff.setPosition(serverPos.sub(bodyDiff.getPosition()));
