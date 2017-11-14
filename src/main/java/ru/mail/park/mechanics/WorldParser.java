@@ -40,11 +40,8 @@ public class WorldParser implements Runnable {
                 LOGGER.error("Running timeout");
             }
 
-            LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
-
-            world.step(1 / 60f, 10, 10);
-
             frameNumber++;
+            LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
                 long bodyId = bodyEntry.getKey();
                 Body body = bodyEntry.getValue();
@@ -55,6 +52,7 @@ public class WorldParser implements Runnable {
                 bodyDiff.setAngle(body.getAngle());
                 bodyDiffMap.put(frameNumber, bodyDiff);
             }
+            world.step(1 / 60f, 10, 10);
             afterTime = System.nanoTime();
 
             sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
