@@ -51,7 +51,7 @@ public class WorldParser implements Runnable {
                 Map<Long, BodyDiff> bodyDiffMap = diffsPerFrame.get(bodyId);
                 bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
                     BodyDiff bodyDiff = new BodyDiff();
-                    bodyDiff.setPosition(body.getPosition());
+                    bodyDiff.setPosition(new Vec2(body.getPosition()));
                     bodyDiff.setAngle(body.getAngle());
                     return bodyDiff;
                 });
