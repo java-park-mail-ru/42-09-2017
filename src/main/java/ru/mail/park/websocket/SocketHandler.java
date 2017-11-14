@@ -81,7 +81,6 @@ public class SocketHandler extends TextWebSocketHandler {
 
         List<BodyDiff> bodyDiffs = snap.getBodies();
         LOGGER.info("Got changes");
-
         for (BodyDiff bodyDiff : bodyDiffs) {
             LOGGER.warn("   clent: " + mapper.writeValueAsString(bodyDiff));
 //            LOGGER.warn("   body #" + bodyDiff.getId().toString());
@@ -90,11 +89,14 @@ public class SocketHandler extends TextWebSocketHandler {
 //            LOGGER.warn("   fnumber " + String.valueOf(serverDiffs.size()));
             BodyDiff serverDiff = serverDiffs.get(snap.getFrame());
             LOGGER.info("   server: " + mapper.writeValueAsString(serverDiff));
+            BodyDiff serverDiffFirst = serverDiffs.get(1L);
+            LOGGER.info("   server frame 1: " + mapper.writeValueAsString(serverDiffFirst));
             Vec2 serverPos = new Vec2(serverDiff.getPosition().x, - serverDiff.getPosition().y);
             float serverAngle = - serverDiff.getAngle();
             bodyDiff.setPosition(serverPos.sub(bodyDiff.getPosition()));
             bodyDiff.setAngle(serverAngle - bodyDiff.getAngle());
         }
+
 
         session.sendMessage(new TextMessage(mapper.writeValueAsString(snap)));
         LOGGER.info("Message is sent");
