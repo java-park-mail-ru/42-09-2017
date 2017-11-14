@@ -1,5 +1,6 @@
 package ru.mail.park.mechanics;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -72,6 +73,11 @@ public class WorldParser implements Runnable {
                     bodyFrame.setPosition(new Vec2(body.getPosition()));
                     bodyFrame.setVelocity(new Vec2(body.getLinearVelocity()));
                     bodyFrame.setAngle(body.getAngle());
+                    try {
+                        LOGGER.error(mapper.writeValueAsString(bodyFrame));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
                     return bodyFrame;
                 });
             }
