@@ -170,8 +170,9 @@ public class WorldParser implements Runnable {
                         + String.valueOf(fixture.m_filter.categoryBits)
                 );
             }
-            world.setContactListener(new SensorListener(this));
+            body.resetMassData();
         }
+        world.setContactListener(new SensorListener(this));
         LOGGER.warn("All bodies created");
     }
 
