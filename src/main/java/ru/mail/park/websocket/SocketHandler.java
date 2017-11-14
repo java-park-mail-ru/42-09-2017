@@ -68,7 +68,7 @@ public class SocketHandler extends TextWebSocketHandler {
             Map<Long, BodyFrame> serverDiffs = worldParser.getDiffsPerFrame().get(bodyFrame.getId());
             BodyFrame serverFrame = serverDiffs.get(snap.getFrame());
             Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
-            Vec2 serverVel = new Vec2(serverFrame.getVelocity().x, -serverFrame.getPosition().y);
+            Vec2 serverVel = new Vec2(serverFrame.getVelocity().x, -serverFrame.getVelocity().y);
             float serverAngle = -serverFrame.getAngle();
             bodyFrame.setPosition(serverPos.sub(bodyFrame.getPosition()));
             bodyFrame.setVelocity(serverVel.sub(bodyFrame.getVelocity()));
