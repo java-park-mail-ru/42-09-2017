@@ -26,7 +26,7 @@ public class WorldParser implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldParser.class);
     private Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
     private Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
-    private Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
+    private Map<Long, Map<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -246,11 +246,11 @@ public class WorldParser implements Runnable {
         this.dynamicBodies = dynamicBodies;
     }
 
-    public Map<Long, ConcurrentHashMap<Long, BodyDiff>> getDiffsPerFrame() {
+    public Map<Long, Map<Long, BodyDiff>> getDiffsPerFrame() {
         return diffsPerFrame;
     }
 
-    public void setDiffsPerFrame(Map<Long, ConcurrentHashMap<Long, BodyDiff>> diffsPerFrame) {
+    public void setDiffsPerFrame(Map<Long, Map<Long, BodyDiff>> diffsPerFrame) {
         this.diffsPerFrame = diffsPerFrame;
     }
 }
