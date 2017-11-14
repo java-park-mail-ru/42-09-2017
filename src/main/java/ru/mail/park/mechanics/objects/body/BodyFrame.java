@@ -7,17 +7,20 @@ import ru.mail.park.info.constants.MessageConstants;
 
 import javax.validation.constraints.NotNull;
 
-public class BodyDiff {
+public class BodyFrame {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long id;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @JsonIgnoreProperties({"valid"})
     private Vec2 position;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    @JsonIgnoreProperties({"valid"})
+    private Vec2 velocity;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Float angle;
 
     @JsonCreator
-    public BodyDiff() {
+    public BodyFrame() {
 
     }
 
@@ -35,6 +38,14 @@ public class BodyDiff {
 
     public void setPosition(Vec2 position) {
         this.position = position;
+    }
+
+    public Vec2 getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Vec2 velocity) {
+        this.velocity = velocity;
     }
 
     public Float getAngle() {

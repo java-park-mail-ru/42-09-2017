@@ -1,6 +1,5 @@
 package ru.mail.park.mechanics;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -9,7 +8,7 @@ import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.mail.park.mechanics.listeners.SensorListener;
-import ru.mail.park.mechanics.objects.body.BodyDiff;
+import ru.mail.park.mechanics.objects.body.BodyFrame;
 import ru.mail.park.mechanics.objects.joint.GJoint;
 import ru.mail.park.mechanics.objects.body.BodyOption;
 import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
@@ -22,23 +21,42 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WorldParser implements Runnable {
 
     private boolean calculation = true;
-    private World world = new World(new Vec2(0f, -10f));
+    private World world;
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldParser.class);
-    private Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
-    private Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
-    private Map<Long, Map<Long, BodyDiff>> diffsPerFrame = new ConcurrentHashMap<>();
+    private Map<Long, Body> gameBodies;
+    private Map<Long, Body> dynamicBodies;
+    private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
+
     private final ObjectMapper mapper = new ObjectMapper();
+
+    private static final long TIMEOUT = 50000000000L;
+    private static final float GRAVITY = -10f;
+    private static final float DELTA = 1 / 60f;
+    private static final int VEL_ITER = 10;
+    private static final int POS_ITER = 10;
+    private static final int SECOND = 1000000000;
+    private static final int MICRO_SECOND = 1000000;
+    private static final int FPS = 60;
+
+    public WorldParser() {
+        this.world = new World(new Vec2(0f, GRAVITY));
+        this.gameBodies = new ConcurrentHashMap<>();
+        this.dynamicBodies = new ConcurrentHashMap<>();
+        this.diffsPerFrame = new ConcurrentHashMap<>();
+    }
 
     @Override
     public void run() {
         long startTime = System.nanoTime();
         long beforeTime = startTime;
-        long afterTime, sleepTime;
+        long afterTime;
+        long sleepTime;
         long frameNumber = 0;
+
+
         LOGGER.warn("Start running");
         while (calculation) {
-
-            if ((beforeTime - startTime) > 50000000000L) {
+            if ((beforeTime - startTime) > TIMEOUT) {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }
@@ -48,23 +66,19 @@ public class WorldParser implements Runnable {
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
                 long bodyId = bodyEntry.getKey();
                 Body body = bodyEntry.getValue();
-                Map<Long, BodyDiff> bodyDiffMap = diffsPerFrame.get(bodyId);
+                Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
                 bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
-                    BodyDiff bodyDiff = new BodyDiff();
-                    bodyDiff.setPosition(new Vec2(body.getPosition()));
-                    bodyDiff.setAngle(body.getAngle());
-                    return bodyDiff;
+                    BodyFrame bodyFrame = new BodyFrame();
+                    bodyFrame.setPosition(new Vec2(body.getPosition()));
+                    bodyFrame.setVelocity(new Vec2(body.getLinearVelocity()));
+                    bodyFrame.setAngle(body.getAngle());
+                    return bodyFrame;
                 });
-                try {
-                    LOGGER.error(mapper.writeValueAsString(bodyDiffMap.get(1L)));
-                } catch (JsonProcessingException ignore) {
-                }
-
             }
-            world.step(1 / 60f, 10, 10);
+            world.step(DELTA, VEL_ITER, POS_ITER);
             afterTime = System.nanoTime();
 
-            sleepTime = (1000000000 / 60 - (afterTime - beforeTime)) / 1000000;
+            sleepTime = (SECOND / FPS - (afterTime - beforeTime)) / MICRO_SECOND;
             if (sleepTime < 0) {
                 sleepTime = 0;
             }
@@ -77,64 +91,54 @@ public class WorldParser implements Runnable {
 
             beforeTime = System.nanoTime();
         }
-        LOGGER.warn("Running completed");
-        for (Map.Entry<Long, BodyDiff> entry : diffsPerFrame.get(1L).entrySet()) {
-            try {
-                LOGGER.error(mapper.writeValueAsString(entry.getValue()));
-            } catch (JsonProcessingException e) {
-            }
-        }
     }
 
     public void initWorld(List<GBody> bodies, List<GJoint> joints) {
         LOGGER.info("World initialization started");
-        gameBodies = new ConcurrentHashMap<>();
-        dynamicBodies = new ConcurrentHashMap<>();
-        diffsPerFrame = new ConcurrentHashMap<>();
-
-        for (GBody gBody : bodies) {
-
+        for (GBody gbody : bodies) {
             BodyDef bodyDef = new BodyDef();
-            bodyDef.type = BodyType.values()[gBody.getType()];
-            Vec2 position = gBody.getBody().getData().getPosition();
+            bodyDef.type = BodyType.values()[gbody.getType()];
+            Vec2 position = gbody.getBody().getData().getPosition();
             bodyDef.position = new Vec2(position.x, -position.y);
-            bodyDef.angle = -gBody.getBody().getData().getAngle();
+            bodyDef.angle = -gbody.getBody().getData().getAngle();
             Body body = world.createBody(bodyDef);
-            gameBodies.put(gBody.getId(), body);
+            gameBodies.put(gbody.getId(), body);
             if (bodyDef.type == BodyType.DYNAMIC) {
-                dynamicBodies.put(gBody.getId(), body);
-                diffsPerFrame.put(gBody.getId(), new ConcurrentHashMap<>());
+                dynamicBodies.put(gbody.getId(), body);
+                diffsPerFrame.put(gbody.getId(), new ConcurrentHashMap<>());
             }
 
-            LOGGER.info("   Body created with options: " +
-                    bodyDef.type.toString() + ", " +
-                    bodyDef.position.toString() + ", " +
-                    String.valueOf(bodyDef.angle));
+            LOGGER.info("   Body created with options: "
+                    + bodyDef.type.toString() + ", "
+                    + bodyDef.position.toString() + ", "
+                    + String.valueOf(bodyDef.angle));
 
-            String type = gBody.getBody().getType();
+            String type = gbody.getBody().getType();
             switch (type) {
                 case "rect":
-                    rectCreator(body, gBody.getBody().getData().getSize());
+                    rectCreator(body, gbody.getBody().getData().getSize());
                     LOGGER.info("   Rectangle created");
                     break;
                 case "circle":
-                    circleCreator(body, gBody.getBody().getData().getRadius());
+                    circleCreator(body, gbody.getBody().getData().getRadius());
                     LOGGER.info("   Circle created");
                     break;
                 case "bucket":
-                    bucketCreator(body, gBody.getBody().getData().getConfig(), gBody);
+                    bucketCreator(body, gbody.getBody().getData().getConfig(), gbody);
                     LOGGER.info("   Bucket created");
+                    break;
+                default:
                     break;
             }
 
-            BodyOption option = gBody.getBody().getData().getOption();
+            BodyOption option = gbody.getBody().getData().getOption();
             float density = option.getDensity();
             float friction = option.getFriction();
             float restitution = option.getRestitution();
             boolean sensor = option.isSensor();
             int categoryBits;
-            if (gBody.isKeyBody() && gBody.getKeyBodyId() != null) {
-                categoryBits = gBody.getKeyBodyId();
+            if (gbody.isKeyBody() && gbody.getKeyBodyId() != null) {
+                categoryBits = gbody.getKeyBodyId();
             } else {
                 categoryBits = 0x0001;
             }
@@ -152,12 +156,12 @@ public class WorldParser implements Runnable {
                         fixture.getFilterData().categoryBits = 0x0001;
                     }
                 }
-                LOGGER.info("   Fixture created with properties: " +
-                        String.valueOf(fixture.m_isSensor) + ", " +
-                        String.valueOf(fixture.m_density) + ", " +
-                        String.valueOf(fixture.m_friction) + ", " +
-                        String.valueOf(fixture.m_restitution) + ", " +
-                        String.valueOf(fixture.m_filter.categoryBits)
+                LOGGER.info("   Fixture created with properties: "
+                        + String.valueOf(fixture.m_isSensor) + ", "
+                        + String.valueOf(fixture.m_density) + ", "
+                        + String.valueOf(fixture.m_friction) + ", "
+                        + String.valueOf(fixture.m_restitution) + ", "
+                        + String.valueOf(fixture.m_filter.categoryBits)
                 );
             }
             world.setContactListener(new SensorListener(this));
@@ -165,7 +169,7 @@ public class WorldParser implements Runnable {
         LOGGER.warn("All bodies created");
     }
 
-    public void rectCreator(Body body, Vec2 size) {
+    private void rectCreator(Body body, Vec2 size) {
         if (size == null) {
             throw new RuntimeException("Size is null");
         }
@@ -175,7 +179,7 @@ public class WorldParser implements Runnable {
         body.createFixture(fixDef);
     }
 
-    public void circleCreator(Body body, Float radius) {
+    private void circleCreator(Body body, Float radius) {
         if (radius == null) {
             throw new RuntimeException("Radius is null");
         }
@@ -185,7 +189,7 @@ public class WorldParser implements Runnable {
         body.createFixture(fixDef);
     }
 
-    public void bucketCreator(Body body, ComplexBodyConfig config, GBody gBody) {
+    private void bucketCreator(Body body, ComplexBodyConfig config, GBody gbody) {
         float wallWidth;
         float bottomLength;
         float height;
@@ -219,7 +223,7 @@ public class WorldParser implements Runnable {
         fixDefSensor.shape = new PolygonShape();
         ((PolygonShape) fixDefSensor.shape).setAsBox(bottomLength / 2, (height - wallWidth) / 2,
                 new Vec2(0f, wallWidth / 2), 0);
-        fixDefSensor.isSensor = gBody.getBody().getData().getOption().isSensor();
+        fixDefSensor.isSensor = gbody.getBody().getData().getOption().isSensor();
         body.createFixture(fixDefSensor);
     }
 
@@ -247,11 +251,11 @@ public class WorldParser implements Runnable {
         this.dynamicBodies = dynamicBodies;
     }
 
-    public Map<Long, Map<Long, BodyDiff>> getDiffsPerFrame() {
+    public Map<Long, Map<Long, BodyFrame>> getDiffsPerFrame() {
         return diffsPerFrame;
     }
 
-    public void setDiffsPerFrame(Map<Long, Map<Long, BodyDiff>> diffsPerFrame) {
+    public void setDiffsPerFrame(Map<Long, Map<Long, BodyFrame>> diffsPerFrame) {
         this.diffsPerFrame = diffsPerFrame;
     }
 }

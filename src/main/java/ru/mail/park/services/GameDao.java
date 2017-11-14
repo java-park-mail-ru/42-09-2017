@@ -25,16 +25,13 @@ import static ru.mail.park.info.constants.Constants.MAPS_ON_PAGE;
 @Transactional
 public class GameDao {
     private EntityManager em;
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private static final Logger LOGGER = LoggerFactory.getLogger(GameDao.class);
+    private List<WorldParser> worldParsers = new ArrayList<>();
 
     public GameDao(EntityManager em) {
         this.em = em;
     }
-
-    private List<WorldParser> worldParsers = new ArrayList<>();
 
     public void registerParser(WorldParser worldParser) {
         worldParsers.add(worldParser);
@@ -87,11 +84,7 @@ public class GameDao {
             Long count = em.createQuery("select count(id) from BoardMeta where name = :name", Long.class)
                     .setParameter("name", name)
                     .getSingleResult();
-            if (count == 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return count != 0;
         } catch (NoResultException e) {
             return false;
         }
@@ -150,14 +143,4 @@ public class GameDao {
             boardMeta.setPreview(metaNew.getPreview());
         }
     }
-
-//    public void initializeWorld(Long mapId) {
-//        Board board = em.find(Board.class, mapId);
-//        try {
-//            BoardRequest.Data bodiesInfo = MAPPER.readValue(board.getData(), BoardRequest.Data.class);
-//            WorldParser.initWorld(bodiesInfo.getBodies(), bodiesInfo.getJoints());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }

@@ -32,6 +32,7 @@ public class GameController {
     private final GameDao gameDao;
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
+
     public GameController(GameDao gameDao) {
         this.gameDao = gameDao;
     }

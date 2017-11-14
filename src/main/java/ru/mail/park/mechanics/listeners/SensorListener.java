@@ -6,9 +6,7 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.mail.park.mechanics.WorldParser;
-import ru.mail.park.services.GameDao;
 
 public class SensorListener implements ContactListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorListener.class);

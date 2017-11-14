@@ -12,6 +12,7 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 public class WebSocketConfig implements WebSocketConfigurer {
     private WebSocketHandler socketHandler;
     private WebSocketHandler runSocketHandler;
+
     public WebSocketConfig(WebSocketHandler socketHandler, WebSocketHandler runSocketHandler) {
         this.socketHandler = socketHandler;
         this.runSocketHandler = runSocketHandler;
