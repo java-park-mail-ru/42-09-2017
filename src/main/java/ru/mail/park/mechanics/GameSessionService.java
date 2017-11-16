@@ -13,10 +13,11 @@ import ru.mail.park.websocket.message.BoardMessage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class GameSessionService {
-    private Map<Id<User>, GameSession> gameSessionMap = new HashMap<>();
+    private Map<Id<User>, GameSession> gameSessionMap = new ConcurrentHashMap<>();
     private final GameDao gameDao;
     private final RemotePointService remotePointService;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -45,10 +46,18 @@ public class GameSessionService {
         }
     }
 
-    public void shutDownGame(Id<User> first, Id<User> second) {
+    public void finishGame(Id<User> first, Id<User> second) {
         gameSessionMap.remove(first);
         gameSessionMap.remove(second);
-        remotePointService.cutDownConnection(first, CloseStatus.SERVER_ERROR);
-        remotePointService.cutDownConnection(second, CloseStatus.SERVER_ERROR);
+    }
+
+    public void removeSessionFor(Id<User> userId) {
+        GameSession gameSession = gameSessionMap.get(userId);
+        if (gameSession == null) {
+            return;
+        }
+        for (Id<User> user : gameSession.getPlayers()) {
+            gameSessionMap.remove(user);
+        }
     }
 }

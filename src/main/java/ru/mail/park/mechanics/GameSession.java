@@ -5,6 +5,8 @@ import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.List;
 
 public class GameSession {
     @NotNull
@@ -46,5 +48,9 @@ public class GameSession {
 
     public void setBoardId(Id<Board> boardId) {
         this.boardId = boardId;
+    }
+
+    public List<Id<User>> getPlayers() {
+        return Arrays.asList(first, second);
     }
 }

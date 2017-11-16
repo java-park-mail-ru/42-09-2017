@@ -10,6 +10,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.Constants;
+import ru.mail.park.mechanics.GameSessionService;
 import ru.mail.park.mechanics.RemotePointService;
 import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.mechanics.objects.ClientSnap;
@@ -24,11 +25,11 @@ import java.util.Map;
 
 import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 
-@Service
 public class SocketHandler extends TextWebSocketHandler {
     private final UserDao userDao;
     private final GameDao gameDao;
     private final RemotePointService remotePointService;
+    private final GameSessionService gameSessionService;
     private final MessageHandlersContainer messageHandlersContainer;
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -39,11 +40,13 @@ public class SocketHandler extends TextWebSocketHandler {
             UserDao userDao,
             GameDao gameDao,
             RemotePointService remotePointService,
+            GameSessionService gameSessionService,
             MessageHandlersContainer messageHandlersContainer
     ) {
         this.userDao = userDao;
         this.gameDao = gameDao;
         this.remotePointService = remotePointService;
+        this.gameSessionService = gameSessionService;
         this.messageHandlersContainer = messageHandlersContainer;
     }
 
@@ -75,7 +78,6 @@ public class SocketHandler extends TextWebSocketHandler {
         ClientSnap snap;
         //WorldParser worldParser = gameDao.getLastParser();
         handleMessage(Id.of(userId), message);
-	    return;
        // if (textMessage.equals("start")) {
        //     Thread thread = new Thread(worldParser);
        //     thread.start();
@@ -127,7 +129,8 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        super.afterConnectionClosed(session, status);
+        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        ensureGameTerminated(Id.of(id));
         LOGGER.warn("CLOSED");
     }
 
@@ -146,4 +149,10 @@ public class SocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private void ensureGameTerminated(Id<User> userId) {
+        gameSessionService.removeSessionFor(userId);
+        if (remotePointService.isConnected(userId)) {
+            remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
+        }
+    }
 }
