@@ -65,6 +65,8 @@ public class GameMechanics {
                     continue;
                 }
                 LOGGER.info("Opponent found. Starting game");
+                removeWaiter(userId);
+                removeWaiter(opponent);
                 gameSessionService.startGame(userId, opponent, boardId);
             }
         }
