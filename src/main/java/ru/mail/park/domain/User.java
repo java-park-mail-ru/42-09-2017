@@ -5,7 +5,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "player")
 public class User {
-    @Id
+    @javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

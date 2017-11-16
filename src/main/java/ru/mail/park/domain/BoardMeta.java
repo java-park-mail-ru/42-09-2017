@@ -5,7 +5,7 @@ import java.sql.Date;
 
 @Entity
 public class BoardMeta {
-    @Id
+    @javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne

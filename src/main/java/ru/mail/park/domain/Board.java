@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @TypeDef(name = "JsonBStringType", typeClass = JsonBStringType.class)
 public class Board {
-    @Id
+    @javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

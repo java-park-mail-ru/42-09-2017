@@ -7,11 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import ru.mail.park.domain.Id;
+import ru.mail.park.domain.User;
+import ru.mail.park.info.constants.Constants;
+import ru.mail.park.mechanics.RemotePointService;
 import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.mechanics.objects.body.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
+import ru.mail.park.websocket.message.SocketMessage;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,28 +28,53 @@ import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 public class SocketHandler extends TextWebSocketHandler {
     private final UserDao userDao;
     private final GameDao gameDao;
-    private final WebSocketService webSocketService;
+    private final RemotePointService remotePointService;
+    private final MessageHandlersContainer messageHandlersContainer;
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketHandler.class);
     public static final CloseStatus ACCESS_DENIED = new CloseStatus(4500, "Not logged in");
 
-    public SocketHandler(UserDao userDao, GameDao gameDao, WebSocketService webSocketService) {
+    public SocketHandler(
+            UserDao userDao,
+            GameDao gameDao,
+            RemotePointService remotePointService,
+            MessageHandlersContainer messageHandlersContainer
+    ) {
         this.userDao = userDao;
         this.gameDao = gameDao;
-        this.webSocketService = webSocketService;
+        this.remotePointService = remotePointService;
+        this.messageHandlersContainer = messageHandlersContainer;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        Long userId = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        if (userId == null || userDao.findUserById(userId) == null) {
+            LOGGER.warn("Empty HTTP session. Closing");
+            closeSession(session, ACCESS_DENIED);
+            return;
+        }
+        remotePointService.registerUser(Id.of(userId), session);
         LOGGER.info("CONNECTED");
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        if (!session.isOpen()) {
+            LOGGER.warn("Warning. Session is not opened");
+            return;
+        }
+        Long userId = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        if (userId == null || userDao.findUserById(userId) == null) {
+            LOGGER.warn("Empty HTTP session. Closing");
+            closeSession(session, ACCESS_DENIED);
+            return;
+        }
         String textMessage = message.getPayload();
         ClientSnap snap;
         WorldParser worldParser = gameDao.getLastParser();
+        handleMessage(Id.of(userId), message);
         if (textMessage.equals("start")) {
             Thread thread = new Thread(worldParser);
             thread.start();
@@ -76,6 +106,22 @@ public class SocketHandler extends TextWebSocketHandler {
         }
         session.sendMessage(new TextMessage(mapper.writeValueAsString(snap)));
         LOGGER.info("Message is sent");
+    }
+
+    public void handleMessage(Id<User> userId, TextMessage textMessage) {
+        final SocketMessage message;
+        try {
+            message = mapper.readValue(textMessage.getPayload(), SocketMessage.class);
+        } catch (IOException ex) {
+            LOGGER.error("wrong json format at game response", ex);
+            return;
+        }
+        try {
+            //noinspection ConstantConditions
+            messageHandlersContainer.handle(message, userId);
+        } catch (Exception e) {
+            LOGGER.error("Can't handle message of type " + message.getClass().getName() + " with content: " + textMessage, e);
+        }
     }
 
     @Override

@@ -86,14 +86,14 @@ public class GameController {
     @GetMapping("map/{id}")
     public ResponseEntity<String> getMap(@PathVariable Long id) {
         return ResponseEntity
-                .ok(gameDao.getBoard(id));
+                .ok(gameDao.getBoardString(id));
     }
 
     @GetMapping("map/{id}/init")
     public ResponseEntity<String> runMap(@PathVariable Long id) {
         BoardRequest.Data data = null;
         try {
-            data = MAPPER.readValue(gameDao.getBoard(id), BoardRequest.Data.class);
+            data = MAPPER.readValue(gameDao.getBoardString(id), BoardRequest.Data.class);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity

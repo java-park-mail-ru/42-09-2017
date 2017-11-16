@@ -11,17 +11,14 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     private WebSocketHandler socketHandler;
-    private WebSocketHandler runSocketHandler;
 
-    public WebSocketConfig(WebSocketHandler socketHandler, WebSocketHandler runSocketHandler) {
+    public WebSocketConfig(WebSocketHandler socketHandler) {
         this.socketHandler = socketHandler;
-        this.runSocketHandler = runSocketHandler;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
         webSocketHandlerRegistry.addHandler(socketHandler, "/handler")
-                .addHandler(runSocketHandler, "/run")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .setAllowedOrigins("*");
     }

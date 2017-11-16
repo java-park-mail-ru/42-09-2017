@@ -16,6 +16,7 @@ import ru.mail.park.mechanics.WorldParser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,12 +70,24 @@ public class GameDao {
         }
     }
 
-    public String getBoard(Long id) {
+    public String getBoardString(Long id) {
         try {
             Board board = em.find(Board.class, id);
             LOGGER.info("Found board with id " + id.toString());
             return board.getData();
         } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public BoardRequest.Data getBoard(Long id) {
+        String boardString = getBoardString(id);
+        if (boardString == null) {
+            return null;
+        }
+        try {
+            return MAPPER.readValue(boardString, BoardRequest.Data.class);
+        } catch (IOException e) {
             return null;
         }
     }
