@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "class")
 @JsonSubTypes({
         @Type(SubscribeMessage.class),
+        @Type(MovingMessage.class),
         @Type(InitMessage.class),
         @Type(StartMessage.class)
 })

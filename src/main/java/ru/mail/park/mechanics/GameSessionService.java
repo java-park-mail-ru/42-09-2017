@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.mechanics.objects.body.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.BoardMessage;
+import ru.mail.park.websocket.message.MovingMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +26,7 @@ public class GameSessionService {
     private final RemotePointService remotePointService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final Logger logger = LoggerFactory.getLogger(GameSessionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameSessionService.class);
 
     public GameSessionService(
             GameDao gameDao,
@@ -51,7 +51,7 @@ public class GameSessionService {
         try {
             remotePointService.sendMessageTo(first, boardMessage);
         } catch (IOException ignore) {
-            logger.warn("Can't send message to first player with nickname "
+            LOGGER.warn("Can't send message to first player with nickname "
                     + userDao.findUserById(first.getId()).getUsername()
             );
         }
@@ -59,7 +59,7 @@ public class GameSessionService {
         try {
             remotePointService.sendMessageTo(second, boardMessage);
         } catch (IOException e) {
-            logger.warn("Can't send message to second player with nickname "
+            LOGGER.warn("Can't send message to second player with nickname "
                     + userDao.findUserById(second.getId()).getUsername()
             );
         }
@@ -76,13 +76,30 @@ public class GameSessionService {
             return;
         }
         for (Id<User> user : gameSession.getPlayers()) {
-            logger.warn("Removing game session for user");
+            LOGGER.warn("Removing game session for user");
             gameSessionMap.remove(user);
             try {
                 remotePointService.sendRowMessageTo(user, "You are kicked from game");
             } catch (IOException e) {
-                logger.warn("Can't send message");
+                LOGGER.warn("Can't send message");
             }
         }
+    }
+
+    public void sendSnapFrom(Id<User> userId, BodyFrame snap) {
+        if (!isPlaying(userId)) {
+            LOGGER.warn("I will not send snapshot because you are not playing");
+            return;
+        }
+        GameSession gameSession = gameSessionMap.get(userId);
+        gameSession.getPlayers().stream()
+                .filter(id -> !userId.equals(id))
+                .forEach(id -> {
+                    try {
+                        remotePointService.sendMessageTo(id, new MovingMessage(snap));
+                    } catch (IOException ignore) {
+                    }
+                });
+
     }
 }

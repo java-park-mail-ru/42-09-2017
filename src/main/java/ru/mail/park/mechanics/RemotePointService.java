@@ -46,7 +46,7 @@ public class RemotePointService {
         }
     }
 
-    public void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
+    public synchronized void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
         WebSocketSession session = checkSessionFor(userId);
         try {
             session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));

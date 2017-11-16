@@ -130,6 +130,9 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        if (id == null) {
+            return;
+        }
         ensureGameTerminated(Id.of(id));
         LOGGER.warn("CLOSED");
     }
