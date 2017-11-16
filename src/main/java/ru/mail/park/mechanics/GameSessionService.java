@@ -1,6 +1,8 @@
 package ru.mail.park.mechanics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Board;
@@ -8,6 +10,7 @@ import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.services.GameDao;
+import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.BoardMessage;
 
 import java.io.IOException;
@@ -19,14 +22,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameSessionService {
     private Map<Id<User>, GameSession> gameSessionMap = new ConcurrentHashMap<>();
     private final GameDao gameDao;
+    private final UserDao userDao;
     private final RemotePointService remotePointService;
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private final Logger logger = LoggerFactory.getLogger(GameSessionService.class);
+
     public GameSessionService(
             GameDao gameDao,
+            UserDao userDao,
             RemotePointService remotePointService
     ) {
         this.gameDao = gameDao;
+        this.userDao = userDao;
         this.remotePointService = remotePointService;
     }
 
@@ -39,10 +47,21 @@ public class GameSessionService {
         gameSessionMap.put(first, gameSession);
         gameSessionMap.put(second, gameSession);
         BoardRequest.Data board = gameDao.getBoard(boardId.getId());
+        BoardMessage boardMessage = new BoardMessage(board);
         try {
-            remotePointService.sendMessageTo(first, new BoardMessage(board));
-        } catch (IOException e) {
+            remotePointService.sendMessageTo(first, boardMessage);
+        } catch (IOException ignore) {
+            logger.warn("Can't send message to first player with nickname %s",
+                    userDao.findUserById(first.getId()).getUsername()
+            );
+        }
 
+        try {
+            remotePointService.sendMessageTo(second, boardMessage);
+        } catch (IOException e) {
+            logger.warn("Can't send message to second player with nickname %s",
+                    userDao.findUserById(second.getId()).getUsername()
+            );
         }
     }
 

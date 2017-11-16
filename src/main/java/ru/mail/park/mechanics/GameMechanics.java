@@ -48,6 +48,10 @@ public class GameMechanics {
 
     public void tryStartGame(Id<User> userId, Id<Board> boardId) {
         LOGGER.warn("Trying to start the game");
+        if (gameSessionService.isPlaying(userId)) {
+            LOGGER.warn("Player is in game now");
+            return;
+        }
         userBoardMap.remove(userId);
         if (!checkCandidate(userId)) {
             return;
@@ -57,6 +61,7 @@ public class GameMechanics {
                 Id<User> opponent = entry.getKey();
                 if (!checkCandidate(opponent)) {
                     userBoardMap.remove(opponent);
+                    LOGGER.warn("Opponent is not connected or playing or he doesn't exists");
                     continue;
                 }
                 LOGGER.info("Opponent found. Starting game");
