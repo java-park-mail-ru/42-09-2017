@@ -51,16 +51,16 @@ public class GameSessionService {
         try {
             remotePointService.sendMessageTo(first, boardMessage);
         } catch (IOException ignore) {
-            logger.warn("Can't send message to first player with nickname %s",
-                    userDao.findUserById(first.getId()).getUsername()
+            logger.warn("Can't send message to first player with nickname "
+                    + userDao.findUserById(first.getId()).getUsername()
             );
         }
 
         try {
             remotePointService.sendMessageTo(second, boardMessage);
         } catch (IOException e) {
-            logger.warn("Can't send message to second player with nickname %s",
-                    userDao.findUserById(second.getId()).getUsername()
+            logger.warn("Can't send message to second player with nickname "
+                    + userDao.findUserById(second.getId()).getUsername()
             );
         }
     }
@@ -78,6 +78,11 @@ public class GameSessionService {
         for (Id<User> user : gameSession.getPlayers()) {
             logger.warn("Removing game session for user");
             gameSessionMap.remove(user);
+            try {
+                remotePointService.sendRowMessageTo(user, "You are kicked from game");
+            } catch (IOException e) {
+                logger.warn("Can't send message");
+            }
         }
     }
 }
