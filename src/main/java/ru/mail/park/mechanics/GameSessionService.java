@@ -76,6 +76,7 @@ public class GameSessionService {
             return;
         }
         for (Id<User> user : gameSession.getPlayers()) {
+            logger.warn("Removing game session for user");
             gameSessionMap.remove(user);
         }
     }

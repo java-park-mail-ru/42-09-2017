@@ -76,4 +76,11 @@ public class GameMechanics {
                 !gameSessionService.isPlaying(userId) &&
                 userDao.findUserById(userId.getId()) != null;
     }
+
+    public void removeWaiter(Id<User> userId) {
+        LOGGER.warn("Removing board waiter with username %s",
+                userDao.findUserById(userId.getId()).getUsername()
+        );
+        userBoardMap.remove(userId);
+    }
 }
