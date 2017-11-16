@@ -9,6 +9,10 @@ import javax.validation.constraints.NotNull;
 public abstract class MessageHandler<T> {
     private Class<T> clazz;
 
+    public MessageHandler(@NotNull Class<T> clazz) {
+        this.clazz = clazz;
+    }
+
     public void handleMessage(@NotNull SocketMessage message, @NotNull Id<User> userId) throws Exception {
         try {
             handle(clazz.cast(message), userId);

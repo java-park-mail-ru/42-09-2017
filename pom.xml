@@ -60,7 +60,7 @@
     <build>
         <finalName>42</finalName>
         <plugins>
-                       <plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>

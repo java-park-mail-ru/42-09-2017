@@ -1,5 +1,7 @@
 package ru.mail.park.websocket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
@@ -13,9 +15,14 @@ import java.util.Map;
 @Service
 public class MessageHandlersContainer {
     private Map<Class<?>, MessageHandler<?>> handlersMap = new HashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(MessageHandlersContainer.class);
 
     public void handle(@NotNull SocketMessage message, @NotNull Id<User> userId) throws Exception {
         final MessageHandler<?> messageHandler = handlersMap.get(message.getClass());
+        for (Map.Entry<Class<?>, MessageHandler<?>> entry : handlersMap.entrySet()) {
+            logger.warn("message class: " + entry.getKey().getName());
+            logger.warn("handler class: " + entry.getValue().getClass().getName());
+        }
         if (messageHandler == null) {
             throw new Exception("Unknown message type");
         }

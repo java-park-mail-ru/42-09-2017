@@ -75,7 +75,7 @@ public class SocketHandler extends TextWebSocketHandler {
         ClientSnap snap;
         //WorldParser worldParser = gameDao.getLastParser();
         handleMessage(Id.of(userId), message);
-	return;
+	    return;
        // if (textMessage.equals("start")) {
        //     Thread thread = new Thread(worldParser);
        //     thread.start();

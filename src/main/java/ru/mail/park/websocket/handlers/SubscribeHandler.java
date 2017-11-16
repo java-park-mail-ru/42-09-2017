@@ -18,6 +18,7 @@ public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
             GameMechanics gameMechanics,
             MessageHandlersContainer handlersContainer
     ) {
+        super(SubscribeMessage.class);
         this.gameMechanics = gameMechanics;
         this.handlersContainer = handlersContainer;
     }
