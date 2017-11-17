@@ -71,13 +71,12 @@ public class GameDao {
     }
 
     public String getBoardString(Long id) {
-        try {
-            Board board = em.find(Board.class, id);
-            LOGGER.info("Found board with id " + id.toString());
-            return board.getData();
-        } catch (NoResultException e) {
+        Board board = em.find(Board.class, id);
+        LOGGER.info("Found board with id " + id.toString());
+        if (board == null) {
             return null;
         }
+        return board.getData();
     }
 
     public BoardRequest.Data getBoard(Long id) {
