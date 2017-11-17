@@ -9,11 +9,9 @@ import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.mail.park.mechanics.listeners.SensorListener;
-import ru.mail.park.mechanics.objects.body.BodyFrame;
+import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.objects.body.*;
 import ru.mail.park.mechanics.objects.joint.GJoint;
-import ru.mail.park.mechanics.objects.body.BodyOption;
-import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
-import ru.mail.park.mechanics.objects.body.GBody;
 
 import java.util.List;
 import java.util.Map;
@@ -103,10 +101,10 @@ public class WorldParser implements Runnable {
         LOGGER.info("World initialization started");
         for (GBody gbody : bodies) {
             BodyDef bodyDef = new BodyDef();
-            bodyDef.type = BodyType.values()[gbody.getType()];
-            Vec2 position = gbody.getBody().getData().getPosition();
+            bodyDef.type = BodyType.values()[gbody.getData().getType()];
+            Vec2 position = gbody.getData().getPosition();
             bodyDef.position = new Vec2(position.x, -position.y);
-            bodyDef.angle = -gbody.getBody().getData().getAngle();
+            bodyDef.angle = -gbody.getData().getAngle();
             Body body = world.createBody(bodyDef);
             gameBodies.put(gbody.getId(), body);
             if (bodyDef.type == BodyType.DYNAMIC) {
@@ -119,49 +117,32 @@ public class WorldParser implements Runnable {
                     + bodyDef.position.toString() + ", "
                     + String.valueOf(bodyDef.angle));
 
-            String type = gbody.getBody().getType();
-            switch (type) {
+            String kind = gbody.getKind();
+            BodyData bodyData = gbody.getData();
+            switch (kind) {
                 case "rect":
-                    rectCreator(body, gbody.getBody().getData().getSize());
+                    rectCreator(body, bodyData);
                     LOGGER.info("   Rectangle created");
                     break;
                 case "circle":
-                    circleCreator(body, gbody.getBody().getData().getRadius());
+                    circleCreator(body, bodyData);
                     LOGGER.info("   Circle created");
                     break;
                 case "bucket":
-                    bucketCreator(body, gbody.getBody().getData().getConfig(), gbody);
+                    bucketCreator(body, bodyData);
                     LOGGER.info("   Bucket created");
                     break;
                 default:
                     break;
             }
 
-            BodyOption option = gbody.getBody().getData().getOption();
-            float density = option.getDensity();
-            float friction = option.getFriction();
-            float restitution = option.getRestitution();
-            boolean sensor = option.isSensor();
-            int categoryBits;
-            if (gbody.isKeyBody() && gbody.getKeyBodyId() != null) {
-                categoryBits = gbody.getKeyBodyId();
-            } else {
-                categoryBits = 0x0001;
-            }
+            BodyOptions options = gbody.getData().getOptions();
+            float density = options.getDensity();
+            float friction = options.getFriction();
+            float restitution = options.getRestitution();
+            boolean sensor = options.isSensor();
+            int categoryBits = gbody.getData().getOptions().getKeyBodyID();
             for (Fixture fixture = body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
-                fixture.setDensity(density);
-                fixture.setFriction(friction);
-                fixture.setRestitution(restitution);
-                if (!type.equals("bucket")) {
-                    fixture.setSensor(sensor);
-                    fixture.getFilterData().categoryBits = categoryBits;
-                } else {
-                    if (fixture.isSensor()) {
-                        fixture.getFilterData().categoryBits = categoryBits;
-                    } else {
-                        fixture.getFilterData().categoryBits = 0x0001;
-                    }
-                }
                 LOGGER.info("   Fixture created with properties: "
                         + String.valueOf(fixture.m_isSensor) + ", "
                         + String.valueOf(fixture.m_density) + ", "
@@ -170,36 +151,57 @@ public class WorldParser implements Runnable {
                         + String.valueOf(fixture.m_filter.categoryBits)
                 );
             }
-            body.resetMassData();
         }
         world.setContactListener(new SensorListener(this));
         LOGGER.warn("All bodies created");
     }
 
-    private void rectCreator(Body body, Vec2 size) {
+    private void setPhysicalProperties(BodyOptions options, boolean simpleBody, FixtureDef... fixDefs) {
+        float density = options.getDensity();
+        float friction = options.getFriction();
+        float restitution = options.getRestitution();
+        for (FixtureDef fixDef : fixDefs) {
+            fixDef.density = density;
+            fixDef.friction = friction;
+            fixDef.restitution = restitution;
+            if (simpleBody) {
+                fixDef.isSensor = options.isSensor();
+                fixDef.filter.categoryBits = options.getKeyBodyID();
+            }
+        }
+    }
+
+    private void rectCreator(Body body, BodyData bodyData) {
+        Vec2 size = bodyData.getSize();
         if (size == null) {
             throw new RuntimeException("Size is null");
         }
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = new PolygonShape();
         ((PolygonShape) fixDef.shape).setAsBox(size.x / 2, size.y / 2);
+
+        setPhysicalProperties(bodyData.getOptions(), true, fixDef);
         body.createFixture(fixDef);
     }
 
-    private void circleCreator(Body body, Float radius) {
+    private void circleCreator(Body body, BodyData bodyData) {
+        Float radius = bodyData.getRadius();
         if (radius == null) {
             throw new RuntimeException("Radius is null");
         }
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = new CircleShape();
         fixDef.shape.setRadius(radius);
+
+        setPhysicalProperties(bodyData.getOptions(), true, fixDef);
         body.createFixture(fixDef);
     }
 
-    private void bucketCreator(Body body, ComplexBodyConfig config, GBody gbody) {
+    private void bucketCreator(Body body, BodyData bodyData) {
         float wallWidth;
         float bottomLength;
         float height;
+        ComplexBodyConfig config = bodyData.getConfig();
         try {
             wallWidth = config.getWallThickness();
             bottomLength = config.getBottomLength();
@@ -208,29 +210,38 @@ public class WorldParser implements Runnable {
             throw new RuntimeException("Config is null");
         }
 
+        int notKeyBodyBits = 0x0001;
+
         FixtureDef fixDefLeft = new FixtureDef();
         fixDefLeft.shape = new PolygonShape();
         ((PolygonShape) fixDefLeft.shape).setAsBox(wallWidth / 2, height / 2,
                 new Vec2(-(bottomLength + wallWidth) / 2, 0), 0);
-        body.createFixture(fixDefLeft);
+        fixDefLeft.filter.categoryBits = notKeyBodyBits;
 
         FixtureDef fixDefRight = new FixtureDef();
         fixDefRight.shape = new PolygonShape();
         ((PolygonShape) fixDefRight.shape).setAsBox(wallWidth / 2, height / 2,
                 new Vec2((bottomLength + wallWidth) / 2, 0), 0);
-        body.createFixture(fixDefRight);
+        fixDefRight.filter.categoryBits = notKeyBodyBits;
 
         FixtureDef fixDefDown = new FixtureDef();
         fixDefDown.shape = new PolygonShape();
         ((PolygonShape) fixDefDown.shape).setAsBox(bottomLength / 2, wallWidth / 2,
                 new Vec2(0, -(height - wallWidth) / 2), 0);
-        body.createFixture(fixDefDown);
+        fixDefDown.filter.categoryBits = notKeyBodyBits;
 
         FixtureDef fixDefSensor = new FixtureDef();
         fixDefSensor.shape = new PolygonShape();
         ((PolygonShape) fixDefSensor.shape).setAsBox(bottomLength / 2, (height - wallWidth) / 2,
                 new Vec2(0f, wallWidth / 2), 0);
-        fixDefSensor.isSensor = gbody.getBody().getData().getOption().isSensor();
+        fixDefSensor.isSensor = bodyData.getOptions().isSensor();
+        fixDefSensor.filter.categoryBits = bodyData.getOptions().getKeyBodyID();
+
+        setPhysicalProperties(bodyData.getOptions(), false,
+                fixDefLeft, fixDefRight, fixDefDown, fixDefSensor);
+        body.createFixture(fixDefLeft);
+        body.createFixture(fixDefRight);
+        body.createFixture(fixDefDown);
         body.createFixture(fixDefSensor);
     }
 

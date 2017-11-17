@@ -8,7 +8,7 @@ import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
-import ru.mail.park.mechanics.objects.body.BodyFrame;
+import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.BoardMessage;

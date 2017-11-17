@@ -1,10 +1,8 @@
 package ru.mail.park.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.mail.park.domain.Id;
@@ -12,16 +10,12 @@ import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.Constants;
 import ru.mail.park.mechanics.GameSessionService;
 import ru.mail.park.mechanics.RemotePointService;
-import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.mechanics.objects.ClientSnap;
-import ru.mail.park.mechanics.objects.body.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.SocketMessage;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 

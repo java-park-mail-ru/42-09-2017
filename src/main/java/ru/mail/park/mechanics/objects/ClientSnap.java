@@ -2,7 +2,6 @@ package ru.mail.park.mechanics.objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import ru.mail.park.info.constants.MessageConstants;
-import ru.mail.park.mechanics.objects.body.BodyFrame;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

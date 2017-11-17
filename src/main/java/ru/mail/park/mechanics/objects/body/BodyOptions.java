@@ -5,7 +5,7 @@ import ru.mail.park.info.constants.MessageConstants;
 
 import javax.validation.constraints.NotNull;
 
-public class BodyOption {
+public class BodyOptions {
     private boolean sensor;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Float density;
@@ -13,9 +13,11 @@ public class BodyOption {
     private Float friction;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Float restitution;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Integer keyBodyID;
 
     @JsonCreator
-    public BodyOption() {
+    public BodyOptions() {
 
     }
 
@@ -49,5 +51,13 @@ public class BodyOption {
 
     public void setRestitution(Float restitution) {
         this.restitution = restitution;
+    }
+
+    public Integer getKeyBodyID() {
+        return keyBodyID;
+    }
+
+    public void setKeyBodyID(Integer keyBodyID) {
+        this.keyBodyID = keyBodyID;
     }
 }

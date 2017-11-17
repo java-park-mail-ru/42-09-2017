@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.body;
+package ru.mail.park.mechanics.objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

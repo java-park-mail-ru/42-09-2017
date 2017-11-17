@@ -6,9 +6,11 @@ import org.jbox2d.common.Vec2;
 import ru.mail.park.info.constants.MessageConstants;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-public class BodyInnerData {
+public class BodyData {
     @JsonIgnoreProperties({ "valid" })
     private Vec2 size;
     private Float radius;
@@ -17,12 +19,15 @@ public class BodyInnerData {
     private ComplexBodyConfig config;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @Valid
-    private BodyOption option;
+    private BodyOptions options;
     @JsonIgnoreProperties({ "valid" })
     private Vec2 position;
+    @Min(value = 0, message = MessageConstants.TYPE_OUT_OF_BOUNDS)
+    @Max(value = 2, message = MessageConstants.TYPE_OUT_OF_BOUNDS)
+    private Integer type;
 
     @JsonCreator
-    public BodyInnerData() {
+    public BodyData() {
 
     }
 
@@ -58,12 +63,12 @@ public class BodyInnerData {
         this.config = config;
     }
 
-    public BodyOption getOption() {
-        return option;
+    public BodyOptions getOptions() {
+        return options;
     }
 
-    public void setOption(BodyOption option) {
-        this.option = option;
+    public void setOptions(BodyOptions options) {
+        this.options = options;
     }
 
     public Vec2 getPosition() {
@@ -73,4 +78,13 @@ public class BodyInnerData {
     public void setPosition(Vec2 position) {
         this.position = position;
     }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
 }

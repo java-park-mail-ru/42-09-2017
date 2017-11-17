@@ -2,7 +2,7 @@ package ru.mail.park.websocket.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import ru.mail.park.mechanics.objects.body.BodyFrame;
+import ru.mail.park.mechanics.objects.BodyFrame;
 
 public class MovingMessage extends SocketMessage {
     @JsonIgnoreProperties({"velocity"})
