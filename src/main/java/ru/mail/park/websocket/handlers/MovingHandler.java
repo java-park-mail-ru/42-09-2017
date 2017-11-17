@@ -30,6 +30,6 @@ public class MovingHandler extends MessageHandler<MovingMessage> {
 
     @Override
     public void handle(MovingMessage message, Id<User> userId) throws Exception {
-        gameSessionService.sendSnapFrom(userId, message.getFrame());
+        gameSessionService.sendSnapFrom(userId, message.getSnap());
     }
 }

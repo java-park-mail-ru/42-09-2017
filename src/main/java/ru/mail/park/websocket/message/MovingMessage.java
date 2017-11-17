@@ -6,22 +6,22 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 
 public class MovingMessage extends SocketMessage {
     @JsonIgnoreProperties({"velocity"})
-    private BodyFrame frame;
+    private BodyFrame snap;
 
     @JsonCreator
     public MovingMessage() {
 
     }
 
-    public MovingMessage(BodyFrame frame) {
-        this.frame = frame;
+    public MovingMessage(BodyFrame snap) {
+        this.snap = snap;
     }
 
-    public BodyFrame getFrame() {
-        return frame;
+    public BodyFrame getSnap() {
+        return snap;
     }
 
-    public void setFrame(BodyFrame frame) {
-        this.frame = frame;
+    public void setSnap(BodyFrame snap) {
+        this.snap = snap;
     }
 }
