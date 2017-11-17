@@ -87,6 +87,9 @@ public class GameSessionService {
     }
 
     public void sendSnapFrom(Id<User> userId, BodyFrame snap) {
+        LOGGER.info("Trying to send snapshot from "
+                + userDao.findUserById(userId.getId()).getUsername()
+        );
         if (!isPlaying(userId)) {
             LOGGER.warn("I will not send snapshot because you are not playing");
             return;
