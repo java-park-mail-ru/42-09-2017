@@ -136,12 +136,6 @@ public class WorldParser implements Runnable {
                     break;
             }
 
-            BodyOptions options = gbody.getData().getOptions();
-            float density = options.getDensity();
-            float friction = options.getFriction();
-            float restitution = options.getRestitution();
-            boolean sensor = options.isSensor();
-            int categoryBits = gbody.getData().getOptions().getKeyBodyID();
             for (Fixture fixture = body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
                 LOGGER.info("   Fixture created with properties: "
                         + String.valueOf(fixture.m_isSensor) + ", "

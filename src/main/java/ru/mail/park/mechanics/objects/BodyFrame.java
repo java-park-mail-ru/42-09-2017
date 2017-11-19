@@ -3,6 +3,7 @@ package ru.mail.park.mechanics.objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.jbox2d.common.Vec2;
+import ru.mail.park.controllers.validators.groups.InitSnap;
 import ru.mail.park.info.constants.MessageConstants;
 
 import javax.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ public class BodyFrame {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @JsonIgnoreProperties({"valid"})
     private Vec2 position;
-    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY, groups = {InitSnap.class})
     @JsonIgnoreProperties({"valid"})
     private Vec2 velocity;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)

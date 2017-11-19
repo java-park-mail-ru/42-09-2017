@@ -7,4 +7,15 @@ public class Constants {
     public static final String SESSION_ATTR = "user_info";
 
     public static final int MAPS_ON_PAGE = 10;
+
+    // Box2d constants
+    public static final long TIMEOUT = 50000000000L;
+    public static final float GRAVITY_X = 0f;
+    public static final float GRAVITY_Y = -10f;
+    public static final float DELTA = 1 / 60f;
+    public static final int VEL_ITER = 10;
+    public static final int POS_ITER = 10;
+    public static final int SECOND = 1000000000;
+    public static final int MICRO_SECOND = 1000000;
+    public static final int FPS = 60;
 }

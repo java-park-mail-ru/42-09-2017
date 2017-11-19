@@ -46,7 +46,7 @@ public class GameController {
     ) {
         return ResponseEntity
                 .ok(BoardMetaHelper.toDto(
-                        gameDao.getBoards(sort, page)
+                        gameDao.getMetas(sort, page)
                 ));
     }
 

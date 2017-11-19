@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Board;
+import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
@@ -42,10 +43,33 @@ public class GameSessionService {
         return gameSessionMap.containsKey(userId);
     }
 
+    public boolean isSimulationStartedFor(Id<User> userId) {
+        GameSession gameSession = gameSessionMap.get(userId);
+        if (gameSession == null) {
+            return true;
+        }
+        return gameSession.isSimulating();
+    }
+
+    public boolean isTeamReady(Id<User> userId) {
+        GameSession gameSession = gameSessionMap.get(userId);
+        long notReadyCount = gameSession.getPlayers().stream()
+                .filter(id -> !userDao.findUserById(id.getId()).isReady())
+                .count();
+        return notReadyCount == 0;
+    }
+
+    public GameSession getSessionFor(Id<User> userId) {
+        return gameSessionMap.get(userId);
+    }
+
+    public void startSimulation(GameSession gameSession) {
+
+    }
+
     public void startGame(Id<User> first, Id<User> second, Id<Board> boardId) {
         GameSession gameSession = new GameSession(first, second, boardId);
         gameSessionMap.put(first, gameSession);
-        gameSessionMap.put(second, gameSession);
         BoardRequest.Data board = gameDao.getBoard(boardId.getId());
         BoardMessage boardMessage = new BoardMessage(board);
         try {
@@ -56,18 +80,26 @@ public class GameSessionService {
             );
         }
 
-        try {
-            remotePointService.sendMessageTo(second, boardMessage);
-        } catch (IOException e) {
-            LOGGER.warn("Can't send message to second player with nickname "
-                    + userDao.findUserById(second.getId()).getUsername()
-            );
+        if (second != null) {
+            gameSessionMap.put(second, gameSession);
+            try {
+                boardMessage.setId(2L);
+                remotePointService.sendMessageTo(second, boardMessage);
+            } catch (IOException e) {
+                LOGGER.warn("Can't send message to second player with nickname "
+                        + userDao.findUserById(second.getId()).getUsername()
+                );
+            }
         }
     }
 
     public void finishGame(Id<User> first, Id<User> second) {
         gameSessionMap.remove(first);
-        gameSessionMap.remove(second);
+        try {
+            gameSessionMap.remove(second);
+        } catch (NullPointerException e) {
+            LOGGER.warn("Session removed only for first player, because it's single player");
+        }
     }
 
     public void removeSessionFor(Id<User> userId) {
@@ -76,6 +108,9 @@ public class GameSessionService {
             return;
         }
         for (Id<User> user : gameSession.getPlayers()) {
+            if (user == null) {
+                continue;
+            }
             LOGGER.warn("Removing game session for user");
             gameSessionMap.remove(user);
             try {

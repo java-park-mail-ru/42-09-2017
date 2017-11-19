@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Board;
+import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 
@@ -56,6 +58,16 @@ public class GameMechanics {
         if (!checkCandidate(userId)) {
             return;
         }
+        BoardMeta meta = gameDao.getMetaOf(boardId.getId());
+        int players = 1;
+        if (meta != null) {
+            players = meta.getPlayers();
+        }
+        if (players == 1) {
+            LOGGER.warn("Starting with one player");
+            gameSessionService.startGame(userId, null, boardId);
+            return;
+        }
         for (Map.Entry<Id<User>, Id<Board>> entry : userBoardMap.entrySet()) {
             if (entry.getValue().equals(boardId) && !entry.getKey().equals(userId)) {
                 Id<User> opponent = entry.getKey();
@@ -68,9 +80,29 @@ public class GameMechanics {
                 removeWaiter(userId);
                 removeWaiter(opponent);
                 gameSessionService.startGame(userId, opponent, boardId);
+                return;
             }
         }
         userBoardMap.put(userId, boardId);
+    }
+
+    public synchronized void tryStartSimulation(Id<User> userId, ClientSnap snap) {
+        LOGGER.warn("Trying to start simulation");
+        if (!gameSessionService.isPlaying(userId)) {
+            LOGGER.error("Should start game before simulation");
+            return;
+        }
+        if (gameSessionService.isSimulationStartedFor(userId)) {
+            LOGGER.error("Already in simulation");
+            return;
+        }
+        userDao.findUserById(userId.getId()).setReady(true);
+        if (gameSessionService.isTeamReady(userId)) {
+            LOGGER.warn("Starting simulation");
+            GameSession gameSession = gameSessionService.getSessionFor(userId);
+            gameSession.putSnapFor(userId, snap);
+            gameSessionService.startSimulation(gameSession);
+        }
     }
 
     public boolean checkCandidate(Id<User> userId) {

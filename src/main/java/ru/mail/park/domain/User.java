@@ -16,6 +16,9 @@ public class User {
     private Long scores;
     private Integer level;
 
+    @Transient
+    private boolean ready;
+
     public User() { }
 
     public Long getId() {
@@ -64,5 +67,13 @@ public class User {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 }

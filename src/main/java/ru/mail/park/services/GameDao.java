@@ -42,13 +42,13 @@ public class GameDao {
         return worldParsers.get(worldParsers.size() - 1);
     }
 
-    public List<BoardMeta> getBoards(@Nullable String sort, @Nullable Integer page) {
+    public List<BoardMeta> getMetas(@Nullable String sort, @Nullable Integer page) {
         StringBuilder sql = new StringBuilder("select m from BoardMeta m");
         if (sort != null) {
             sql.append(" order by ").append(sort);
         }
         if (page != null) {
-            return getBoardsPaged(sql, page);
+            return getMetasPaged(sql, page);
         }
         try {
             return em.createQuery(sql.toString(), BoardMeta.class)
@@ -58,7 +58,7 @@ public class GameDao {
         }
     }
 
-    private List<BoardMeta> getBoardsPaged(StringBuilder sql, Integer page) {
+    private List<BoardMeta> getMetasPaged(StringBuilder sql, Integer page) {
         sql.append(" limit :limit offset :offset");
         try {
             return em.createQuery(sql.toString(), BoardMeta.class)
@@ -87,6 +87,17 @@ public class GameDao {
         try {
             return MAPPER.readValue(boardString, BoardRequest.Data.class);
         } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public BoardMeta getMetaOf(Long boardId) {
+        try {
+            return em.createQuery("select m from BoardMeta m where board_id = :board", BoardMeta.class)
+                    .setParameter("board", boardId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            LOGGER.error("Can't find meta");
             return null;
         }
     }
