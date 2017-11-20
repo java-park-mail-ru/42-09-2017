@@ -11,7 +11,7 @@ import ru.mail.park.websocket.message.from.SnapMessage;
 
 import javax.annotation.PostConstruct;
 
-@Service
+//@Service
 public class SnapHandler extends MessageHandler<SnapMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapHandler.class);
     private final WorldRunnerService worldRunnerService;

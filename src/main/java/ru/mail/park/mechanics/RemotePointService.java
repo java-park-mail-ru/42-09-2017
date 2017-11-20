@@ -1,6 +1,8 @@
 package ru.mail.park.mechanics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RemotePointService {
     private Map<Id<User>, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemotePointService.class);
 
     public void registerUser(Id<User> userId, WebSocketSession session) {
         sessions.put(userId, session);
@@ -50,6 +53,7 @@ public class RemotePointService {
         WebSocketSession session = checkSessionFor(userId);
         try {
             session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
+            LOGGER.info("SENT MESSAGE BY SOCKET");
         } catch(IOException e) {
             throw new IOException("Unable to send the message");
         }
