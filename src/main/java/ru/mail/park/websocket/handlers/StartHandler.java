@@ -9,7 +9,7 @@ import ru.mail.park.websocket.message.from.StartMessage;
 
 import javax.annotation.PostConstruct;
 
-//@Service
+@Service
 public class StartHandler extends MessageHandler<StartMessage> {
     private final MessageHandlerContainer messageHandlerContainer;
     private final GameMechanics gameMechanics;
