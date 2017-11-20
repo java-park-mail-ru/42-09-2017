@@ -19,10 +19,6 @@ public class MessageHandlerContainer {
 
     public void handle(@NotNull SocketMessage message, @NotNull Id<User> userId) throws Exception {
         final MessageHandler<?> messageHandler = handlersMap.get(message.getClass());
-        for (Map.Entry<Class<?>, MessageHandler<?>> entry : handlersMap.entrySet()) {
-            logger.warn("message class: " + entry.getKey().getName());
-            logger.warn("handler class: " + entry.getValue().getClass().getName());
-        }
         if (messageHandler == null) {
             throw new Exception("Unknown message type");
         }

@@ -147,9 +147,11 @@ public class GameSessionService {
         gameSession.getPlayers().stream()
                 .filter(id -> !userId.equals(id))
                 .forEach(id -> {
+                    LOGGER.info("Sending to " + id.getId());
                     try {
                         remotePointService.sendMessageTo(id, new MovingMessage(snap));
-                    } catch (IOException ignore) {
+                    } catch (IOException e) {
+                        LOGGER.error("Can't send moving snap " + e.getMessage());
                     }
                 });
 
