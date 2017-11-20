@@ -72,6 +72,7 @@ public class GameMechanics {
             gameSessionService.startGame(userId, null, boardId);
             return;
         }
+        LOGGER.info("Map size: " + userBoardMap.size());
         for (Map.Entry<Id<User>, Id<Board>> entry : userBoardMap.entrySet()) {
             if (entry.getValue().equals(boardId) && !entry.getKey().equals(userId)) {
                 Id<User> opponent = entry.getKey();
@@ -88,6 +89,7 @@ public class GameMechanics {
             }
         }
         userBoardMap.put(userId, boardId);
+        LOGGER.info("Player added!");
     }
 
     public synchronized void tryStartSimulation(Id<User> userId, List<BodyFrame> snap) {
