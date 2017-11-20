@@ -83,8 +83,9 @@ public class GameDao {
 
     public BoardMeta getMetaOf(Long boardId) {
         try {
-            return em.createQuery("select m from BoardMeta m where board_id = :board", BoardMeta.class)
-                    .setParameter("board", boardId)
+            Board board = em.find(Board.class, boardId);
+            return em.createQuery("select m from BoardMeta m where board = :board", BoardMeta.class)
+                    .setParameter("board", board)
                     .getSingleResult();
         } catch (NoResultException e) {
             LOGGER.error("Can't find meta");
