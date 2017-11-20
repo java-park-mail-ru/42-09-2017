@@ -97,7 +97,7 @@ public class GameSessionService {
         if (second != null) {
             gameSessionMap.put(second, gameSession);
             try {
-                boardMessage.setId(2L);
+                boardMessage.setPlayerID(2L);
                 remotePointService.sendMessageTo(second, boardMessage);
             } catch (IOException e) {
                 LOGGER.warn("Can't send message to second player with nickname "
