@@ -53,6 +53,7 @@ public class RemotePointService {
         WebSocketSession session = checkSessionFor(userId);
         try {
             session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
+            LOGGER.info("SENT MESSAGE BY SOCKET");
         } catch(IOException e) {
             throw new IOException("Unable to send the message");
         }
