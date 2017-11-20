@@ -22,6 +22,7 @@ public class AppConfiguration {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://localhost:8000");
+        config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedHeader("*");
         config.addAllowedHeader("Content-Type");
         config.addAllowedMethod("*");
