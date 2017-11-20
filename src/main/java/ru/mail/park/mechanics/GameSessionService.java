@@ -98,6 +98,7 @@ public class GameSessionService {
 
         if (second != null) {
             gameSessionMap.put(second, gameSession);
+            playerMap.put(second, new Player(userDao.findUserById(second.getId())));
             try {
                 boardMessage.setPlayerID(2L);
                 remotePointService.sendMessageTo(second, boardMessage);
