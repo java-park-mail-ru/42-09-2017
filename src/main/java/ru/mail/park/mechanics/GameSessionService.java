@@ -147,6 +147,7 @@ public class GameSessionService {
                 LOGGER.warn("Can't send message");
             }
         }
+        worldRunnerService.removeWorldRunnerFor(gameSession);
     }
 
     public void sendSnapFrom(Id<User> userId, BodyFrame snap) {

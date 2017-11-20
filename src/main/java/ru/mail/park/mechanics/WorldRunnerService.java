@@ -51,6 +51,10 @@ public class WorldRunnerService {
         return worldRunnerMap.get(gameSession);
     }
 
+    public void removeWorldRunnerFor(GameSession gameSession) {
+        worldRunnerMap.remove(gameSession);
+    }
+
     public void runSimulation(GameSession gameSession) {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
 //        Thread thread = new Thread(worldRunner);
@@ -75,6 +79,7 @@ public class WorldRunnerService {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
+        LOGGER.info("   client frame: " + frameNumber);
         boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
             Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
