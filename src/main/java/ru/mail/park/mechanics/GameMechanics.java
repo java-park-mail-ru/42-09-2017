@@ -102,7 +102,7 @@ public class GameMechanics {
             LOGGER.error("Already in simulation");
             return;
         }
-        userDao.findUserById(userId.getId()).setReady(true);
+        gameSessionService.setReady(userId);
         if (gameSessionService.isTeamReady(userId)) {
             LOGGER.warn("Starting simulation");
             GameSession gameSession = gameSessionService.getSessionFor(userId);

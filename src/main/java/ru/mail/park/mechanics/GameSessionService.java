@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class GameSessionService {
     private Map<Id<User>, GameSession> gameSessionMap = new ConcurrentHashMap<>();
+    private Map<Id<User>, Player> playerMap = new ConcurrentHashMap<>();
     private final GameDao gameDao;
     private final UserDao userDao;
     private final RemotePointService remotePointService;
@@ -57,7 +58,7 @@ public class GameSessionService {
     public boolean isTeamReady(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
         long notReadyCount = gameSession.getPlayers().stream()
-                .filter(id -> !userDao.findUserById(id.getId()).isReady())
+                .filter(id -> !playerMap.get(id).isReady())
                 .count();
         return notReadyCount == 0;
     }
@@ -85,6 +86,7 @@ public class GameSessionService {
     public void startGame(Id<User> first, Id<User> second, Id<Board> boardId) {
         GameSession gameSession = new GameSession(first, second, boardId);
         gameSessionMap.put(first, gameSession);
+        playerMap.put(first, new Player(userDao.findUserById(first.getId())));
         BoardMessage boardMessage = new BoardMessage();
         try {
             remotePointService.sendMessageTo(first, boardMessage);
@@ -107,10 +109,16 @@ public class GameSessionService {
         }
     }
 
+    public void setReady(Id<User> userId) {
+        playerMap.get(userId).setReady(true);
+    }
+
     public void finishGame(Id<User> first, Id<User> second) {
         gameSessionMap.remove(first);
+        playerMap.remove(first);
         try {
             gameSessionMap.remove(second);
+            playerMap.remove(second);
         } catch (NullPointerException e) {
             LOGGER.warn("Session removed only for first player, because it's single player");
         }
@@ -127,6 +135,7 @@ public class GameSessionService {
             }
             LOGGER.warn("Removing game session for user");
             gameSessionMap.remove(user);
+            playerMap.remove(user);
             try {
                 remotePointService.sendRowMessageTo(user, "You are kicked from game");
             } catch (IOException e) {
