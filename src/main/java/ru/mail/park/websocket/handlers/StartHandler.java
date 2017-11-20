@@ -1,5 +1,6 @@
 package ru.mail.park.websocket.handlers;
 
+import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.GameMechanics;
@@ -8,6 +9,7 @@ import ru.mail.park.websocket.message.from.StartMessage;
 
 import javax.annotation.PostConstruct;
 
+@Service
 public class StartHandler extends MessageHandler<StartMessage> {
     private final MessageHandlerContainer messageHandlerContainer;
     private final GameMechanics gameMechanics;

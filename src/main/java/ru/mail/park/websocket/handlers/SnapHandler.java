@@ -2,6 +2,7 @@ package ru.mail.park.websocket.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.WorldRunnerService;
@@ -10,6 +11,7 @@ import ru.mail.park.websocket.message.from.SnapMessage;
 
 import javax.annotation.PostConstruct;
 
+@Service
 public class SnapHandler extends MessageHandler<SnapMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapHandler.class);
     private final WorldRunnerService worldRunnerService;
@@ -31,6 +33,6 @@ public class SnapHandler extends MessageHandler<SnapMessage> {
 
     @Override
     public void handle(SnapMessage message, Id<User> userId) throws Exception {
-//        worldRunnerService.
+        worldRunnerService.handleSnap(userId, message);
     }
 }
