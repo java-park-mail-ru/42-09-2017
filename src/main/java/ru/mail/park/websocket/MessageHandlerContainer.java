@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class MessageHandlersContainer {
+public class MessageHandlerContainer {
     private Map<Class<?>, MessageHandler<?>> handlersMap = new HashMap<>();
-    private final Logger logger = LoggerFactory.getLogger(MessageHandlersContainer.class);
+    private final Logger logger = LoggerFactory.getLogger(MessageHandlerContainer.class);
 
     public void handle(@NotNull SocketMessage message, @NotNull Id<User> userId) throws Exception {
         final MessageHandler<?> messageHandler = handlersMap.get(message.getClass());

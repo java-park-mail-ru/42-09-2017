@@ -4,19 +4,19 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.GameMechanics;
-import ru.mail.park.websocket.MessageHandlersContainer;
-import ru.mail.park.websocket.message.SubscribeMessage;
+import ru.mail.park.websocket.MessageHandlerContainer;
+import ru.mail.park.websocket.message.from.SubscribeMessage;
 
 import javax.annotation.PostConstruct;
 
 @Service
 public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
     private GameMechanics gameMechanics;
-    private MessageHandlersContainer handlersContainer;
+    private MessageHandlerContainer handlersContainer;
 
     public SubscribeHandler(
             GameMechanics gameMechanics,
-            MessageHandlersContainer handlersContainer
+            MessageHandlerContainer handlersContainer
     ) {
         super(SubscribeMessage.class);
         this.gameMechanics = gameMechanics;

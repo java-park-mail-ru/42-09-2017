@@ -5,17 +5,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Board;
-import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.objects.ClientSnap;
+import ru.mail.park.mechanics.objects.body.BodyData;
+import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
-import ru.mail.park.websocket.message.BoardMessage;
-import ru.mail.park.websocket.message.MovingMessage;
+import ru.mail.park.websocket.message.to.BoardMessage;
+import ru.mail.park.websocket.message.from.MovingMessage;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,6 +29,7 @@ public class GameSessionService {
     private final GameDao gameDao;
     private final UserDao userDao;
     private final RemotePointService remotePointService;
+    private final WorldRunnerService worldRunnerService;
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameSessionService.class);
@@ -32,11 +37,13 @@ public class GameSessionService {
     public GameSessionService(
             GameDao gameDao,
             UserDao userDao,
-            RemotePointService remotePointService
+            RemotePointService remotePointService,
+            WorldRunnerService worldRunnerService
     ) {
         this.gameDao = gameDao;
         this.userDao = userDao;
         this.remotePointService = remotePointService;
+        this.worldRunnerService = worldRunnerService;
     }
 
     public boolean isPlaying(Id<User> userId) {
@@ -64,7 +71,19 @@ public class GameSessionService {
     }
 
     public void startSimulation(GameSession gameSession) {
-
+        BoardRequest.Data board = gameDao.getBoard(gameSession.getBoardId().getId());
+        Map<Long, GBody> bodiesMap = new HashMap<>();
+        board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
+        Map<Id<User>, List<BodyFrame>> initSnapsMap = gameSession.getInitSnapsMap();
+        for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
+            initSnap.getValue().forEach(bodyFrame -> {
+                BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
+                bodyData.setPosition(bodyFrame.getPosition());
+                bodyData.setAngle(bodyFrame.getAngle());
+            });
+        }
+        worldRunnerService.initWorld(gameSession, board.getBodies(), board.getJoints());
+        worldRunnerService.runSimulation(gameSession);
     }
 
     public void startGame(Id<User> first, Id<User> second, Id<Board> boardId) {

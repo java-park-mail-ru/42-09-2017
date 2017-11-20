@@ -6,6 +6,7 @@ import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.Constants;
+import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.mechanics.objects.ClientSnap;
 
 import javax.validation.constraints.NotNull;
@@ -25,7 +26,7 @@ public class GameSession {
     private Id<Board> boardId;
     private World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
     private boolean simulating = false;
-    private Map<Id<User>, ClientSnap> initSnapsMap = new HashMap<>();
+    private Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
 
     public GameSession(
             @NotNull Id<User> first,
@@ -69,11 +70,11 @@ public class GameSession {
         this.simulating = simulating;
     }
 
-    public Map<Id<User>, ClientSnap> getInitSnapsMap() {
+    public Map<Id<User>, List<BodyFrame>> getInitSnapsMap() {
         return initSnapsMap;
     }
 
-    public void putSnapFor(Id<User> userId, ClientSnap snap) {
+    public void putSnapFor(Id<User> userId, List<BodyFrame> snap) {
         initSnapsMap.putIfAbsent(userId, snap);
     }
 

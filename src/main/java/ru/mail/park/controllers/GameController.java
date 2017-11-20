@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.domain.dto.BoardMetaDto;
 import ru.mail.park.domain.dto.helpers.BoardMetaHelper;
-import ru.mail.park.mechanics.WorldParser;
 import ru.mail.park.services.GameDao;
 
 import javax.validation.Valid;
@@ -101,9 +100,6 @@ public class GameController {
                     .body("bad");
         }
 
-        WorldParser worldParser = new WorldParser();
-        worldParser.initWorld(data.getBodies(), data.getJoints());
-        gameDao.registerParser(worldParser);
         return ResponseEntity
                 .ok("good");
     }

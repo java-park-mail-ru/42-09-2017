@@ -1,8 +1,9 @@
-package ru.mail.park.websocket.message;
+package ru.mail.park.websocket.message.from;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
+import ru.mail.park.websocket.message.SocketMessage;
 
 import javax.validation.constraints.NotNull;
 

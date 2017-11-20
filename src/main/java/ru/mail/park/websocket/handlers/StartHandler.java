@@ -3,32 +3,32 @@ package ru.mail.park.websocket.handlers;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.GameMechanics;
-import ru.mail.park.websocket.MessageHandlersContainer;
-import ru.mail.park.websocket.message.StartMessage;
+import ru.mail.park.websocket.MessageHandlerContainer;
+import ru.mail.park.websocket.message.from.StartMessage;
 
 import javax.annotation.PostConstruct;
 
 public class StartHandler extends MessageHandler<StartMessage> {
-    private final MessageHandlersContainer messageHandlersContainer;
+    private final MessageHandlerContainer messageHandlerContainer;
     private final GameMechanics gameMechanics;
 
 
     public StartHandler(
-            MessageHandlersContainer messageHandlersContainer,
+            MessageHandlerContainer messageHandlerContainer,
             GameMechanics gameMechanics
     ) {
         super(StartMessage.class);
-        this.messageHandlersContainer = messageHandlersContainer;
+        this.messageHandlerContainer = messageHandlerContainer;
         this.gameMechanics = gameMechanics;
     }
 
     @PostConstruct
     public void init() {
-        messageHandlersContainer.registerHandler(StartMessage.class, this);
+        messageHandlerContainer.registerHandler(StartMessage.class, this);
     }
 
     @Override
     public void handle(StartMessage message, Id<User> userId) throws Exception {
-        gameMechanics.tryStartSimulation(userId, message.getSnap());
+        gameMechanics.tryStartSimulation(userId, message.getBodies());
     }
 }

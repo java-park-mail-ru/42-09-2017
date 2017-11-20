@@ -7,6 +7,7 @@ import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
@@ -86,7 +87,7 @@ public class GameMechanics {
         userBoardMap.put(userId, boardId);
     }
 
-    public synchronized void tryStartSimulation(Id<User> userId, ClientSnap snap) {
+    public synchronized void tryStartSimulation(Id<User> userId, List<BodyFrame> snap) {
         LOGGER.warn("Trying to start simulation");
         if (!gameSessionService.isPlaying(userId)) {
             LOGGER.error("Should start game before simulation");

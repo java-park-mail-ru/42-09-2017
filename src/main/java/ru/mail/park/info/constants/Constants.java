@@ -18,4 +18,6 @@ public class Constants {
     public static final int SECOND = 1000000000;
     public static final int MICRO_SECOND = 1000000;
     public static final int FPS = 60;
+
+    public static final float ALLOWED_DELTA = 0.01f;
 }

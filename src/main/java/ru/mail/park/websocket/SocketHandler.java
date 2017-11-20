@@ -24,7 +24,7 @@ public class SocketHandler extends TextWebSocketHandler {
     private final GameDao gameDao;
     private final RemotePointService remotePointService;
     private final GameSessionService gameSessionService;
-    private final MessageHandlersContainer messageHandlersContainer;
+    private final MessageHandlerContainer messageHandlerContainer;
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketHandler.class);
@@ -35,13 +35,13 @@ public class SocketHandler extends TextWebSocketHandler {
             GameDao gameDao,
             RemotePointService remotePointService,
             GameSessionService gameSessionService,
-            MessageHandlersContainer messageHandlersContainer
+            MessageHandlerContainer messageHandlerContainer
     ) {
         this.userDao = userDao;
         this.gameDao = gameDao;
         this.remotePointService = remotePointService;
         this.gameSessionService = gameSessionService;
-        this.messageHandlersContainer = messageHandlersContainer;
+        this.messageHandlerContainer = messageHandlerContainer;
     }
 
     @Override
@@ -69,8 +69,7 @@ public class SocketHandler extends TextWebSocketHandler {
             return;
         }
         String textMessage = message.getPayload();
-        ClientSnap snap;
-        //WorldParser worldParser = gameDao.getLastParser();
+        //WorldInitializer worldParser = gameDao.getLastParser();
         handleMessage(Id.of(userId), message);
        // if (textMessage.equals("start")) {
        //     Thread thread = new Thread(worldParser);
@@ -115,7 +114,7 @@ public class SocketHandler extends TextWebSocketHandler {
         }
         try {
             //noinspection ConstantConditions
-            messageHandlersContainer.handle(message, userId);
+            messageHandlerContainer.handle(message, userId);
         } catch (Exception e) {
             LOGGER.error("Can't handle message of type " + message.getClass().getName() + " with content: " + textMessage, e);
         }

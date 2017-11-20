@@ -1,104 +1,97 @@
 package ru.mail.park.mechanics;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import ru.mail.park.domain.Id;
+import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.body.*;
+import ru.mail.park.mechanics.objects.body.BodyData;
+import ru.mail.park.mechanics.objects.body.BodyOptions;
+import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
+import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
+import ru.mail.park.websocket.message.from.SnapMessage;
+import ru.mail.park.websocket.message.to.StartedMessage;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WorldParser implements Runnable {
+import static ru.mail.park.info.constants.Constants.GRAVITY_X;
+import static ru.mail.park.info.constants.Constants.GRAVITY_Y;
 
-    private boolean calculation = true;
-    private World world;
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorldParser.class);
-    private Map<Long, Body> gameBodies;
-    private Map<Long, Body> dynamicBodies;
-    private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
+@Service
+public class WorldRunnerService {
+    private Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final RemotePointService remotePointService;
+    private final GameSessionService gameSessionService;
 
-    private static final long TIMEOUT = 50000000000L;
-    private static final float GRAVITY = -10f;
-    private static final float DELTA = 1 / 60f;
-    private static final int VEL_ITER = 10;
-    private static final int POS_ITER = 10;
-    private static final int SECOND = 1000000000;
-    private static final int MICRO_SECOND = 1000000;
-    private static final int FPS = 60;
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunnerService.class);
 
-    public WorldParser() {
-        this.world = new World(new Vec2(0f, GRAVITY));
-        this.gameBodies = new ConcurrentHashMap<>();
-        this.dynamicBodies = new ConcurrentHashMap<>();
-        this.diffsPerFrame = new ConcurrentHashMap<>();
+    public WorldRunnerService(
+            RemotePointService remotePointService,
+            GameSessionService gameSessionService
+    ) {
+        this.remotePointService = remotePointService;
+        this.gameSessionService = gameSessionService;
     }
 
-    @Override
-    public void run() {
-        long startTime = System.nanoTime();
-        long beforeTime = startTime;
-        long afterTime;
-        long sleepTime;
-        long frameNumber = 0;
+    public WorldRunner getWorldRunnerFor(GameSession gameSession) {
+        return worldRunnerMap.get(gameSession);
+    }
 
-
-        LOGGER.warn("Start running");
-        while (calculation) {
-            if ((beforeTime - startTime) > TIMEOUT) {
-                calculation = false;
-                LOGGER.error("Running timeout");
-            }
-
-            frameNumber++;
-            LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
-            for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
-                long bodyId = bodyEntry.getKey();
-                Body body = bodyEntry.getValue();
-                Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
-                bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
-                    BodyFrame bodyFrame = new BodyFrame();
-                    bodyFrame.setPosition(new Vec2(body.getPosition()));
-                    bodyFrame.setVelocity(new Vec2(body.getLinearVelocity()));
-                    bodyFrame.setAngle(body.getAngle());
+    public void runSimulation(GameSession gameSession) {
+        WorldRunner worldRunner = worldRunnerMap.get(gameSession);
+//        Thread thread = new Thread(worldRunner);
+        gameSession.setSimulating(true);
+//        LOGGER.warn("Executing simulation in new thread " + thread.getName());
+//        thread.start();
+//        Executors.newSingleThreadExecutor().execute(worldRunner);
+        worldRunner.run();
+        gameSession.getPlayers().stream()
+                .filter(Objects::nonNull)
+                .forEach(id -> {
                     try {
-                        LOGGER.error(mapper.writeValueAsString(bodyFrame));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                        remotePointService.sendMessageTo(id, new StartedMessage());
+                    } catch (IOException ignore) {
                     }
-                    return bodyFrame;
                 });
-            }
-            world.step(DELTA, VEL_ITER, POS_ITER);
-            afterTime = System.nanoTime();
+    }
 
-            sleepTime = (SECOND / FPS - (afterTime - beforeTime)) / MICRO_SECOND;
-            if (sleepTime < 0) {
-                sleepTime = 0;
-            }
-            try {
-                LOGGER.info(String.valueOf(sleepTime));
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {
-                LOGGER.error("Sleep interrupted");
-            }
-
-            beforeTime = System.nanoTime();
+    public void handleSnap(Id<User> userId, SnapMessage snap) {
+        List<BodyFrame> bodyFrames = snap.getBodies();
+        Long frame = snap.getFrame();
+        GameSession gameSession = gameSessionService.getSessionFor(userId);
+        WorldRunner worldRunner = worldRunnerMap.get(gameSession);
+        LOGGER.info("Got changes");
+        for (BodyFrame bodyFrame : bodyFrames) {
+            Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
+            BodyFrame serverFrame = serverDiffs.get(snap.getFrame());
+            Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
+            Vec2 serverVel = new Vec2(serverFrame.getVelocity().x, -serverFrame.getVelocity().y);
+            float serverAngle = -serverFrame.getAngle();
+            bodyFrame.setPosition(serverPos.sub(bodyFrame.getPosition()));
+            bodyFrame.setVelocity(serverVel.sub(bodyFrame.getVelocity()));
+            bodyFrame.setAngle(serverAngle - bodyFrame.getAngle());
         }
     }
 
-    public void initWorld(List<GBody> bodies, List<GJoint> joints) {
+    public void initWorld(GameSession gameSession, List<GBody> bodies, List<GJoint> joints) {
         LOGGER.info("World initialization started");
+        World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
+        Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
+        Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
+        Map<Long, Map<Long, BodyFrame>> diffsPerFrame = new ConcurrentHashMap<>();
+
         for (GBody gbody : bodies) {
             BodyDef bodyDef = new BodyDef();
             bodyDef.type = BodyType.values()[gbody.getData().getType()];
@@ -146,7 +139,9 @@ public class WorldParser implements Runnable {
                 );
             }
         }
-        world.setContactListener(new SensorListener(this));
+        WorldRunner worldRunner = new WorldRunner(world, gameBodies, dynamicBodies, diffsPerFrame);
+        world.setContactListener(new SensorListener(worldRunner));
+        worldRunnerMap.put(gameSession, worldRunner);
         LOGGER.warn("All bodies created");
     }
 
@@ -237,37 +232,5 @@ public class WorldParser implements Runnable {
         body.createFixture(fixDefRight);
         body.createFixture(fixDefDown);
         body.createFixture(fixDefSensor);
-    }
-
-    public boolean isCalculation() {
-        return calculation;
-    }
-
-    public void setCalculation(boolean calculation) {
-        this.calculation = calculation;
-    }
-
-    public Map<Long, Body> getGameBodies() {
-        return gameBodies;
-    }
-
-    public void setGameBodies(Map<Long, Body> gameBodies) {
-        this.gameBodies = gameBodies;
-    }
-
-    public Map<Long, Body> getDynamicBodies() {
-        return dynamicBodies;
-    }
-
-    public void setDynamicBodies(Map<Long, Body> dynamicBodies) {
-        this.dynamicBodies = dynamicBodies;
-    }
-
-    public Map<Long, Map<Long, BodyFrame>> getDiffsPerFrame() {
-        return diffsPerFrame;
-    }
-
-    public void setDiffsPerFrame(Map<Long, Map<Long, BodyFrame>> diffsPerFrame) {
-        this.diffsPerFrame = diffsPerFrame;
     }
 }
