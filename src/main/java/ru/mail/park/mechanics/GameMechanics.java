@@ -8,7 +8,6 @@ import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 

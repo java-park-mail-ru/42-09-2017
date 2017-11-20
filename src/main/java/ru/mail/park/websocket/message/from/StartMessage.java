@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import org.springframework.validation.annotation.Validated;
 import ru.mail.park.controllers.validators.groups.InitSnap;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.websocket.message.SocketMessage;
 
 import javax.validation.Valid;

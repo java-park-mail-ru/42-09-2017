@@ -6,6 +6,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
@@ -17,16 +18,17 @@ import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
 import ru.mail.park.websocket.message.from.SnapMessage;
+import ru.mail.park.websocket.message.to.FinishMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static ru.mail.park.info.constants.Constants.GRAVITY_X;
-import static ru.mail.park.info.constants.Constants.GRAVITY_Y;
+import static ru.mail.park.info.constants.Constants.*;
 
 @Service
 public class WorldRunnerService {
@@ -39,7 +41,7 @@ public class WorldRunnerService {
 
     public WorldRunnerService(
             RemotePointService remotePointService,
-            GameSessionService gameSessionService
+            @Lazy GameSessionService gameSessionService
     ) {
         this.remotePointService = remotePointService;
         this.gameSessionService = gameSessionService;
@@ -69,19 +71,45 @@ public class WorldRunnerService {
 
     public void handleSnap(Id<User> userId, SnapMessage snap) {
         List<BodyFrame> bodyFrames = snap.getBodies();
-        Long frame = snap.getFrame();
         GameSession gameSession = gameSessionService.getSessionFor(userId);
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         LOGGER.info("Got changes");
+        long frameNumber = snap.getFrame();
+        boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
             Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
-            BodyFrame serverFrame = serverDiffs.get(snap.getFrame());
+            BodyFrame serverFrame = serverDiffs.get(frameNumber);
             Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
             Vec2 serverVel = new Vec2(serverFrame.getVelocity().x, -serverFrame.getVelocity().y);
             float serverAngle = -serverFrame.getAngle();
-            bodyFrame.setPosition(serverPos.sub(bodyFrame.getPosition()));
-            bodyFrame.setVelocity(serverVel.sub(bodyFrame.getVelocity()));
-            bodyFrame.setAngle(serverAngle - bodyFrame.getAngle());
+            Vec2 posDiff = serverPos.sub(bodyFrame.getPosition());
+            if (Math.max(posDiff.x, posDiff.y) > ALLOWED_POS_DELTA) {
+                cheat = true;
+                bodyFrame.setPosition(serverPos);
+            }
+            Vec2 velDiff = serverVel.sub(bodyFrame.getVelocity());
+            if (Math.max(velDiff.x, velDiff.y) > ALLOWED_VEL_DELTA) {
+                cheat = true;
+                bodyFrame.setVelocity(serverVel);
+            }
+            if ((serverAngle - bodyFrame.getAngle()) > ALLOWED_ANGLE_DELTA) {
+                cheat = true;
+                bodyFrame.setAngle(serverAngle);
+            }
+        }
+        if (cheat) {
+            try {
+                remotePointService.sendMessageTo(userId, snap);
+            } catch (IOException e) {
+                LOGGER.error("Can't send difference snap");
+            }
+        }
+        if (frameNumber == worldRunner.getFrames()) {
+            try {
+                remotePointService.sendMessageTo(userId, new FinishMessage(100L));
+            } catch (IOException e) {
+                LOGGER.error("Can't send finish message");
+            }
         }
     }
 

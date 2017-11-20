@@ -10,7 +10,6 @@ import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.Constants;
 import ru.mail.park.mechanics.GameSessionService;
 import ru.mail.park.mechanics.RemotePointService;
-import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.SocketMessage;

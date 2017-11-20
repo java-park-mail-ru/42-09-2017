@@ -25,6 +25,18 @@ public class BodyFrame {
 
     }
 
+    public BodyFrame(
+        Long id,
+        Vec2 position,
+        Vec2 velocity,
+        Float angle
+    ) {
+        this.id = id;
+        this.position = position;
+        this.velocity = velocity;
+        this.angle = angle;
+    }
+
     public Long getId() {
         return id;
     }

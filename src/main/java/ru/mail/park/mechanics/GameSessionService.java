@@ -9,7 +9,6 @@ import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.ClientSnap;
 import ru.mail.park.mechanics.objects.body.BodyData;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
@@ -52,10 +51,7 @@ public class GameSessionService {
 
     public boolean isSimulationStartedFor(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
-        if (gameSession == null) {
-            return true;
-        }
-        return gameSession.isSimulating();
+        return gameSession == null || gameSession.isSimulating();
     }
 
     public boolean isTeamReady(Id<User> userId) {
@@ -89,8 +85,7 @@ public class GameSessionService {
     public void startGame(Id<User> first, Id<User> second, Id<Board> boardId) {
         GameSession gameSession = new GameSession(first, second, boardId);
         gameSessionMap.put(first, gameSession);
-        BoardRequest.Data board = gameDao.getBoard(boardId.getId());
-        BoardMessage boardMessage = new BoardMessage(board);
+        BoardMessage boardMessage = new BoardMessage();
         try {
             remotePointService.sendMessageTo(first, boardMessage);
         } catch (IOException ignore) {

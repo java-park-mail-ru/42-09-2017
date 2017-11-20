@@ -6,20 +6,14 @@ import ru.mail.park.websocket.message.SocketMessage;
 
 public class BoardMessage extends SocketMessage {
     private Long id;
-    private BoardRequest.Data board;
 
     @JsonCreator
     public BoardMessage() {
-
+        this(1L);
     }
 
-    public BoardMessage(BoardRequest.Data board) {
-        this(1L, board);
-    }
-
-    public BoardMessage(Long id, BoardRequest.Data board) {
+    public BoardMessage(Long id) {
         this.id = id;
-        this.board = board;
     }
 
     public Long getId() {
@@ -28,13 +22,5 @@ public class BoardMessage extends SocketMessage {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public BoardRequest.Data getBoard() {
-        return board;
-    }
-
-    public void setBoard(BoardRequest.Data board) {
-        this.board = board;
     }
 }

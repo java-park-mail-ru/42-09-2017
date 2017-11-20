@@ -9,6 +9,7 @@ import ru.mail.park.websocket.message.from.MovingMessage;
 import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.from.StartMessage;
 import ru.mail.park.websocket.message.from.SubscribeMessage;
+import ru.mail.park.websocket.message.to.FinishMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "class")
@@ -17,7 +18,8 @@ import ru.mail.park.websocket.message.to.StartedMessage;
         @Type(MovingMessage.class),
         @Type(SnapMessage.class),
         @Type(StartMessage.class),
-        @Type(StartedMessage.class)
+        @Type(StartedMessage.class),
+        @Type(FinishMessage.class)
 })
 public abstract class SocketMessage {
 }

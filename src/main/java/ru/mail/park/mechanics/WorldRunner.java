@@ -16,9 +16,11 @@ import static ru.mail.park.info.constants.Constants.*;
 public class WorldRunner implements Runnable {
     private World world;
     private boolean calculation = true;
+    private long frames = 0L;
     private Map<Long, Body> gameBodies;
     private Map<Long, Body> dynamicBodies;
     private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunner.class);
     private final ObjectMapper mapper = new ObjectMapper();
@@ -86,6 +88,7 @@ public class WorldRunner implements Runnable {
 //
 //            beforeTime = System.nanoTime();
         }
+        frames = frameNumber;
     }
 
     public boolean isCalculation() {
@@ -94,6 +97,14 @@ public class WorldRunner implements Runnable {
 
     public void setCalculation(boolean calculation) {
         this.calculation = calculation;
+    }
+
+    public long getFrames() {
+        return frames;
+    }
+
+    public void setFrames(long frames) {
+        this.frames = frames;
     }
 
     public Map<Long, Body> getGameBodies() {

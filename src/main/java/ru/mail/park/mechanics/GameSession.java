@@ -5,9 +5,7 @@ import org.jbox2d.dynamics.World;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.info.constants.Constants;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.ClientSnap;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;

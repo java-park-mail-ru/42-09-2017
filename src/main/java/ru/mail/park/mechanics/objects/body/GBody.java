@@ -10,6 +10,8 @@ public class GBody {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long id;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
+    private Long playerID;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @Valid
     private BodyData data;
     private boolean selectable;
@@ -27,6 +29,14 @@ public class GBody {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getPlayerID() {
+        return playerID;
+    }
+
+    public void setPlayerID(Long playerID) {
+        this.playerID = playerID;
     }
 
     public BodyData getData() {
