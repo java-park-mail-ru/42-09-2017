@@ -71,9 +71,13 @@ public class GameSessionService {
         BoardRequest.Data board = gameDao.getBoard(gameSession.getBoardId().getId());
         Map<Long, GBody> bodiesMap = new HashMap<>();
         board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
+        LOGGER.info("Bodies: " + bodiesMap.size());
         Map<Id<User>, List<BodyFrame>> initSnapsMap = gameSession.getInitSnapsMap();
+        LOGGER.info("Init snaps map size: " + initSnapsMap.size());
         for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
+            LOGGER.info("   value size: " + initSnap.getValue().size());
             initSnap.getValue().forEach(bodyFrame -> {
+                LOGGER.info("   body frame id: " + bodyFrame.getId());
                 BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
                 bodyData.setPosition(bodyFrame.getPosition());
                 bodyData.setAngle(bodyFrame.getAngle());
