@@ -62,6 +62,7 @@ public class GameMechanics {
         int players = 1;
         if (meta != null) {
             players = meta.getPlayers();
+            LOGGER.info("Players: " + players);
         } else {
             LOGGER.error("Meta is null");
         }
