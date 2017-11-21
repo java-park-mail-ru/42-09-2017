@@ -148,7 +148,7 @@ public class WorldRunnerService {
             switch (kind) {
                 case "rect":
                     rectCreator(body, bodyData);
-                    LOGGER.info("   Rectangle created");
+                    LOGGER.info("   Rectangle created with size: " + bodyData.getSize());
                     break;
                 case "circle":
                     circleCreator(body, bodyData);
