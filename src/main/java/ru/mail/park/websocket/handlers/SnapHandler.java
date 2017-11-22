@@ -33,6 +33,10 @@ public class SnapHandler extends MessageHandler<SnapMessage> {
 
     @Override
     public void handle(SnapMessage message, Id<User> userId) throws Exception {
-        worldRunnerService.handleSnap(userId, message);
+        try {
+            worldRunnerService.handleSnap(userId, message);
+        } catch (NullPointerException e) {
+            LOGGER.warn("There could appear NullPointerException. But doesn't. LOL");
+        }
     }
 }
