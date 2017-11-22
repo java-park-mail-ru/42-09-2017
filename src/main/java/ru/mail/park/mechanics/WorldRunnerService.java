@@ -133,9 +133,9 @@ public class WorldRunnerService {
             bodyDef.angle = -gbody.getData().getAngle();
             Body body = world.createBody(bodyDef);
             gameBodies.put(gbody.getId(), body);
+            diffsPerFrame.put(gbody.getId(), new ConcurrentHashMap<>());
             if (bodyDef.type == BodyType.DYNAMIC) {
                 dynamicBodies.put(gbody.getId(), body);
-                diffsPerFrame.put(gbody.getId(), new ConcurrentHashMap<>());
             }
 
             LOGGER.info("   Body created with options: "
