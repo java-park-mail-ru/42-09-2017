@@ -76,6 +76,9 @@ public class WorldRunnerService {
     public void handleSnap(Id<User> userId, SnapMessage snap) {
         List<BodyFrame> bodyFrames = snap.getBodies();
         GameSession gameSession = gameSessionService.getSessionFor(userId);
+        if (gameSession == null) {
+            LOGGER.warn("There could appear NullPointerException. But doesn't. LOL");
+        }
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
