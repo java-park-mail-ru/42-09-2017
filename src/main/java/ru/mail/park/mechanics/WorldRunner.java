@@ -62,7 +62,8 @@ public class WorldRunner implements Runnable {
                 bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
                     BodyFrame bodyFrame = new BodyFrame();
                     bodyFrame.setPosition(new Vec2(body.getPosition()));
-                    bodyFrame.setVelocity(new Vec2(body.getLinearVelocity()));
+                    bodyFrame.setLinVelocity(new Vec2(body.getLinearVelocity()));
+                    bodyFrame.setAngVelocity(body.getAngularVelocity());
                     bodyFrame.setAngle(body.getAngle());
                     try {
                         LOGGER.error(mapper.writeValueAsString(bodyFrame));

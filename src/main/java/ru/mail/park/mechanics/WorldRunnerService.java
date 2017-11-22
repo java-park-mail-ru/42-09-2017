@@ -22,7 +22,6 @@ import ru.mail.park.websocket.message.to.FinishMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,17 +88,22 @@ public class WorldRunnerService {
             Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
             BodyFrame serverFrame = serverDiffs.get(frameNumber);
             Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
-            Vec2 serverVel = new Vec2(serverFrame.getVelocity().x, -serverFrame.getVelocity().y);
+            Vec2 serverLinVel = new Vec2(serverFrame.getLinVelocity().x, -serverFrame.getLinVelocity().y);
+            float serverAngVel = serverFrame.getAngVelocity();
             float serverAngle = -serverFrame.getAngle();
             Vec2 posDiff = serverPos.sub(bodyFrame.getPosition());
             if (Math.max(posDiff.x, posDiff.y) > ALLOWED_POS_DELTA) {
                 cheat = true;
                 bodyFrame.setPosition(serverPos);
             }
-            Vec2 velDiff = serverVel.sub(bodyFrame.getVelocity());
+            Vec2 velDiff = serverLinVel.sub(bodyFrame.getLinVelocity());
             if (Math.max(velDiff.x, velDiff.y) > ALLOWED_VEL_DELTA) {
                 cheat = true;
-                bodyFrame.setVelocity(serverVel);
+                bodyFrame.setLinVelocity(serverLinVel);
+            }
+            if ((serverAngVel - bodyFrame.getAngVelocity()) > ALLOWED_VEL_DELTA) {
+                cheat = true;
+                bodyFrame.setAngVelocity(serverAngVel);
             }
             if ((serverAngle - bodyFrame.getAngle()) > ALLOWED_ANGLE_DELTA) {
                 cheat = true;

@@ -3,7 +3,7 @@ package ru.mail.park.mechanics.objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.jbox2d.common.Vec2;
-import ru.mail.park.controllers.validators.groups.InitSnap;
+import ru.mail.park.controllers.validators.groups.SimulationSnap;
 import ru.mail.park.info.constants.MessageConstants;
 
 import javax.validation.constraints.NotNull;
@@ -14,9 +14,12 @@ public class BodyFrame {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @JsonIgnoreProperties({"valid"})
     private Vec2 position;
-    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY, groups = {InitSnap.class})
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY, groups = {SimulationSnap.class})
     @JsonIgnoreProperties({"valid"})
-    private Vec2 velocity;
+    private Vec2 linVelocity;
+    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY, groups = {SimulationSnap.class})
+    @JsonIgnoreProperties({"valid"})
+    private Float angVelocity;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Float angle;
 
@@ -28,12 +31,12 @@ public class BodyFrame {
     public BodyFrame(
         Long id,
         Vec2 position,
-        Vec2 velocity,
+        Vec2 linVelocity,
         Float angle
     ) {
         this.id = id;
         this.position = position;
-        this.velocity = velocity;
+        this.linVelocity = linVelocity;
         this.angle = angle;
     }
 
@@ -53,12 +56,20 @@ public class BodyFrame {
         this.position = position;
     }
 
-    public Vec2 getVelocity() {
-        return velocity;
+    public Vec2 getLinVelocity() {
+        return linVelocity;
     }
 
-    public void setVelocity(Vec2 velocity) {
-        this.velocity = velocity;
+    public void setLinVelocity(Vec2 linVelocity) {
+        this.linVelocity = linVelocity;
+    }
+
+    public Float getAngVelocity() {
+        return angVelocity;
+    }
+
+    public void setAngVelocity(Float angVelocity) {
+        this.angVelocity = angVelocity;
     }
 
     public Float getAngle() {

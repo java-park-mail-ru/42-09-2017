@@ -1,4 +1,4 @@
 package ru.mail.park.controllers.validators.groups;
 
-public class InitSnap {
+public class SimulationSnap {
 }

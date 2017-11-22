@@ -1,6 +1,8 @@
 package ru.mail.park.websocket.message.from;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.springframework.validation.annotation.Validated;
+import ru.mail.park.controllers.validators.groups.SimulationSnap;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.info.constants.MessageConstants;
@@ -11,6 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+@Validated(SimulationSnap.class)
 public class SnapMessage extends SocketMessage {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long frame;
