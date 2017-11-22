@@ -82,6 +82,7 @@ public class WorldRunnerService {
         long serverFrames = worldRunner.getFrames();
         if (frameNumber > serverFrames) {
             LOGGER.warn("There could appear NullPointerException. But doesn't. LOL");
+            return;
         }
         LOGGER.info("   client frame: " + frameNumber);
         boolean cheat = false;
