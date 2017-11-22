@@ -79,6 +79,10 @@ public class WorldRunnerService {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
+        long serverFrames = worldRunner.getFrames();
+        if (frameNumber > serverFrames) {
+            LOGGER.warn("There could appear NullPointerException. But doesn't. LOL");
+        }
         LOGGER.info("   client frame: " + frameNumber);
         boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
@@ -109,7 +113,7 @@ public class WorldRunnerService {
                 LOGGER.error("Can't send difference snap");
             }
         }
-        if (frameNumber == worldRunner.getFrames()) {
+        if (frameNumber == serverFrames) {
             try {
                 remotePointService.sendMessageTo(userId, new FinishMessage(100L));
             } catch (IOException e) {
