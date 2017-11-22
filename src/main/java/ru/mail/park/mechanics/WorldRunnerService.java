@@ -179,10 +179,10 @@ public class WorldRunnerService {
                         + String.valueOf(fixture.m_filter.categoryBits)
                 );
             }
-            body.resetMassData();
         }
         WorldRunner worldRunner = new WorldRunner(world, gameBodies, dynamicBodies, diffsPerFrame);
         world.setContactListener(new SensorListener(worldRunner));
+        world.setContinuousPhysics(false);
         worldRunnerMap.put(gameSession, worldRunner);
         LOGGER.warn("All bodies created");
     }
