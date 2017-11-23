@@ -3,6 +3,7 @@ package ru.mail.park.mechanics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
@@ -10,7 +11,9 @@ import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
+import ru.mail.park.websocket.message.to.FinishedMessage;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -109,6 +112,18 @@ public class GameMechanics {
             gameSession.putSnapFor(userId, snap);
             gameSessionService.startSimulation(gameSession);
         }
+    }
+
+    public void handleFinish(Id<User> userId) {
+        try {
+            remotePointService.sendMessageTo(userId, new FinishedMessage(100L));
+        } catch (IOException e) {
+            LOGGER.error("Can't send finish message");
+        }
+
+        removeWaiter(userId);
+        gameSessionService.removeSessionFor(userId);
+        remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
     }
 
     public boolean checkCandidate(Id<User> userId) {

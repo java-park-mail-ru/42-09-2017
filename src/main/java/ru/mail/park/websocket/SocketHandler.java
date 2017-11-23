@@ -145,7 +145,7 @@ public class SocketHandler extends TextWebSocketHandler {
     }
 
     private void ensureGameTerminated(Id<User> userId) {
-        gameSessionService.removeSessionFor(userId);
+        gameSessionService.removeSessionForTeam(userId);
         if (remotePointService.isConnected(userId)) {
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
         }

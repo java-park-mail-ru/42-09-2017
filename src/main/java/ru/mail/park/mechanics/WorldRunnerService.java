@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.listeners.SensorListener;
@@ -18,7 +19,7 @@ import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
 import ru.mail.park.websocket.message.from.SnapMessage;
-import ru.mail.park.websocket.message.to.FinishMessage;
+import ru.mail.park.websocket.message.to.FinishedMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
 
 import java.io.IOException;
@@ -95,18 +96,8 @@ public class WorldRunnerService {
             if (Math.max(posDiff.x, posDiff.y) > ALLOWED_POS_DELTA) {
                 cheat = true;
                 bodyFrame.setPosition(serverPos);
-            }
-            Vec2 velDiff = serverLinVel.sub(bodyFrame.getLinVelocity());
-            if (Math.max(velDiff.x, velDiff.y) > ALLOWED_VEL_DELTA) {
-                cheat = true;
                 bodyFrame.setLinVelocity(serverLinVel);
-            }
-            if ((serverAngVel - bodyFrame.getAngVelocity()) > ALLOWED_VEL_DELTA) {
-                cheat = true;
                 bodyFrame.setAngVelocity(serverAngVel);
-            }
-            if ((serverAngle - bodyFrame.getAngle()) > ALLOWED_ANGLE_DELTA) {
-                cheat = true;
                 bodyFrame.setAngle(serverAngle);
             }
         }
@@ -115,13 +106,6 @@ public class WorldRunnerService {
                 remotePointService.sendMessageTo(userId, snap);
             } catch (IOException e) {
                 LOGGER.error("Can't send difference snap");
-            }
-        }
-        if (frameNumber == serverFrames) {
-            try {
-                remotePointService.sendMessageTo(userId, new FinishMessage(100L));
-            } catch (IOException e) {
-                LOGGER.error("Can't send finish message");
             }
         }
     }
