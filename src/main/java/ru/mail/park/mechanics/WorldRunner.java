@@ -55,7 +55,7 @@ public class WorldRunner implements Runnable {
 
             frameNumber++;
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
-            for (Map.Entry<Long, Body> bodyEntry : gameBodies.entrySet()) {
+            for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
                 long bodyId = bodyEntry.getKey();
                 Body body = bodyEntry.getValue();
                 Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);

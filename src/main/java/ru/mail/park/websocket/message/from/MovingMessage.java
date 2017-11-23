@@ -6,7 +6,7 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.websocket.message.SocketMessage;
 
 public class MovingMessage extends SocketMessage {
-    @JsonIgnoreProperties({"velocity"})
+    @JsonIgnoreProperties({"linVelocity", "angVelocity"})
     private BodyFrame snap;
 
     @JsonCreator
