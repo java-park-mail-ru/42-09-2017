@@ -155,11 +155,6 @@ public class GameSessionService {
             LOGGER.warn("Removing game session for user");
             gameSessionMap.remove(user);
             playerMap.remove(user);
-            try {
-                remotePointService.sendRowMessageTo(user, "You are kicked from game");
-            } catch (IOException e) {
-                LOGGER.warn("Can't send message");
-            }
         }
         worldRunnerService.removeWorldRunnerFor(gameSession);
     }

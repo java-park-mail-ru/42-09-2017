@@ -80,10 +80,10 @@ public class WorldRunnerService {
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
         long serverFrames = worldRunner.getFrames();
+        LOGGER.info("   client frame: " + frameNumber);
         if (frameNumber > serverFrames) {
             throw new NullPointerException();
         }
-        LOGGER.info("   client frame: " + frameNumber);
         boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
             Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
