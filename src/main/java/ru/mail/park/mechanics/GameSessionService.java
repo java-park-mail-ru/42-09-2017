@@ -136,11 +136,6 @@ public class GameSessionService {
         }
         gameSessionMap.remove(userId);
         playerMap.remove(userId);
-        try {
-            remotePointService.sendRowMessageTo(userId, "You are kicked from game");
-        } catch (IOException e) {
-            LOGGER.warn("Can't send message");
-        }
     }
 
     public void removeSessionForTeam(Id<User> userId) {
