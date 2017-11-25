@@ -8,6 +8,7 @@ public class Constants {
 
     public static final int MAPS_ON_PAGE = 10;
 
+    public static final int TICK = 33;
     // Box2d constants
     public static final long TIMEOUT = 30L;
     public static final float GRAVITY_X = 0f;
