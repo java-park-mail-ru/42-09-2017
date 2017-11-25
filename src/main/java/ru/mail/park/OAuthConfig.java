@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -38,10 +39,10 @@ public class OAuthConfig extends WebSecurityConfigurerAdapter {
     OAuth2ClientContext oauth2ClientContext;
 
     @RequestMapping({ "/user" })
-    public Map<String, String> user(Principal principal) {
-        Map<String, String> map = new LinkedHashMap<>();
-        map.put("name", principal.getName());
-        return map;
+    public Principal user(Principal principal) {
+//        Map<String, String> map = new LinkedHashMap<>();
+//        map.put("name", principal.getName());
+        return principal;
     }
 
     @Override
