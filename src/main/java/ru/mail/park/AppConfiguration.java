@@ -27,7 +27,8 @@ public class AppConfiguration {
         config.addAllowedHeader("Content-Type");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/api/auth**", config);
+        source.registerCorsConfiguration("/api/game**", config);
         return new CorsFilter(source);
     }
 

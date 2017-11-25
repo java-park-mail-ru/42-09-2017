@@ -47,7 +47,7 @@ public class OAuthConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().antMatchers("/api/oauth**")
-                .authenticated().and().logout()
+                .permitAll().and().logout()
                 .logoutSuccessUrl("/").permitAll().and()
                 .addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
     }
