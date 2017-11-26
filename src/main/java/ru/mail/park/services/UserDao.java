@@ -28,6 +28,26 @@ public class UserDao {
         this.em = em;
     }
 
+    public User createUserVk(String token) {
+        String pattern = "Player";
+        long count = 0;
+        String username;
+        while (true) {
+            username = pattern + String.valueOf(count);
+            if (!hasUsername(username)) {
+                User user = new User();
+                user.setUsername(username);
+                em.persist(user);
+                return user;
+            }
+            count++;
+            if (count > 1000000) {
+                return null;
+                // ToDo: 26.11.17 throw an exception
+            }
+        }
+    }
+
     public void createUser(User userData) {
         List<String> errors = checkIfNotExists(userData.getUsername(), userData.getEmail());
         if (!errors.isEmpty()) {
@@ -36,6 +56,12 @@ public class UserDao {
         final String passwordEncoded = passwordEncoder.encode(userData.getPassword());
         userData.setPassword(passwordEncoded);
         em.persist(userData);
+    }
+
+    public void updateUserVk(User user, String token) {
+        if (token != null) {
+            user.setVkToken(token);
+        }
     }
 
     public User updateUser(User user, UserUpdateInfo userData) {
@@ -133,5 +159,25 @@ public class UserDao {
                 .setParameter("email", email)
                 .getSingleResult();
         return count > 0;
+    }
+
+    public User findUserVkById(Integer id) {
+        try {
+            return em.createQuery("select u from User as u where lower(vk_id)=lower(:id)", User.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public User findUserVkByToken(String token) {
+        try {
+            return em.createQuery("select u from User as u where lower(vk_token)=lower(:token)", User.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }
