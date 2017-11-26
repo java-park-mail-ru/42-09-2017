@@ -7,6 +7,8 @@ public class Constants {
     public static final String SESSION_ATTR = "user_info";
     public static final String OAUTH_VK_ATTR = "vk_info";
 
+    public static final int HASHCODE_CONSTANT = 32;
+
     public static final int MAPS_ON_PAGE = 10;
 
     public static final int CLIENT_ID = 6206034;

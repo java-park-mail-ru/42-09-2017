@@ -67,40 +67,7 @@ public class SocketHandler extends TextWebSocketHandler {
             closeSession(session, ACCESS_DENIED);
             return;
         }
-        String textMessage = message.getPayload();
-        //WorldInitializer worldParser = gameDao.getLastParser();
         handleMessage(Id.of(userId), message);
-       // if (textMessage.equals("start")) {
-       //     Thread thread = new Thread(worldParser);
-       //     thread.start();
-       //     LOGGER.info("Simulation started");
-       //     session.sendMessage(new TextMessage("STARTED"));
-       //     return;
-       // } else {
-       //     try {
-       //         snap = mapper.readValue(message.getPayload(), ClientSnap.class);
-       //         LOGGER.debug(message.getPayload());
-       //     } catch (IOException e) {
-       //         LOGGER.error("Wrong format");
-       //         session.sendMessage(new TextMessage("WrongFormat"));
-       //         return;
-       //     }
-       // }
-
-       // List<BodyFrame> bodyFrames = snap.getBodies();
-      //  LOGGER.info("Got changes");
-      //  for (BodyFrame bodyFrame : bodyFrames) {
-        //    Map<Long, BodyFrame> serverDiffs = worldParser.getDiffsPerFrame().get(bodyFrame.getId());
-          //  BodyFrame serverFrame = serverDiffs.get(snap.getFrame());
-            //Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
-           // Vec2 serverVel = new Vec2(serverFrame.getLinVelocity().x, -serverFrame.getLinVelocity().y);
-           // float serverAngle = -serverFrame.getAngle();
-           // bodyFrame.setPosition(serverPos.sub(bodyFrame.getPosition()));
-           // bodyFrame.setLinVelocity(serverVel.sub(bodyFrame.getLinVelocity()));
-           // bodyFrame.setAngle(serverAngle - bodyFrame.getAngle());
-       // }
-       // session.sendMessage(new TextMessage(mapper.writeValueAsString(snap)));
-        //LOGGER.info("Message is sent");
     }
 
     public void handleMessage(Id<User> userId, TextMessage textMessage) {

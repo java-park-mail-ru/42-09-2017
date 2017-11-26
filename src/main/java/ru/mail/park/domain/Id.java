@@ -2,6 +2,8 @@ package ru.mail.park.domain;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import static ru.mail.park.info.constants.Constants.HASHCODE_CONSTANT;
+
 public class Id<T> {
     private final long id;
 
@@ -20,22 +22,26 @@ public class Id<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final Id<?> id1 = (Id<?>) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final Id<?> id1 = (Id<?>) obj;
         return id == id1.id;
     }
 
     @Override
     public int hashCode() {
-        return (int) (id ^ (id >>> 32));
+        return (int) (id ^ (id >>> HASHCODE_CONSTANT));
     }
 
     @Override
     public String toString() {
-        return "Id{" +
-                "id=" + id +
-                '}';
+        return "Id{"
+                + "id=" + id
+                + '}';
     }
 }

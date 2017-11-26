@@ -1,11 +1,9 @@
 package ru.mail.park.controllers;
 
 import com.vk.api.sdk.client.VkApiClient;
-import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.UserAuthResponse;
-import com.vk.api.sdk.objects.users.UserXtrCounters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.OAuthUserDto;
-import ru.mail.park.domain.dto.UserDto;
-import ru.mail.park.domain.dto.helpers.UserHelper;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
-import java.util.List;
 
 import static ru.mail.park.info.constants.Constants.*;
 

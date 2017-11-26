@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.listeners.SensorListener;
@@ -19,7 +18,6 @@ import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
 import ru.mail.park.websocket.message.from.SnapMessage;
-import ru.mail.park.websocket.message.to.FinishedMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
 
 import java.io.IOException;
@@ -57,24 +55,20 @@ public class WorldRunnerService {
 
     public void runSimulation(GameSession gameSession) {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
-//        Thread thread = new Thread(worldRunner);
         gameSession.setSimulating(true);
-//        LOGGER.warn("Executing simulation in new thread " + thread.getName());
-//        thread.start();
-//        Executors.newSingleThreadExecutor().execute(worldRunner);
         worldRunner.run();
         gameSession.getPlayers().stream()
                 .filter(Objects::nonNull)
                 .forEach(id -> {
                     try {
                         remotePointService.sendMessageTo(id, new StartedMessage());
-                    } catch (IOException ignore) {
+                    } catch (IOException e) {
+                        LOGGER.warn("Error with sending started message");
                     }
                 });
     }
 
     public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
-        List<BodyFrame> bodyFrames = snap.getBodies();
         GameSession gameSession = gameSessionService.getSessionFor(userId);
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         LOGGER.info("Got changes");
@@ -84,6 +78,7 @@ public class WorldRunnerService {
         if (frameNumber > serverFrames) {
             throw new NullPointerException();
         }
+        List<BodyFrame> bodyFrames = snap.getBodies();
         boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
             Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());

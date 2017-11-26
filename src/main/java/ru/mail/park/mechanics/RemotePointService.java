@@ -35,7 +35,8 @@ public class RemotePointService {
         if (webSocketSession != null && webSocketSession.isOpen()) {
             try {
                 webSocketSession.close(closeStatus);
-            } catch (IOException ignore) {
+            } catch (IOException e) {
+                LOGGER.warn("Cut down exception");
             }
         }
     }
@@ -44,7 +45,7 @@ public class RemotePointService {
         WebSocketSession session = checkSessionFor(userId);
         try {
             session.sendMessage(new TextMessage(message));
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new IOException("Unable to send the message");
         }
     }
@@ -54,7 +55,7 @@ public class RemotePointService {
         try {
             session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
             LOGGER.info("SENT MESSAGE BY SOCKET");
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new IOException("Unable to send the message");
         }
     }

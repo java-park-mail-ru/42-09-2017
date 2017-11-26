@@ -48,7 +48,7 @@ public class WorldRunner implements Runnable {
 
         LOGGER.warn("Start running");
         while (calculation) {
-            if (frameNumber / 60 > TIMEOUT) {
+            if (frameNumber / FPS > TIMEOUT) {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }

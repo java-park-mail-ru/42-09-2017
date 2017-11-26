@@ -14,7 +14,9 @@ import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -116,7 +118,7 @@ public class GameMechanics {
 
     public void handleFinish(Id<User> userId) {
         try {
-            remotePointService.sendMessageTo(userId, new FinishedMessage(100L));
+            remotePointService.sendMessageTo(userId, new FinishedMessage(1L));
         } catch (IOException e) {
             LOGGER.error("Can't send finish message");
         }
@@ -127,9 +129,9 @@ public class GameMechanics {
     }
 
     public boolean checkCandidate(Id<User> userId) {
-        return remotePointService.isConnected(userId) &&
-                !gameSessionService.isPlaying(userId) &&
-                userDao.findUserById(userId.getId()) != null;
+        return remotePointService.isConnected(userId)
+                && !gameSessionService.isPlaying(userId)
+                && userDao.findUserById(userId.getId()) != null;
     }
 
     public void removeWaiter(Id<User> userId) {

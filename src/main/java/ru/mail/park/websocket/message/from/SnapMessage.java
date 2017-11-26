@@ -3,8 +3,6 @@ package ru.mail.park.websocket.message.from;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.springframework.validation.annotation.Validated;
 import ru.mail.park.controllers.validators.groups.SimulationSnap;
-import ru.mail.park.domain.Board;
-import ru.mail.park.domain.Id;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.websocket.message.SocketMessage;

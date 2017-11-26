@@ -20,6 +20,8 @@ public class UserDao {
     private final PasswordEncoder passwordEncoder;
     private EntityManager em;
 
+    private static final long MILLION = 1000000;
+
     public UserDao(
             PasswordEncoder passwordEncoder,
             EntityManager em
@@ -42,7 +44,7 @@ public class UserDao {
                 return user;
             }
             count++;
-            if (count > 1000000) {
+            if (count > MILLION) {
                 return null;
                 // ToDo: 26.11.17 throw an exception
             }

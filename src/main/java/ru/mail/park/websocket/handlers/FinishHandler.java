@@ -6,7 +6,6 @@ import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.GameMechanics;
 import ru.mail.park.websocket.MessageHandlerContainer;
 import ru.mail.park.websocket.message.from.FinishMessage;
-import ru.mail.park.websocket.message.to.FinishedMessage;
 
 import javax.annotation.PostConstruct;
 
