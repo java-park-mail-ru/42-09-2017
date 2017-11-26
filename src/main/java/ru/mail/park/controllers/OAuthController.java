@@ -22,6 +22,7 @@ import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.Enumeration;
 import java.util.List;
 
 import static ru.mail.park.info.constants.Constants.*;
@@ -44,7 +45,11 @@ public class OAuthController {
     @GetMapping("vk")
     public ResponseEntity<?> oauth(@RequestParam String code, HttpSession httpSession) {
         String accessToken = (String) httpSession.getAttribute(OAUTH_VK_ATTR);
-        if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
+        Enumeration<String> attrs = httpSession.getAttributeNames();
+        while (attrs.hasMoreElements()) {
+            LOGGER.warn(attrs.nextElement());
+        }
+        if (accessToken != null) { // && userDao.findUserVkByToken(accessToken) != null) {
             return ResponseEntity
                     .badRequest()
                     .body(new Message<>(MessageConstants.AUTHORIZED));
