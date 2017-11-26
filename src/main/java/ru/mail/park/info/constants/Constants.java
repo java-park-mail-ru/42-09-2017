@@ -11,7 +11,7 @@ public class Constants {
 
     public static final int CLIENT_ID = 6206034;
     public static final String CLIENT_SECRET = "MIyVHEJs0GudeiNPRNfB";
-    public static final String REDIRECT_URI = "http://194.87.110.17:1111/api/oauth/vk";
+    public static final String REDIRECT_URI = "https://physicsio.tech/backend/api/oauth/vk";
 
     public static final int TICK = 33;
     // Box2d constants
