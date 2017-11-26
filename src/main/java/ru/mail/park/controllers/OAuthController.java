@@ -45,10 +45,6 @@ public class OAuthController {
     @GetMapping("vk")
     public ResponseEntity<?> oauth(@RequestParam String code, HttpSession httpSession) {
         String accessToken = (String) httpSession.getAttribute(OAUTH_VK_ATTR);
-        Enumeration<String> attrs = httpSession.getAttributeNames();
-        while (attrs.hasMoreElements()) {
-            LOGGER.warn(attrs.nextElement());
-        }
         if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
             return ResponseEntity
                     .badRequest()
