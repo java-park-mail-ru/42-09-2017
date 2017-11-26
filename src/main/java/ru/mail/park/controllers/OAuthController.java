@@ -37,11 +37,9 @@ public class OAuthController {
     }
 
     @PostMapping("vk")
-    public ResponseEntity<?> oauth(@RequestBody OAuthCodeRequest codeRequest) {
-        String code = codeRequest.getCode();
-        UserAuthResponse userAuthResponse = null;
+    public ResponseEntity<?> oauth(@RequestParam String code) {
         try {
-            userAuthResponse = vkApiClient
+            UserAuthResponse userAuthResponse = vkApiClient
                     .oauth().userAuthorizationCodeFlow(
                             CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, code
                     ).execute();
@@ -65,7 +63,5 @@ public class OAuthController {
                     .badRequest()
                     .body(new Message<>(MessageConstants.VK_API_EXCEPTION));
         }
-
-
     }
 }
