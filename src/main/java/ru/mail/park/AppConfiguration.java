@@ -1,5 +1,8 @@
 package ru.mail.park;
 
+import com.vk.api.sdk.client.TransportClient;
+import com.vk.api.sdk.client.VkApiClient;
+import com.vk.api.sdk.httpclient.HttpTransportClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,6 +18,12 @@ public class AppConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public VkApiClient getVkApiClient() {
+        TransportClient transportClient = HttpTransportClient.getInstance();
+        return new VkApiClient(transportClient);
     }
 
     @Bean

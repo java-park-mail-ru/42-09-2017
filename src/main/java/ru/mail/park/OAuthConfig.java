@@ -47,7 +47,7 @@ public class OAuthConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/api/oauth**")
+        http.authorizeRequests().antMatchers("/api/goauth**")
                 .permitAll().and().logout()
                 .logoutSuccessUrl("/").permitAll().and()
                 .addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
@@ -70,7 +70,7 @@ public class OAuthConfig extends WebSecurityConfigurerAdapter {
     private Filter ssoFilter() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-        filters.add(ssoFilter(vk(), "/api/oauth/vk"));
+        filters.add(ssoFilter(vk(), "/api/goauth/vk"));
         filter.setFilters(filters);
         return filter;
     }
