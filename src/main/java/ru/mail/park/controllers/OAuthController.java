@@ -5,23 +5,23 @@ import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.UserAuthResponse;
-import com.vk.api.sdk.objects.account.UserSettings;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.domain.User;
-import ru.mail.park.domain.dto.OAuthCodeRequest;
+import ru.mail.park.domain.dto.OAuthUserDto;
 import ru.mail.park.domain.dto.UserDto;
 import ru.mail.park.domain.dto.helpers.UserHelper;
-import ru.mail.park.info.constants.Constants;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
-
 import java.util.Enumeration;
 import java.util.List;
 
@@ -68,10 +68,9 @@ public class OAuthController {
             } else {
                 user = userDao.createUserVk(userId, accessToken);
             }
-            UserActor userActor = new UserActor(userAuthResponse.getUserId(), userAuthResponse.getAccessToken());
-            List<UserXtrCounters> users = vkApiClient.users().get(userActor).userIds(userId.toString()).execute();
-            UserDto userDto = UserHelper.toDto(user);
-            userDto.setEmail(users.get(0).getLastName());
+            OAuthUserDto userDto = new OAuthUserDto();
+            userDto.setUserId(userId);
+            userDto.setUsername(user.getUsername());
             return ResponseEntity
                     .ok(userDto);
         } catch (ApiException e) {
