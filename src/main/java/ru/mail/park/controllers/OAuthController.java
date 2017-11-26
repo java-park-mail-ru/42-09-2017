@@ -36,7 +36,7 @@ public class OAuthController {
         this.vkApiClient = vkApiClient;
     }
 
-    @PostMapping("vk")
+    @GetMapping("vk")
     public ResponseEntity<?> oauth(@RequestParam String code) {
         try {
             UserAuthResponse userAuthResponse = vkApiClient
