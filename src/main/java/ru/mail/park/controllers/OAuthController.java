@@ -49,7 +49,7 @@ public class OAuthController {
         while (attrs.hasMoreElements()) {
             LOGGER.warn(attrs.nextElement());
         }
-        if (accessToken != null) { // && userDao.findUserVkByToken(accessToken) != null) {
+        if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
             return ResponseEntity
                     .badRequest()
                     .body(new Message<>(MessageConstants.AUTHORIZED));
@@ -66,7 +66,7 @@ public class OAuthController {
             if (user != null) {
                 userDao.updateUserVk(user, accessToken);
             } else {
-                user = userDao.createUserVk(accessToken);
+                user = userDao.createUserVk(userId, accessToken);
             }
             UserActor userActor = new UserActor(userAuthResponse.getUserId(), userAuthResponse.getAccessToken());
             List<UserXtrCounters> users = vkApiClient.users().get(userActor).userIds(userId.toString()).execute();

@@ -28,7 +28,7 @@ public class UserDao {
         this.em = em;
     }
 
-    public User createUserVk(String token) {
+    public User createUserVk(Integer userId, String token) {
         String pattern = "Player";
         long count = 0;
         String username;
@@ -37,6 +37,7 @@ public class UserDao {
             if (!hasUsername(username)) {
                 User user = new User();
                 user.setUsername(username);
+                user.setVkId(userId);
                 em.persist(user);
                 return user;
             }
