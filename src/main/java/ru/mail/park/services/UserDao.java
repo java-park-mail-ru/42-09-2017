@@ -163,7 +163,7 @@ public class UserDao {
 
     public User findUserVkById(Integer id) {
         try {
-            return em.createQuery("select u from User as u where lower(vk_id)=lower(:id)", User.class)
+            return em.createQuery("select u from User as u where vk_id = :id", User.class)
                     .setParameter("id", id)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -173,7 +173,7 @@ public class UserDao {
 
     public User findUserVkByToken(String token) {
         try {
-            return em.createQuery("select u from User as u where lower(vk_token)=lower(:token)", User.class)
+            return em.createQuery("select u from User as u where vk_token = :token", User.class)
                     .setParameter("token", token)
                     .getSingleResult();
         } catch (NoResultException e) {
