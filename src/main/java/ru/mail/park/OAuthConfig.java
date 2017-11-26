@@ -38,7 +38,7 @@ public class OAuthConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     OAuth2ClientContext oauth2ClientContext;
 
-    @RequestMapping({ "/user" })
+    @RequestMapping("/api/oauth/me")
     public Principal user(Principal principal) {
 //        Map<String, String> map = new LinkedHashMap<>();
 //        map.put("name", principal.getName());

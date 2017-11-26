@@ -31,6 +31,4 @@ public class AppConfiguration {
         source.registerCorsConfiguration("/api/game/**", config);
         return new CorsFilter(source);
     }
-
-
 }
