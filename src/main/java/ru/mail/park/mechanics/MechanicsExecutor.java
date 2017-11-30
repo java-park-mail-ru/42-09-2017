@@ -1,4 +1,4 @@
-//package ru.mail.park.mechanics;
+package ru.mail.park.mechanics;//package ru.mail.park.mechanics;
 //
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
