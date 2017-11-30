@@ -199,12 +199,13 @@ public class UserDaoTest {
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(
-                                new UserSigninInfo(userDto.getUsername(), "wrongpass"))))
+                                new UserSigninInfo(userDto.getEmail(), "wrongpass"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message")
                         .value(MessageConstants.PASSWORD_WRONG));
 
         verify(userDao).findUserByUsername(anyString());
+        verify(userDao).findUserByEmail(anyString());
         verify(userDao).checkUserPassword(any(User.class), anyString());
     }
 
