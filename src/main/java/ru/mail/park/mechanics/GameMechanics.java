@@ -39,6 +39,7 @@ public class GameMechanics {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
 
     private Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
+    private Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
     private Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
     private Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
@@ -87,12 +88,14 @@ public class GameMechanics {
                         .remove(userId);
             }
         }
-        if (gameDao.getMetaOf(board.getId()) == null) {
+        BoardMeta meta = gameDao.getMetaOf(board.getId());
+        if (meta == null) {
             LOGGER.error("Subscribed on bad board. Closing session");
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
             return;
         }
         boardUserMap.putIfAbsent(board, new LinkedHashSet<>());
+        boardCapacityMap.putIfAbsent(board, meta.getPlayers());
         boardUserMap.get(board)
                 .add(userId);
         userBoardMap.put(userId, board);
@@ -193,8 +196,7 @@ public class GameMechanics {
 
     public void tryJoinGame() {
         boardUserMap.forEach((boardId, waiters) -> {
-            BoardMeta meta = gameDao.getMetaOf(boardId.getId());
-            int players = meta.getPlayers();
+            int players = boardCapacityMap.get(boardId);
             Set<Id<User>> matchedPlayers;
             while (waiters.size() / players > 0) {
                 matchedPlayers = matchPlayers(waiters, players);
@@ -280,7 +282,8 @@ public class GameMechanics {
         );
         Id<Board> toRemove = userBoardMap.remove(userId);
         if (toRemove != null) {
-            boardUserMap.remove(toRemove);
+            boardUserMap.get(toRemove)
+                    .remove(userId);
         }
     }
 }
