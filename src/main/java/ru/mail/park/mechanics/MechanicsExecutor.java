@@ -14,11 +14,13 @@ import static ru.mail.park.info.constants.Constants.TICK;
 @Service
 public class MechanicsExecutor implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MechanicsExecutor.class);
-
+    private final GameMechanics gameMechanics;
     private final Executor tickExecutor = Executors.newSingleThreadExecutor();
 
-    public MechanicsExecutor() {
-
+    public MechanicsExecutor(
+            GameMechanics gameMechanics
+    ) {
+        this.gameMechanics = gameMechanics;
     }
 
     @PostConstruct
@@ -37,7 +39,7 @@ public class MechanicsExecutor implements Runnable {
         long sleepTime;
 
         while (true) {
-
+            gameMechanics.gameStep();
 
             afterTime = System.nanoTime();
             sleepTime = Math.max(0, TICK - (afterTime - beforeTime) / MICRO_SECOND);
@@ -46,6 +48,7 @@ public class MechanicsExecutor implements Runnable {
             } catch (InterruptedException e) {
                 LOGGER.warn("Thread is interrupted");
             }
+            beforeTime = System.nanoTime();
         }
     }
 }

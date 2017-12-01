@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.body.BodyData;
-import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -106,7 +106,12 @@ public class GameSessionService {
     }
 
     public void setReadyForPlayer(Id<User> userId) {
-        playerMap.get(userId).setReady(true);
+        Player player = playerMap.get(userId);
+        if (player == null) {
+            LOGGER.warn("Can't set ready for player");
+            return;
+        }
+        player.setReady(true);
     }
 
     public void setReadyForSession(Id<User> userId) {
@@ -118,24 +123,21 @@ public class GameSessionService {
         session.setState(GameState.READY);
     }
 
-    public void finishGame(Id<User> first, Id<User> second) {
-        gameSessionMap.remove(first);
-        playerMap.remove(first);
-        try {
-            gameSessionMap.remove(second);
-            playerMap.remove(second);
-        } catch (NullPointerException e) {
-            LOGGER.warn("Session removed only for first player, because it's single player");
+    public void setFinishedForPlayer(Id<User> userId) {
+        Player player = playerMap.get(userId);
+        if (player == null) {
+            LOGGER.warn("Can't set finished for player");
+            return;
         }
+        player.setFinished();
     }
 
     public void removeSessionFor(Id<User> userId) {
-        GameSession gameSession = gameSessionMap.get(userId);
+        GameSession gameSession = gameSessionMap.remove(userId);
+        playerMap.remove(userId);
         if (gameSession == null) {
             return;
         }
-        gameSessionMap.remove(userId);
-        playerMap.remove(userId);
         if (gameSession.getPlayers().stream().noneMatch(id -> gameSessionMap.containsKey(id))) {
             sessions.remove(gameSession);
             worldRunnerService.removeWorldRunnerFor(gameSession);

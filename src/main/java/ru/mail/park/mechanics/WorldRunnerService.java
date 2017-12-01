@@ -6,10 +6,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import ru.mail.park.domain.Id;
-import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.mechanics.objects.BodyFrame;
@@ -19,12 +16,9 @@ import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
 import ru.mail.park.websocket.message.from.SnapMessage;
-import ru.mail.park.websocket.message.to.StartedMessage;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.mail.park.info.constants.Constants.*;
@@ -33,17 +27,10 @@ import static ru.mail.park.info.constants.Constants.*;
 public class WorldRunnerService {
     private Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
 
-    private final RemotePointService remotePointService;
-    private final GameSessionService gameSessionService;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunnerService.class);
 
-    public WorldRunnerService(
-            RemotePointService remotePointService,
-            @Lazy GameSessionService gameSessionService
-    ) {
-        this.remotePointService = remotePointService;
-        this.gameSessionService = gameSessionService;
+    public WorldRunnerService() {
+
     }
 
     public WorldRunner getWorldRunnerFor(GameSession gameSession) {
@@ -61,9 +48,8 @@ public class WorldRunnerService {
         gameSession.setState(GameState.HANDLING);
     }
 
-    public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
-        GameSession gameSession = gameSessionService.getSessionFor(userId);
-        WorldRunner worldRunner = worldRunnerMap.get(gameSession);
+    public boolean handleSnap(GameSession session, SnapMessage snap) throws NullPointerException {
+        WorldRunner worldRunner = worldRunnerMap.get(session);
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
         long serverFrames = worldRunner.getFrames();
@@ -89,13 +75,7 @@ public class WorldRunnerService {
                 bodyFrame.setAngle(serverAngle);
             }
         }
-        if (cheat) {
-            try {
-                remotePointService.sendMessageTo(userId, snap);
-            } catch (IOException e) {
-                LOGGER.error("Can't send difference snap");
-            }
-        }
+        return cheat;
     }
 
     public void initWorld(GameSession gameSession, BoardRequest.Data board) {

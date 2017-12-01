@@ -15,6 +15,7 @@ import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.from.MovingMessage;
+import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.to.BoardMessage;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 import ru.mail.park.websocket.message.to.StartedMessage;
@@ -66,9 +67,8 @@ public class GameMechanics {
                 }
             }
         }
-
+        tryStartSimulation();
         tryJoinGame();
-
     }
 
     public void addWaiter(Id<User> userId, Id<Board> board) {
@@ -100,15 +100,16 @@ public class GameMechanics {
     }
 
     private void addBoardMessageTask(Set<Id<User>> players) {
-        long id = 1;
         BoardMessage message = new BoardMessage();
+        final long[] id = {1};
         players.forEach(player -> tasks.add(() -> {
             try {
-                message.setPlayerID(id);
+                message.setPlayerID(id[0]);
                 remotePointService.sendMessageTo(player, message);
                 gameSessionService.setMovingForSession(player);
+                id[0]++;
             } catch (IOException e) {
-                LOGGER.warn("Can't send board message to player " + id);
+                LOGGER.warn("Can't send board message to player " + id[0]);
             }
 
         }));
@@ -141,20 +142,45 @@ public class GameMechanics {
                 }));
     }
 
+    private void addSnapMessageTask(Id<User> userId, SnapMessage message) {
+        tasks.add(() -> {
+            try {
+                remotePointService.sendMessageTo(userId, message);
+            } catch (IOException e) {
+                LOGGER.error("Can't send difference snap");
+            }
+        });
+    }
+
+    // ToDo: 01.12.17  Try second way: checking all finished players in gmStep() with tryFinishGame()
+    private void addFinishedMessageTask(Id<User> userId, long score) {
+        FinishedMessage message = new FinishedMessage(score);
+        tasks.add(() -> {
+            try {
+                remotePointService.sendMessageTo(userId, message);
+            } catch (IOException e) {
+                LOGGER.error("Can't send finish message");
+            }
+            removeWaiter(userId);
+            gameSessionService.removeSessionFor(userId);
+            remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
+        });
+    }
+
     private Set<Id<User>> matchPlayers(Set<Id<User>> waiters, int players) {
         Set<Id<User>> matchedPlayers = new LinkedHashSet<>();
         Iterator<Id<User>> waitersIterator = waiters.iterator();
-        int i = 0;
-        while (i < players && waitersIterator.hasNext()) {
+        int count = 0;
+        while (count < players && waitersIterator.hasNext()) {
             Id<User> waiter = waitersIterator.next();
             if (!checkCandidate(waiter)) {
                 waitersIterator.remove();
                 continue;
             }
             matchedPlayers.add(waiter);
-            i++;
+            count++;
         }
-        if (i < players) {
+        if (count < players) {
             return null;
         }
         waiters.removeAll(matchedPlayers);
@@ -163,7 +189,7 @@ public class GameMechanics {
     }
 
     public void tryJoinGame() {
-        LOGGER.warn("Trying to start the game");
+        LOGGER.warn("Trying to join the game");
 
         boardUserMap.forEach((boardId, waiters) -> {
             BoardMeta meta = gameDao.getMetaOf(boardId.getId());
@@ -205,6 +231,7 @@ public class GameMechanics {
                     worldRunnerService.runSimulation(session);
                     addStartedMessageTask(session);
                 }));
+        executorService.shutdown();
     }
 
     public void handleMoving(Id<User> userId, BodyFrame snap) {
@@ -219,16 +246,18 @@ public class GameMechanics {
         gameSessionService.prepareSimulation(userId, snap);
     }
 
-    public void handleFinish(Id<User> userId) {
-        try {
-            remotePointService.sendMessageTo(userId, new FinishedMessage(1L));
-        } catch (IOException e) {
-            LOGGER.error("Can't send finish message");
+    public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
+        GameSession session = gameSessionService.getSessionFor(userId);
+        boolean cheat = worldRunnerService.handleSnap(session, snap);
+        if (cheat) {
+            addSnapMessageTask(userId, snap);
         }
+    }
 
-        removeWaiter(userId);
-        gameSessionService.removeSessionFor(userId);
-        remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
+    public void handleFinish(Id<User> userId) {
+        gameSessionService.setFinishedForPlayer(userId);
+        addFinishedMessageTask(userId, 1L);
+
     }
 
     public boolean checkCandidate(Id<User> userId) {
@@ -241,6 +270,9 @@ public class GameMechanics {
         LOGGER.warn("Removing board waiter with username %s",
                 userDao.findUserById(userId.getId()).getUsername()
         );
-        boardUserMap.remove(userId);
+        Id<Board> toRemove = userBoardMap.remove(userId);
+        if (toRemove != null) {
+            boardUserMap.remove(toRemove);
+        }
     }
 }
