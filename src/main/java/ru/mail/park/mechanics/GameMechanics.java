@@ -78,7 +78,7 @@ public class GameMechanics {
         }
         Id<Board> found = userBoardMap.get(userId);
         if (found != null) {
-            if (found == board) {
+            if (found.equals(board)) {
                 LOGGER.warn("Already subscribed on this board");
                 return;
             } else {
@@ -196,7 +196,7 @@ public class GameMechanics {
             BoardMeta meta = gameDao.getMetaOf(boardId.getId());
             int players = meta.getPlayers();
             Set<Id<User>> matchedPlayers;
-            while (waiters.size() % players > 0) {
+            while (waiters.size() / players > 0) {
                 matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
                     gameSessionService.joinGame(boardId, matchedPlayers);
