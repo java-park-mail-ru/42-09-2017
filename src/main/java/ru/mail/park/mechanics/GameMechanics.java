@@ -100,9 +100,11 @@ public class GameMechanics {
     }
 
     private void addBoardMessageTask(Set<Id<User>> players) {
+        LOGGER.info("Team is found");
         BoardMessage message = new BoardMessage();
         final long[] id = {1};
         players.forEach(player -> tasks.add(() -> {
+            LOGGER.info("Sending board message");
             try {
                 message.setPlayerID(id[0]);
                 remotePointService.sendMessageTo(player, message);
