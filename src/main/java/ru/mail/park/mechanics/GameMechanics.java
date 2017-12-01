@@ -121,6 +121,7 @@ public class GameMechanics {
         players.stream()
                 .filter(id -> !from.equals(id))
                 .forEach(id -> tasks.add(() -> {
+                    LOGGER.info("Sending moving message from " + userDao.findUserById(from.getId()).getUsername());
                     try {
                         remotePointService.sendMessageTo(id, message);
                     } catch (IOException e) {
@@ -189,8 +190,6 @@ public class GameMechanics {
     }
 
     public void tryJoinGame() {
-        LOGGER.warn("Trying to join the game");
-
         boardUserMap.forEach((boardId, waiters) -> {
             BoardMeta meta = gameDao.getMetaOf(boardId.getId());
             int players = meta.getPlayers();
@@ -206,7 +205,6 @@ public class GameMechanics {
     }
 
     public void tryStartSimulation() {
-        LOGGER.info("Trying to start simulation");
         ExecutorService executorService = Executors.newFixedThreadPool(POOL_SIZE);
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isReady)
@@ -235,6 +233,7 @@ public class GameMechanics {
     }
 
     public void handleMoving(Id<User> userId, BodyFrame snap) {
+        LOGGER.info("Handle moving");
         if (!gameSessionService.isPlaying(userId)) {
             LOGGER.warn("I will not send snapshot because you are not playing");
             return;
@@ -243,10 +242,12 @@ public class GameMechanics {
     }
 
     public void handleStart(Id<User> userId, List<BodyFrame> snap) {
+        LOGGER.info("Handle start");
         gameSessionService.prepareSimulation(userId, snap);
     }
 
     public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
+        LOGGER.info("Handle snap");
         GameSession session = gameSessionService.getSessionFor(userId);
         boolean cheat = worldRunnerService.handleSnap(session, snap);
         if (cheat) {
@@ -255,6 +256,7 @@ public class GameMechanics {
     }
 
     public void handleFinish(Id<User> userId) {
+        LOGGER.info("Handle finish");
         gameSessionService.setFinishedForPlayer(userId);
         addFinishedMessageTask(userId, 1L);
 
