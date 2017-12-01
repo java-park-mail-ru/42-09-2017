@@ -236,8 +236,9 @@ public class GameMechanics {
 
     public void handleMoving(Id<User> userId, BodyFrame snap) {
         LOGGER.info("Handle moving");
-        if (!gameSessionService.isPlaying(userId)) {
-            LOGGER.warn("I will not send snapshot because you are not playing");
+        if (!gameSessionService.isPlaying(userId) || !gameSessionService.isMovingState(userId)) {
+            LOGGER.warn("I will not send snapshot because you are not playing "
+                    + "or session is not in Moving state");
             return;
         }
         addMovingMessageTask(userId, snap);
@@ -251,6 +252,9 @@ public class GameMechanics {
     public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
         LOGGER.info("Handle snap");
         GameSession session = gameSessionService.getSessionFor(userId);
+        if (session == null) {
+            LOGGER.error("Can't handle snap. Session is null");
+        }
         boolean cheat = worldRunnerService.handleSnap(session, snap);
         if (cheat) {
             addSnapMessageTask(userId, snap);

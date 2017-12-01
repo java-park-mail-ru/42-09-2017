@@ -46,6 +46,14 @@ public class GameSessionService {
         return sessions;
     }
 
+    public boolean isMovingState(Id<User> userId) {
+        GameSession session = getSessionFor(userId);
+        if (session == null) {
+            return false;
+        }
+        return session.getState() == GameState.MOVING;
+    }
+
     public boolean isPlaying(Id<User> userId) {
         return gameSessionMap.containsKey(userId);
     }
