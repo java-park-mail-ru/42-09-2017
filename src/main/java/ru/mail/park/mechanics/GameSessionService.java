@@ -13,19 +13,15 @@ import ru.mail.park.mechanics.objects.body.BodyData;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
-import ru.mail.park.websocket.message.to.BoardMessage;
-import ru.mail.park.websocket.message.from.MovingMessage;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class GameSessionService {
     private Map<Id<User>, GameSession> gameSessionMap = new ConcurrentHashMap<>();
     private Map<Id<User>, Player> playerMap = new ConcurrentHashMap<>();
+    private Set<GameSession> sessions = new LinkedHashSet<>();
     private final GameDao gameDao;
     private final UserDao userDao;
     private final RemotePointService remotePointService;
@@ -46,76 +42,80 @@ public class GameSessionService {
         this.worldRunnerService = worldRunnerService;
     }
 
+    public Set<GameSession> getSessions() {
+        return sessions;
+    }
+
     public boolean isPlaying(Id<User> userId) {
         return gameSessionMap.containsKey(userId);
     }
 
     public boolean isSimulationStartedFor(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
-        return gameSession == null || gameSession.isSimulating();
+        return gameSession == null || gameSession.getState() == GameState.SIMULATION;
+    }
+
+    public boolean isTeamReady(GameSession session) {
+        return session.getPlayers().stream()
+                .allMatch(id -> playerMap.get(id).isReady());
     }
 
     public boolean isTeamReady(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
-        long notReadyCount = gameSession.getPlayers().stream()
-                .filter(id -> !playerMap.get(id).isReady())
-                .count();
-        return notReadyCount == 0;
+        return isTeamReady(gameSession);
     }
 
     public GameSession getSessionFor(Id<User> userId) {
         return gameSessionMap.get(userId);
     }
 
-    public void startSimulation(GameSession gameSession) {
-        BoardRequest.Data board = gameDao.getBoard(gameSession.getBoardId().getId());
-        Map<Long, GBody> bodiesMap = new HashMap<>();
-        board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
-        LOGGER.info("Bodies: " + bodiesMap.size());
-        Map<Id<User>, List<BodyFrame>> initSnapsMap = gameSession.getInitSnapsMap();
-        LOGGER.info("Init snaps map size: " + initSnapsMap.size());
-        for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
-            LOGGER.info("   value size: " + initSnap.getValue().size());
-            initSnap.getValue().forEach(bodyFrame -> {
-                LOGGER.info("   body frame id: " + bodyFrame.getId());
-                BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
-                bodyData.setPosition(bodyFrame.getPosition());
-                bodyData.setAngle(bodyFrame.getAngle());
-            });
+    public void prepareSimulation(Id<User> userId, List<BodyFrame> snap) {
+        LOGGER.warn("Trying to start simulation");
+        if (!isPlaying(userId)) {
+            LOGGER.error("Should start game before simulation");
+            return;
         }
-        worldRunnerService.initWorld(gameSession, board.getBodies(), board.getJoints());
-        worldRunnerService.runSimulation(gameSession);
-    }
-
-    public void startGame(Id<User> first, Id<User> second, Id<Board> boardId) {
-        GameSession gameSession = new GameSession(first, second, boardId);
-        gameSessionMap.put(first, gameSession);
-        playerMap.put(first, new Player(userDao.findUserById(first.getId())));
-        BoardMessage boardMessage = new BoardMessage();
-        try {
-            remotePointService.sendMessageTo(first, boardMessage);
-        } catch (IOException ignore) {
-            LOGGER.warn("Can't send message to first player with nickname "
-                    + userDao.findUserById(first.getId()).getUsername()
-            );
+        if (isSimulationStartedFor(userId)) {
+            LOGGER.error("Already in simulation");
+            return;
         }
-
-        if (second != null) {
-            gameSessionMap.put(second, gameSession);
-            playerMap.put(second, new Player(userDao.findUserById(second.getId())));
-            try {
-                boardMessage.setPlayerID(2L);
-                remotePointService.sendMessageTo(second, boardMessage);
-            } catch (IOException e) {
-                LOGGER.warn("Can't send message to second player with nickname "
-                        + userDao.findUserById(second.getId()).getUsername()
-                );
-            }
+        setReadyForPlayer(userId);
+        getSessionFor(userId)
+                .putSnapFor(userId, snap);
+        if (isTeamReady(userId)) {
+            setReadyForSession(userId);
         }
     }
 
-    public void setReady(Id<User> userId) {
+    public void joinGame(Id<Board> boardId, Set<Id<User>> players) {
+        GameSession gameSession = new GameSession(boardId, players);
+        players.forEach(player -> {
+            gameSessionMap.put(player, gameSession);
+            playerMap.put(player, new Player(userDao.findUserById(player.getId())));
+        });
+        sessions.add(gameSession);
+    }
+
+    public void setMovingForSession(Id<User> userId) {
+        GameSession session = getSessionFor(userId);
+        if (session == null || session.getState() == GameState.MOVING) {
+            LOGGER.warn("Session is null or already in Moving state");
+            return;
+        }
+        session.setState(GameState.MOVING);
+    }
+
+    public void setReadyForPlayer(Id<User> userId) {
         playerMap.get(userId).setReady(true);
+    }
+
+    public void setReadyForSession(Id<User> userId) {
+        GameSession session = getSessionFor(userId);
+        if (session == null || session.getState() == GameState.READY) {
+            LOGGER.warn("Session is null or already in Ready state");
+            return;
+        }
+        session.setState(GameState.READY);
     }
 
     public void finishGame(Id<User> first, Id<User> second) {
@@ -136,6 +136,10 @@ public class GameSessionService {
         }
         gameSessionMap.remove(userId);
         playerMap.remove(userId);
+        if (gameSession.getPlayers().stream().noneMatch(id -> gameSessionMap.containsKey(id))) {
+            sessions.remove(gameSession);
+            worldRunnerService.removeWorldRunnerFor(gameSession);
+        }
     }
 
     public void removeSessionForTeam(Id<User> userId) {
@@ -151,27 +155,15 @@ public class GameSessionService {
             gameSessionMap.remove(user);
             playerMap.remove(user);
         }
+        sessions.remove(gameSession);
         worldRunnerService.removeWorldRunnerFor(gameSession);
     }
 
-    public void sendSnapFrom(Id<User> userId, BodyFrame snap) {
-        LOGGER.info("Trying to send snapshot from "
-                + userDao.findUserById(userId.getId()).getUsername()
-        );
-        if (!isPlaying(userId)) {
-            LOGGER.warn("I will not send snapshot because you are not playing");
-            return;
-        }
+    public Set<Id<User>> getTeamOf(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
-        gameSession.getPlayers().stream()
-                .filter(id -> !userId.equals(id))
-                .forEach(id -> {
-                    try {
-                        remotePointService.sendMessageTo(id, new MovingMessage(snap));
-                    } catch (IOException e) {
-                        LOGGER.error("Can't send moving snap");
-                    }
-                });
-
+        if (gameSession == null) {
+            return null;
+        }
+        return gameSession.getPlayers();
     }
 }

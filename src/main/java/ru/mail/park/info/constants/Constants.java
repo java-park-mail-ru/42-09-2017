@@ -11,12 +11,18 @@ public class Constants {
 
     public static final int MAPS_ON_PAGE = 10;
 
+    /* Vk OAUTH */
     public static final int CLIENT_ID = 6206034;
     public static final String CLIENT_SECRET = "MIyVHEJs0GudeiNPRNfB";
     public static final String REDIRECT_URI = "https://physicsio.tech/backend/api/oauth/vk";
 
+    /* Game Mechanics*/
     public static final int TICK = 33;
-    // Box2d constants
+
+    /* Multi Threading*/
+    public static final int POOL_SIZE = 4;
+
+    /* Box2d constants */
     public static final long TIMEOUT = 30L;
     public static final float GRAVITY_X = 0f;
     public static final float GRAVITY_Y = -10f;

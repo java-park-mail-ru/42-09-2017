@@ -30,7 +30,7 @@ public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
 
     @Override
     public void handle(SubscribeMessage message, Id<User> userId) throws Exception {
-//        gameMechanics.tryStartGame(userId, message.getBoard());
+//        gameMechanics.tryJoinGame(userId, message.getBoard());
         gameMechanics.addWaiter(userId, message.getBoard());
     }
 }

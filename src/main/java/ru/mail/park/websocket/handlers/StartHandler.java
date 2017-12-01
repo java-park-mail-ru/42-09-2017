@@ -31,6 +31,6 @@ public class StartHandler extends MessageHandler<StartMessage> {
 
     @Override
     public void handle(StartMessage message, Id<User> userId) throws Exception {
-        gameMechanics.tryStartSimulation(userId, message.getBodies());
+        gameMechanics.handleStart(userId, message.getBodies());
     }
 }

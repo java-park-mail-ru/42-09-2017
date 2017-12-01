@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.mechanics.objects.body.BodyData;
@@ -55,17 +56,9 @@ public class WorldRunnerService {
 
     public void runSimulation(GameSession gameSession) {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
-        gameSession.setSimulating(true);
+        gameSession.setState(GameState.SIMULATION);
         worldRunner.run();
-        gameSession.getPlayers().stream()
-                .filter(Objects::nonNull)
-                .forEach(id -> {
-                    try {
-                        remotePointService.sendMessageTo(id, new StartedMessage());
-                    } catch (IOException e) {
-                        LOGGER.warn("Error with sending started message");
-                    }
-                });
+        gameSession.setState(GameState.HANDLING);
     }
 
     public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
@@ -105,13 +98,15 @@ public class WorldRunnerService {
         }
     }
 
-    public void initWorld(GameSession gameSession, List<GBody> bodies, List<GJoint> joints) {
+    public void initWorld(GameSession gameSession, BoardRequest.Data board) {
         LOGGER.info("World initialization started");
         World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
         Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
         Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
         Map<Long, Map<Long, BodyFrame>> diffsPerFrame = new ConcurrentHashMap<>();
 
+        List<GBody> bodies = board.getBodies();
+        List<GJoint> joints = board.getJoints();
         for (GBody gbody : bodies) {
             BodyDef bodyDef = new BodyDef();
             bodyDef.type = BodyType.values()[gbody.getData().getType()];
