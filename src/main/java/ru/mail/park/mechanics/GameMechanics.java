@@ -299,9 +299,7 @@ public class GameMechanics {
     }
 
     public void removeWaiter(Id<User> userId) {
-        LOGGER.warn("Removing board waiter with username %s",
-                userDao.findUserById(userId.getId()).getUsername()
-        );
+        LOGGER.warn("Removing board waiter");
         Id<Board> toRemove = userBoardMap.remove(userId);
         if (toRemove != null) {
             boardUserMap.get(toRemove)
