@@ -81,7 +81,10 @@ public class GameSessionService {
             return false;
         }
         return session.getPlayers().stream()
-                .allMatch(id -> playerMap.get(id).isFinished());
+                .allMatch(id -> {
+                    Player player = playerMap.get(id);
+                    return player == null || player.isFinished();
+                });
     }
 
     public GameSession getSessionFor(Id<User> userId) {
