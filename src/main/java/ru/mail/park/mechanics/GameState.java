@@ -5,6 +5,7 @@ public enum GameState {
     MOVING,
     READY,
     SIMULATION,
+    SIMULATED,
     HANDLING,
     FINISHED
 }

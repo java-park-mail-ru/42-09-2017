@@ -43,9 +43,8 @@ public class WorldRunnerService {
 
     public void runSimulation(GameSession gameSession) {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
-        gameSession.setState(GameState.SIMULATION);
         worldRunner.run();
-        gameSession.setState(GameState.HANDLING);
+        gameSession.setState(GameState.SIMULATED);
     }
 
     public boolean handleSnap(GameSession session, SnapMessage snap) throws NullPointerException {

@@ -30,4 +30,8 @@ public class Player {
     public void setFinished() {
         this.finished = true;
     }
+
+    public boolean isFinished() {
+        return finished;
+    }
 }

@@ -11,10 +11,7 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -69,8 +66,22 @@ public class GameSessionService {
     }
 
     public boolean isTeamReady(Id<User> userId) {
-        GameSession gameSession = gameSessionMap.get(userId);
-        return isTeamReady(gameSession);
+        GameSession session = gameSessionMap.get(userId);
+        if (session == null) {
+            LOGGER.error("isTeamReady() - session is null");
+            return false;
+        }
+        return isTeamReady(session);
+    }
+
+    public boolean isTeamFinished(Id<User> userId) {
+        GameSession session = gameSessionMap.get(userId);
+        if (session == null) {
+            LOGGER.error("isTeamFinished() - session is null");
+            return false;
+        }
+        return session.getPlayers().stream()
+                .allMatch(id -> playerMap.get(id).isFinished());
     }
 
     public GameSession getSessionFor(Id<User> userId) {
@@ -140,33 +151,38 @@ public class GameSessionService {
         player.setFinished();
     }
 
-    public void removeSessionFor(Id<User> userId) {
-        GameSession gameSession = gameSessionMap.remove(userId);
-        playerMap.remove(userId);
-        if (gameSession == null) {
+    public void setFinishedForSession(Id<User> userId) {
+        GameSession session = getSessionFor(userId);
+        if (session == null || session.getState() == GameState.FINISHED) {
+            LOGGER.warn("Session is null or already in Finished state");
             return;
         }
-        if (gameSession.getPlayers().stream().noneMatch(id -> gameSessionMap.containsKey(id))) {
-            sessions.remove(gameSession);
-            worldRunnerService.removeWorldRunnerFor(gameSession);
+        session.setState(GameState.FINISHED);
+    }
+
+    public void removeSessionFor(Id<User> userId) {
+        gameSessionMap.remove(userId);
+        playerMap.remove(userId);
+    }
+
+    public void removeSessionForTeam(GameSession session) {
+        if (session == null) {
+            return;
         }
+        session.getPlayers().stream()
+                .filter(Objects::nonNull)
+                .forEach(player -> {
+                    LOGGER.warn("Removing game session for user");
+                    gameSessionMap.remove(player);
+                    playerMap.remove(player);
+                });
+        sessions.remove(session);
+        worldRunnerService.removeWorldRunnerFor(session);
     }
 
     public void removeSessionForTeam(Id<User> userId) {
-        GameSession gameSession = gameSessionMap.get(userId);
-        if (gameSession == null) {
-            return;
-        }
-        for (Id<User> user : gameSession.getPlayers()) {
-            if (user == null) {
-                continue;
-            }
-            LOGGER.warn("Removing game session for user");
-            gameSessionMap.remove(user);
-            playerMap.remove(user);
-        }
-        sessions.remove(gameSession);
-        worldRunnerService.removeWorldRunnerFor(gameSession);
+        GameSession session = gameSessionMap.get(userId);
+        removeSessionForTeam(session);
     }
 
     public Set<Id<User>> getTeamOf(Id<User> userId) {

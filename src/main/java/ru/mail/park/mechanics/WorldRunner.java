@@ -39,10 +39,6 @@ public class WorldRunner implements Runnable {
 
     @Override
     public void run() {
-        long startTime = System.nanoTime();
-        long beforeTime = startTime;
-        long afterTime;
-        long sleepTime;
         long frameNumber = 0;
 
 
@@ -52,7 +48,6 @@ public class WorldRunner implements Runnable {
                 calculation = false;
                 LOGGER.error("Running timeout");
             }
-
             frameNumber++;
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
@@ -74,20 +69,6 @@ public class WorldRunner implements Runnable {
                 });
             }
             world.step(DELTA, VEL_ITER, POS_ITER);
-//            afterTime = System.nanoTime();
-
-//            sleepTime = (SECOND / FPS - (afterTime - beforeTime)) / MICRO_SECOND;
-//            if (sleepTime < 0) {
-//                sleepTime = 0;
-//            }
-//            try {
-//                LOGGER.info(String.valueOf(sleepTime));
-//                Thread.sleep(sleepTime);
-//            } catch (InterruptedException e) {
-//                LOGGER.error("Sleep interrupted");
-//            }
-//
-//            beforeTime = System.nanoTime();
         }
         frames = frameNumber;
     }

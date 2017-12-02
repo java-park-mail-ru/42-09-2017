@@ -8,6 +8,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.info.constants.Constants;
+import ru.mail.park.mechanics.GameMechanics;
 import ru.mail.park.mechanics.GameSessionService;
 import ru.mail.park.mechanics.RemotePointService;
 import ru.mail.park.services.GameDao;
@@ -21,6 +22,7 @@ import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 public class SocketHandler extends TextWebSocketHandler {
     private final UserDao userDao;
     private final GameDao gameDao;
+    private final GameMechanics gameMechanics;
     private final RemotePointService remotePointService;
     private final GameSessionService gameSessionService;
     private final MessageHandlerContainer messageHandlerContainer;
@@ -32,12 +34,14 @@ public class SocketHandler extends TextWebSocketHandler {
     public SocketHandler(
             UserDao userDao,
             GameDao gameDao,
+            GameMechanics gameMechanics,
             RemotePointService remotePointService,
             GameSessionService gameSessionService,
             MessageHandlerContainer messageHandlerContainer
     ) {
         this.userDao = userDao;
         this.gameDao = gameDao;
+        this.gameMechanics = gameMechanics;
         this.remotePointService = remotePointService;
         this.gameSessionService = gameSessionService;
         this.messageHandlerContainer = messageHandlerContainer;
@@ -112,6 +116,7 @@ public class SocketHandler extends TextWebSocketHandler {
     }
 
     private void ensureGameTerminated(Id<User> userId) {
+        gameMechanics.removeWaiter(userId);
         gameSessionService.removeSessionForTeam(userId);
         if (remotePointService.isConnected(userId)) {
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);

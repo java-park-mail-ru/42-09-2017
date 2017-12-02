@@ -38,6 +38,8 @@ public class GameMechanics {
     private final WorldRunnerService worldRunnerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(POOL_SIZE);
+
     private Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
     private Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
     private Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
@@ -68,6 +70,8 @@ public class GameMechanics {
                 }
             }
         }
+        tryFinishGame();
+        processFinishedSimulation();
         tryStartSimulation();
         tryJoinGame();
     }
@@ -168,6 +172,7 @@ public class GameMechanics {
                 LOGGER.error("Can't send finish message");
             }
             removeWaiter(userId);
+            // ToDo: 02.12.17  These calls can be removed from this method (may be)
             gameSessionService.removeSessionFor(userId);
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
         });
@@ -209,31 +214,46 @@ public class GameMechanics {
     }
 
     public void tryStartSimulation() {
-        ExecutorService executorService = Executors.newFixedThreadPool(POOL_SIZE);
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isReady)
-                .forEach(session -> executorService.submit(() -> {
-                    LOGGER.warn("Starting simulation in new thread");
-                    BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
-                    Map<Long, GBody> bodiesMap = new HashMap<>();
-                    board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
-                    LOGGER.info("Bodies: " + bodiesMap.size());
-                    Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
-                    LOGGER.info("Init snaps map size: " + initSnapsMap.size());
-                    for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
-                        LOGGER.info("   value size: " + initSnap.getValue().size());
-                        initSnap.getValue().forEach(bodyFrame -> {
-                            LOGGER.info("   body frame id: " + bodyFrame.getId());
-                            BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
-                            bodyData.setPosition(bodyFrame.getPosition());
-                            bodyData.setAngle(bodyFrame.getAngle());
-                        });
-                    }
-                    worldRunnerService.initWorld(session, board);
-                    worldRunnerService.runSimulation(session);
-                    addStartedMessageTask(session);
-                }));
-        executorService.shutdown();
+                .forEach(session -> {
+                    session.setState(GameState.SIMULATION);
+                    executorService.submit(() -> {
+                        LOGGER.warn("Starting simulation in new thread");
+                        BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
+                        Map<Long, GBody> bodiesMap = new HashMap<>();
+                        board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
+                        LOGGER.info("Bodies: " + bodiesMap.size());
+                        Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
+                        LOGGER.info("Init snaps map size: " + initSnapsMap.size());
+                        for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
+                            LOGGER.info("   value size: " + initSnap.getValue().size());
+                            initSnap.getValue().forEach(bodyFrame -> {
+                                LOGGER.info("   body frame id: " + bodyFrame.getId());
+                                BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
+                                bodyData.setPosition(bodyFrame.getPosition());
+                                bodyData.setAngle(bodyFrame.getAngle());
+                            });
+                        }
+                        worldRunnerService.initWorld(session, board);
+                        worldRunnerService.runSimulation(session);
+                    });
+                });
+    }
+
+    public void processFinishedSimulation() {
+        gameSessionService.getSessions().stream()
+                .filter(GameSession::isSimulated)
+                .forEach(session -> {
+                    session.setState(GameState.HANDLING);
+                    executorService.submit(() -> addStartedMessageTask(session));
+                });
+    }
+
+    public void tryFinishGame() {
+        gameSessionService.getSessions().stream()
+                .filter(GameSession::isFinished)
+                .forEach(gameSessionService::removeSessionForTeam);
     }
 
     public void handleMoving(Id<User> userId, BodyFrame snap) {
@@ -267,7 +287,9 @@ public class GameMechanics {
         LOGGER.info("Handle finish");
         gameSessionService.setFinishedForPlayer(userId);
         addFinishedMessageTask(userId, 1L);
-
+        if (gameSessionService.isTeamFinished(userId)) {
+            gameSessionService.setFinishedForSession(userId);
+        }
     }
 
     public boolean checkCandidate(Id<User> userId) {

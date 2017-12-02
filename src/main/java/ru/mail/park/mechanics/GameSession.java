@@ -54,6 +54,14 @@ public class GameSession {
         return state == GameState.READY;
     }
 
+    public boolean isSimulated() {
+        return state == GameState.SIMULATED;
+    }
+
+    public boolean isFinished() {
+        return state == GameState.FINISHED;
+    }
+
     public GameState getState() {
         return state;
     }
