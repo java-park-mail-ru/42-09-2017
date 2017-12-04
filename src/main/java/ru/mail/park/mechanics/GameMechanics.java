@@ -195,7 +195,7 @@ public class GameMechanics {
             return null;
         }
         waiters.removeAll(matchedPlayers);
-        waiters.forEach(userBoardMap::remove);
+        matchedPlayers.forEach(userBoardMap::remove);
         return matchedPlayers;
     }
 
