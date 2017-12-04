@@ -63,7 +63,7 @@ public class WorldRunnerService {
             BodyFrame serverFrame = serverDiffs.get(frameNumber);
             Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
             Vec2 serverLinVel = new Vec2(serverFrame.getLinVelocity().x, -serverFrame.getLinVelocity().y);
-            float serverAngVel = serverFrame.getAngVelocity();
+            float serverAngVel = -serverFrame.getAngVelocity();
             float serverAngle = -serverFrame.getAngle();
             Vec2 posDiff = serverPos.sub(bodyFrame.getPosition());
             if (Math.max(posDiff.x, posDiff.y) > ALLOWED_POS_DELTA) {
