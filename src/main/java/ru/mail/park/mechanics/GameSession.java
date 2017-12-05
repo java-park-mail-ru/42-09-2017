@@ -50,6 +50,14 @@ public class GameSession {
         this.players = players;
     }
 
+    public void removePlayer(Id<User> userId) {
+        players.remove(userId);
+    }
+
+    public boolean isMoving() {
+        return state == GameState.MOVING;
+    }
+
     public boolean isReady() {
         return state == GameState.READY;
     }

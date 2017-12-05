@@ -96,7 +96,7 @@ public class SocketHandler extends TextWebSocketHandler {
         if (id == null) {
             return;
         }
-        ensureGameTerminated(Id.of(id));
+        gameMechanics.userDisconnected(Id.of(id));
         LOGGER.warn("CLOSED");
     }
 
@@ -112,14 +112,6 @@ public class SocketHandler extends TextWebSocketHandler {
             LOGGER.error("Connection is closed");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void ensureGameTerminated(Id<User> userId) {
-        gameMechanics.removeWaiter(userId);
-        gameSessionService.removeSessionForTeam(userId);
-        if (remotePointService.isConnected(userId)) {
-            remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
         }
     }
 }

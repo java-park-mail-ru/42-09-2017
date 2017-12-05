@@ -33,4 +33,8 @@ public class MessageConstants {
     public static final String BOARD_EXISTS = "BOARD_ALREADY_EXISTS";
 
     public static final String TYPE_OUT_OF_BOUNDS = "TYPE_OUT_OF_BOUNDS";
+
+    public static final String TIMEOUT = "TIMEOUT";
+    public static final String SUCCESS = "SUCCESS";
+    public static final String GAME_ERROR = "ERROR";
 }

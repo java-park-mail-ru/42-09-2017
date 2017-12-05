@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
@@ -97,7 +98,7 @@ public class GameSessionService {
             LOGGER.error("Should start game before simulation");
             return;
         }
-        if (isSimulationStartedFor(userId)) {
+        if (!isMovingState(userId)) {
             LOGGER.error("Already in simulation");
             return;
         }
@@ -164,21 +165,18 @@ public class GameSessionService {
     }
 
     public void removeSessionFor(Id<User> userId) {
-        gameSessionMap.remove(userId);
+        GameSession session = gameSessionMap.remove(userId);
+        if (session != null) {
+            session.removePlayer(userId);
+        }
         playerMap.remove(userId);
+        remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
     }
 
     public void removeSessionForTeam(GameSession session) {
         if (session == null) {
             return;
         }
-        session.getPlayers().stream()
-                .filter(Objects::nonNull)
-                .forEach(player -> {
-                    LOGGER.warn("Removing game session for user");
-                    gameSessionMap.remove(player);
-                    playerMap.remove(player);
-                });
         sessions.remove(session);
         worldRunnerService.removeWorldRunnerFor(session);
     }

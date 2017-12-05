@@ -33,7 +33,7 @@ public class Constants {
     public static final int MICRO_SECOND = 1000000;
     public static final int FPS = 60;
 
-    public static final float ALLOWED_POS_DELTA = 0.05f;
+    public static final float ALLOWED_POS_DELTA = 0.1f;
     public static final float ALLOWED_VEL_DELTA = 0.05f;
     public static final float ALLOWED_ANGLE_DELTA = 0.05f;
 }

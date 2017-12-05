@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ru.mail.park.info.constants.Constants.POOL_SIZE;
+import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
+import static ru.mail.park.info.constants.MessageConstants.SUCCESS;
 
 @Service
 public class GameMechanics {
@@ -163,8 +165,7 @@ public class GameMechanics {
     }
 
     // ToDo: 01.12.17  Try second way: checking all finished players in gmStep() with tryFinishGame()
-    private void addFinishedMessageTask(Id<User> userId, long score) {
-        FinishedMessage message = new FinishedMessage(score);
+    private void addFinishedMessageTask(Id<User> userId, FinishedMessage message) {
         tasks.add(() -> {
             try {
                 remotePointService.sendMessageTo(userId, message);
@@ -174,7 +175,6 @@ public class GameMechanics {
             removeWaiter(userId);
             // ToDo: 02.12.17  These calls can be removed from this method (may be)
             gameSessionService.removeSessionFor(userId);
-            remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
         });
     }
 
@@ -199,7 +199,7 @@ public class GameMechanics {
         return matchedPlayers;
     }
 
-    public void tryJoinGame() {
+    private void tryJoinGame() {
         boardUserMap.forEach((boardId, waiters) -> {
             int players = boardCapacityMap.get(boardId);
             Set<Id<User>> matchedPlayers;
@@ -213,7 +213,7 @@ public class GameMechanics {
         });
     }
 
-    public void tryStartSimulation() {
+    private void tryStartSimulation() {
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isReady)
                 .forEach(session -> {
@@ -241,7 +241,7 @@ public class GameMechanics {
                 });
     }
 
-    public void processFinishedSimulation() {
+    private void processFinishedSimulation() {
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isSimulated)
                 .forEach(session -> {
@@ -250,7 +250,7 @@ public class GameMechanics {
                 });
     }
 
-    public void tryFinishGame() {
+    private void tryFinishGame() {
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isFinished)
                 .forEach(gameSessionService::removeSessionForTeam);
@@ -286,24 +286,40 @@ public class GameMechanics {
     public void handleFinish(Id<User> userId) {
         LOGGER.info("Handle finish");
         gameSessionService.setFinishedForPlayer(userId);
-        addFinishedMessageTask(userId, 1L);
+        addFinishedMessageTask(userId, new FinishedMessage(1L, SUCCESS));
         if (gameSessionService.isTeamFinished(userId)) {
             gameSessionService.setFinishedForSession(userId);
         }
     }
 
-    public boolean checkCandidate(Id<User> userId) {
+    private boolean checkCandidate(Id<User> userId) {
         return remotePointService.isConnected(userId)
                 && !gameSessionService.isPlaying(userId)
                 && userDao.findUserById(userId.getId()) != null;
     }
 
-    public void removeWaiter(Id<User> userId) {
+    private void removeWaiter(Id<User> userId) {
         LOGGER.warn("Removing board waiter");
         Id<Board> toRemove = userBoardMap.remove(userId);
         if (toRemove != null) {
             boardUserMap.get(toRemove)
                     .remove(userId);
+        }
+    }
+
+    public void userDisconnected(Id<User> userId) {
+        removeWaiter(userId);
+        GameSession session = gameSessionService.getSessionFor(userId);
+        if (session == null) {
+            LOGGER.warn("User disconnected. GameSession was null");
+            return;
+        }
+        if (session.isMoving() || session.isReady()) {
+            FinishedMessage message = new FinishedMessage(0L, GAME_ERROR);
+            session.getPlayers().forEach(player -> addFinishedMessageTask(player, message));
+            gameSessionService.removeSessionForTeam(userId);
+        } else {
+            gameSessionService.removeSessionFor(userId);
         }
     }
 }
