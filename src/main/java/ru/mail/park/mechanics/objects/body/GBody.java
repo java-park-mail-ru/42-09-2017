@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 public class GBody {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long id;
-    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long playerID;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @Valid
