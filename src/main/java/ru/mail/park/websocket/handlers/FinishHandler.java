@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.GameMechanics;
+import ru.mail.park.mechanics.GameMessageHandler;
 import ru.mail.park.websocket.MessageHandlerContainer;
 import ru.mail.park.websocket.message.from.FinishMessage;
 
@@ -12,15 +13,15 @@ import javax.annotation.PostConstruct;
 @Service
 public class FinishHandler extends MessageHandler<FinishMessage> {
     private MessageHandlerContainer messageHandlerContainer;
-    private GameMechanics gameMechanics;
+    private GameMessageHandler gameMessageHandler;
 
     public FinishHandler(
             MessageHandlerContainer messageHandlerContainer,
-            GameMechanics gameMechanics
+            GameMessageHandler gameMessageHandler
     ) {
         super(FinishMessage.class);
         this.messageHandlerContainer = messageHandlerContainer;
-        this.gameMechanics = gameMechanics;
+        this.gameMessageHandler = gameMessageHandler;
     }
 
     @PostConstruct
@@ -30,6 +31,6 @@ public class FinishHandler extends MessageHandler<FinishMessage> {
 
     @Override
     public void handle(FinishMessage message, Id<User> userId) throws Exception {
-        gameMechanics.handleFinish(userId);
+        gameMessageHandler.handleFinish(userId);
     }
 }

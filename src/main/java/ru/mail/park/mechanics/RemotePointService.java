@@ -50,13 +50,16 @@ public class RemotePointService {
         }
     }
 
-    public synchronized void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
+    public void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
         WebSocketSession session = checkSessionFor(userId);
-        try {
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
-            LOGGER.info("SENT MESSAGE BY SOCKET");
-        } catch (IOException e) {
-            throw new IOException("Unable to send the message");
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (session) {
+            try {
+                session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
+                LOGGER.info("SENT MESSAGE BY SOCKET");
+            } catch (IOException e) {
+                throw new IOException("Unable to send the message");
+            }
         }
     }
 

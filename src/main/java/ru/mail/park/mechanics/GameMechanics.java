@@ -65,11 +65,13 @@ public class GameMechanics {
         while (!tasks.isEmpty()) {
             final Runnable nextTask = tasks.poll();
             if (nextTask != null) {
-                try {
-                    nextTask.run();
-                } catch (RuntimeException ex) {
-                    LOGGER.error("Can't handle game task", ex);
-                }
+                executorService.submit(() -> {
+                    try {
+                        nextTask.run();
+                    } catch (RuntimeException ex) {
+                        LOGGER.error("Can't handle game task", ex);
+                    }
+                });
             }
         }
         tryFinishGame();
@@ -126,7 +128,7 @@ public class GameMechanics {
         }));
     }
 
-    private void addMovingMessageTask(Id<User> from, BodyFrame snap) {
+    public void addMovingMessageTask(Id<User> from, BodyFrame snap) {
         Set<Id<User>> players = gameSessionService.getTeamOf(from);
         MovingMessage message = new MovingMessage(snap);
         players.stream()
@@ -154,7 +156,7 @@ public class GameMechanics {
                 }));
     }
 
-    private void addSnapMessageTask(Id<User> userId, SnapMessage message) {
+    public void addSnapMessageTask(Id<User> userId, SnapMessage message) {
         tasks.add(() -> {
             try {
                 remotePointService.sendMessageTo(userId, message);
@@ -165,7 +167,7 @@ public class GameMechanics {
     }
 
     // ToDo: 01.12.17  Try second way: checking all finished players in gmStep() with tryFinishGame()
-    private void addFinishedMessageTask(Id<User> userId, FinishedMessage message) {
+    public void addFinishedMessageTask(Id<User> userId, FinishedMessage message) {
         tasks.add(() -> {
             try {
                 remotePointService.sendMessageTo(userId, message);
@@ -254,42 +256,6 @@ public class GameMechanics {
         gameSessionService.getSessions().stream()
                 .filter(GameSession::isFinished)
                 .forEach(gameSessionService::removeSessionForTeam);
-    }
-
-    public void handleMoving(Id<User> userId, BodyFrame snap) {
-        LOGGER.info("Handle moving");
-        if (!gameSessionService.isPlaying(userId) || !gameSessionService.isMovingState(userId)) {
-            LOGGER.warn("I will not send snapshot because you are not playing "
-                    + "or session is not in Moving state");
-            return;
-        }
-        addMovingMessageTask(userId, snap);
-    }
-
-    public void handleStart(Id<User> userId, List<BodyFrame> snap) {
-        LOGGER.info("Handle start");
-        gameSessionService.prepareSimulation(userId, snap);
-    }
-
-    public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
-        LOGGER.info("Handle snap");
-        GameSession session = gameSessionService.getSessionFor(userId);
-        if (session == null) {
-            LOGGER.error("Can't handle snap. Session is null");
-        }
-        boolean cheat = worldRunnerService.handleSnap(session, snap);
-        if (cheat) {
-            addSnapMessageTask(userId, snap);
-        }
-    }
-
-    public void handleFinish(Id<User> userId) {
-        LOGGER.info("Handle finish");
-        gameSessionService.setFinishedForPlayer(userId);
-        addFinishedMessageTask(userId, new FinishedMessage(1L, SUCCESS));
-        if (gameSessionService.isTeamFinished(userId)) {
-            gameSessionService.setFinishedForSession(userId);
-        }
     }
 
     private boolean checkCandidate(Id<User> userId) {
