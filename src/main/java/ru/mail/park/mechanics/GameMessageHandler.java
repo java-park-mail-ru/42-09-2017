@@ -65,8 +65,14 @@ public class GameMessageHandler {
 
     public void handleFinish(Id<User> userId) {
         LOGGER.info("Handle finish");
+        Player player = gameSessionService.getPlayer(userId);
+        if (player.isFinished()) {
+            return;
+        }
         gameSessionService.setFinishedForPlayer(userId);
-        gameMechanics.addFinishedMessageTask(userId, new FinishedMessage(1L, SUCCESS));
+        GameSession session = gameSessionService.getSessionFor(userId);
+        FinishedMessage message = new FinishedMessage(player.getScore(), session.getResult());
+        gameMechanics.addFinishedMessageTask(userId, message);
         if (gameSessionService.isTeamFinished(userId)) {
             gameSessionService.setFinishedForSession(userId);
         }

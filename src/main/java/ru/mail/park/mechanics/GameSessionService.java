@@ -186,6 +186,10 @@ public class GameSessionService {
         removeSessionForTeam(session);
     }
 
+    public Player getPlayer(Id<User> userId) {
+        return playerMap.get(userId);
+    }
+
     public Set<Id<User>> getTeamOf(Id<User> userId) {
         GameSession gameSession = gameSessionMap.get(userId);
         if (gameSession == null) {

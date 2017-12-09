@@ -18,6 +18,7 @@ public class Constants {
 
     /* Game Mechanics*/
     public static final int TICK = 33;
+    public static final int MAX_FRAMES_DELTA = 3;
 
     /* Multi Threading*/
     public static final int POOL_SIZE = 4;

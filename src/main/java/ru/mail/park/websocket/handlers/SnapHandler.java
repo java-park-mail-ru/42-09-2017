@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.exceptions.FramesOutOfBoundException;
 import ru.mail.park.mechanics.GameMechanics;
 import ru.mail.park.mechanics.GameMessageHandler;
 import ru.mail.park.websocket.MessageHandlerContainer;
@@ -38,6 +39,8 @@ public class SnapHandler extends MessageHandler<SnapMessage> {
             gameMessageHandler.handleSnap(userId, message);
         } catch (NullPointerException e) {
             LOGGER.warn("There could appear NullPointerException. But doesn't. LOL");
+        } catch (FramesOutOfBoundException e) {
+            gameMessageHandler.handleFinish(userId);
         }
     }
 }

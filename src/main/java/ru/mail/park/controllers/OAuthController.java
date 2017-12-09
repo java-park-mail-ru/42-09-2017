@@ -6,6 +6,8 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.UserAuthResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,9 @@ import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static ru.mail.park.info.constants.Constants.*;
 
@@ -61,15 +66,19 @@ public class OAuthController {
             OAuthUserDto userDto = new OAuthUserDto();
             userDto.setUserId(userId);
             userDto.setUsername(user.getUsername());
-            return ResponseEntity
-                    .ok(userDto);
+//            return ResponseEntity
+//                    .ok(userDto);
+            HttpHeaders headers = new HttpHeaders();
+            URI redirectURI = new URI("https://physicsio.tech/vk_ok");
+            headers.setLocation(redirectURI);
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (ApiException e) {
             e.printStackTrace();
             LOGGER.error("ApiException");
             return ResponseEntity
                     .badRequest()
                     .body(new Message<>(MessageConstants.VK_API_EXCEPTION));
-        } catch (ClientException e) {
+        } catch (ClientException | URISyntaxException e) {
             e.printStackTrace();
             LOGGER.error("ClientException");
             return ResponseEntity

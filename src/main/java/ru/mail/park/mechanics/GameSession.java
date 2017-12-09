@@ -9,20 +9,23 @@ import ru.mail.park.domain.User;
 import ru.mail.park.mechanics.objects.BodyFrame;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static ru.mail.park.info.constants.Constants.GRAVITY_X;
 import static ru.mail.park.info.constants.Constants.GRAVITY_Y;
+import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 public class GameSession {
     @NotNull
     private Id<Board> boardId;
     @NotEmpty
     private Set<Id<User>> players;
-
     private World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
-
     private GameState state = GameState.NONE;
+    private String result = GAME_ERROR;
 
     private Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
 
@@ -76,6 +79,14 @@ public class GameSession {
 
     public void setState(GameState state) {
         this.state = state;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     public Map<Id<User>, List<BodyFrame>> getInitSnapsMap() {

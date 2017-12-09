@@ -21,6 +21,7 @@ public class WorldRunner implements Runnable {
     private Map<Long, Body> dynamicBodies;
     private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
 
+    private Map<Long, Long> playerScoreMap;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunner.class);
     private final ObjectMapper mapper = new ObjectMapper();
@@ -111,5 +112,10 @@ public class WorldRunner implements Runnable {
 
     public void setDiffsPerFrame(Map<Long, Map<Long, BodyFrame>> diffsPerFrame) {
         this.diffsPerFrame = diffsPerFrame;
+    }
+
+    public void setScore(Long playerId, Long score) {
+        Long oldScore = playerScoreMap.getOrDefault(playerId, 0L);
+        playerScoreMap.put(playerId, oldScore + score);
     }
 }

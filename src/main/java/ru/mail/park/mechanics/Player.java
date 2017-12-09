@@ -6,6 +6,7 @@ public class Player {
     private User user;
     private boolean ready = false;
     private boolean finished = false;
+    private Long score = 0L;
 
     public Player(User user) {
         this.user = user;
@@ -33,5 +34,13 @@ public class Player {
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public Long getScore() {
+        return score;
+    }
+
+    public void setScore(Long score) {
+        this.score = score;
     }
 }

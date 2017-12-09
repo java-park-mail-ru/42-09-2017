@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.exceptions.FramesOutOfBoundException;
 import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.mechanics.objects.body.BodyData;
@@ -54,6 +55,9 @@ public class WorldRunnerService {
         long serverFrames = worldRunner.getFrames();
         LOGGER.info("   client frame: " + frameNumber);
         if (frameNumber > serverFrames) {
+            if (frameNumber - serverFrames > MAX_FRAMES_DELTA) {
+                throw new FramesOutOfBoundException();
+            }
             throw new NullPointerException();
         }
         List<BodyFrame> bodyFrames = snap.getBodies();
@@ -122,6 +126,8 @@ public class WorldRunnerService {
                 default:
                     break;
             }
+
+            body.setUserData(gbody);
 
             for (Fixture fixture = body.getFixtureList(); fixture != null; fixture = fixture.getNext()) {
                 LOGGER.info("   Fixture created with properties: "
