@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.exceptions.FramesOutOfBoundException;
-import ru.mail.park.mechanics.GameMechanics;
 import ru.mail.park.mechanics.GameMessageHandler;
 import ru.mail.park.websocket.MessageHandlerContainer;
 import ru.mail.park.websocket.message.from.SnapMessage;

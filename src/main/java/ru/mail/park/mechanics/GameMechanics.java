@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
 
 import static ru.mail.park.info.constants.Constants.POOL_SIZE;
 import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
-import static ru.mail.park.info.constants.MessageConstants.SUCCESS;
 
 @Service
 public class GameMechanics {

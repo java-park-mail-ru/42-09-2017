@@ -12,8 +12,6 @@ import ru.mail.park.websocket.message.to.FinishedMessage;
 
 import java.util.List;
 
-import static ru.mail.park.info.constants.MessageConstants.SUCCESS;
-
 @Service
 public class GameMessageHandler {
     private final GameMechanics gameMechanics;
