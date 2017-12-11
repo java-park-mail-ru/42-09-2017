@@ -42,7 +42,7 @@ public class OAuthController {
         String accessToken = (String) httpSession.getAttribute(OAUTH_VK_ATTR);
         HttpHeaders headers = new HttpHeaders();
         try {
-            URI redirectURI = new URI("https://physicsio.tech/vk_ok");
+            URI redirectURI = new URI(RESULT_REDIRECT_URI);
             headers.setLocation(redirectURI);
             if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
                 return new ResponseEntity<>(headers, HttpStatus.FOUND);

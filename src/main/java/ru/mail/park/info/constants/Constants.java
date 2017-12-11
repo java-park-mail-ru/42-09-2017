@@ -16,6 +16,8 @@ public class Constants {
     public static final String CLIENT_SECRET = "MIyVHEJs0GudeiNPRNfB";
     public static final String REDIRECT_URI = "https://physicsio.tech/backend/api/oauth/vk";
 
+    public static final String RESULT_REDIRECT_URI = "https://physicsio.tech/online/lobby";
+
     /* Game Mechanics*/
     public static final int TICK = 33;
     public static final int MAX_FRAMES_DELTA = 3;
