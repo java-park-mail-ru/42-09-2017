@@ -63,9 +63,6 @@ public class OAuthController {
             } else {
                 user = userDao.createUserVk(userId, accessToken);
             }
-            OAuthUserDto userDto = new OAuthUserDto();
-            userDto.setUserId(userId);
-            userDto.setUsername(user.getUsername());
             HttpHeaders headers = new HttpHeaders();
             URI redirectURI = new URI("https://physicsio.tech/vk_ok");
             headers.setLocation(redirectURI);

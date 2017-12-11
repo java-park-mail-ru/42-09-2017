@@ -119,7 +119,7 @@ public class UserController {
     @DeleteMapping("logout")
     public ResponseEntity<Message<String>> logout(HttpSession httpSession) {
         if (httpSession.getAttribute(Constants.SESSION_ATTR) == null
-                || httpSession.getAttribute(Constants.OAUTH_VK_ATTR) == null) {
+                && httpSession.getAttribute(Constants.OAUTH_VK_ATTR) == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new Message<>(MessageConstants.UNAUTHORIZED));
