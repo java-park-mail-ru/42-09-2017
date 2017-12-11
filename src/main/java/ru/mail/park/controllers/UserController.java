@@ -1,5 +1,7 @@
 package ru.mail.park.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,7 @@ public class UserController {
     private final UserDao userDao;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public UserController(
             UserDao userDao
@@ -96,6 +99,11 @@ public class UserController {
             return ResponseEntity
                     .ok(UserHelper.toDto(userDao.findUserById(id)));
         } else if (vkToken != null) {
+            try {
+                LOGGER.warn(mapper.writeValueAsString(userDao.findUserVkByToken(vkToken)));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
             return ResponseEntity
                     .ok(UserHelper.toDto(userDao.findUserVkByToken(vkToken)));
         }
