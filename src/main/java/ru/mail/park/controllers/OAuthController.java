@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.domain.User;
-import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
@@ -42,12 +40,13 @@ public class OAuthController {
     @GetMapping("vk")
     public ResponseEntity<?> oauth(@RequestParam String code, HttpSession httpSession) {
         String accessToken = (String) httpSession.getAttribute(OAUTH_VK_ATTR);
-        if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new Message<>(MessageConstants.AUTHORIZED));
-        }
+        HttpHeaders headers = new HttpHeaders();
         try {
+            URI redirectURI = new URI("https://physicsio.tech/vk_ok");
+            headers.setLocation(redirectURI);
+            if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
+                return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            }
             UserAuthResponse userAuthResponse = vkApiClient
                     .oauth().userAuthorizationCodeFlow(
                             CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, code
@@ -59,24 +58,13 @@ public class OAuthController {
             if (user != null) {
                 userDao.updateUserVk(user, accessToken);
             } else {
-                user = userDao.createUserVk(userId, accessToken);
+                userDao.createUserVk(userId, accessToken);
             }
-            HttpHeaders headers = new HttpHeaders();
-            URI redirectURI = new URI("https://physicsio.tech/vk_ok");
-            headers.setLocation(redirectURI);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        } catch (ApiException e) {
+        } catch (ApiException | ClientException | URISyntaxException e) {
             e.printStackTrace();
-            LOGGER.error("ApiException");
-            return ResponseEntity
-                    .badRequest()
-                    .body(new Message<>(MessageConstants.VK_API_EXCEPTION));
-        } catch (ClientException | URISyntaxException e) {
-            e.printStackTrace();
-            LOGGER.error("ClientException");
-            return ResponseEntity
-                    .badRequest()
-                    .body(new Message<>(MessageConstants.VK_API_EXCEPTION));
+            LOGGER.error("Vk or URI Syntax Exception");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }
 }
