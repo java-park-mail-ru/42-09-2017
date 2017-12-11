@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.mail.park.controllers.messages.Message;
 import ru.mail.park.domain.User;
-import ru.mail.park.domain.dto.OAuthUserDto;
 import ru.mail.park.info.constants.MessageConstants;
 import ru.mail.park.services.UserDao;
 
 import javax.servlet.http.HttpSession;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
