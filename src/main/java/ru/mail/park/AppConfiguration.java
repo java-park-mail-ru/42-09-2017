@@ -32,6 +32,7 @@ public class AppConfiguration {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://localhost:8000");
         config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("https://localhost:8080");
         config.addAllowedOrigin("https://physicsio.tech");
         config.addAllowedOrigin("https://194.87.110.17");
         config.addAllowedHeader("*");
