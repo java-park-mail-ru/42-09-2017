@@ -55,7 +55,7 @@ public class GameMessageHandler {
         if (session == null) {
             LOGGER.error("Can't handle snap. Session is null");
         }
-        boolean cheat = worldRunnerService.handleSnap(session, snap);
+        boolean cheat = worldRunnerService.checkSnap(session, snap);
         if (cheat) {
             gameMechanics.addSnapMessageTask(userId, snap);
         }

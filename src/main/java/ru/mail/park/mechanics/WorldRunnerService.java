@@ -42,13 +42,14 @@ public class WorldRunnerService {
         worldRunnerMap.remove(gameSession);
     }
 
+    // ToDo: 14.12.17 не задерживать WorldRunnerService симуляцией прямо здесь
     public void runSimulation(GameSession gameSession) {
         WorldRunner worldRunner = worldRunnerMap.get(gameSession);
         worldRunner.run();
         gameSession.setState(GameState.SIMULATED);
     }
 
-    public boolean handleSnap(GameSession session, SnapMessage snap) throws NullPointerException {
+    public boolean checkSnap(GameSession session, SnapMessage snap) throws NullPointerException {
         WorldRunner worldRunner = worldRunnerMap.get(session);
         LOGGER.info("Got changes");
         long frameNumber = snap.getFrame();
