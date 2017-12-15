@@ -50,12 +50,14 @@ public class SocketHandler extends TextWebSocketHandler {
         if (userId != null && userDao.findUserById(userId) != null) {
             remotePointService.registerUser(Id.of(userId), session);
             LOGGER.info("CONNECTED");
+            return;
         } else if (vkToken != null) {
             User user = userDao.findUserVkByToken(vkToken);
             if (user != null) {
                 remotePointService.registerUser(Id.of(user.getId()), session);
                 LOGGER.info("CONNECTED");
             }
+            return;
         }
         LOGGER.warn("Empty HTTP session. Closing");
         closeSession(session, ACCESS_DENIED);
