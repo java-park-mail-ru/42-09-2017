@@ -12,7 +12,7 @@ import java.util.Set;
 public interface GameMechanics {
     void gameStep();
 
-    void addWaiter(Id<User> userId, Id<Board> board);
+    boolean addWaiter(Id<User> userId, Id<Board> board);
 
     void removeWaiter(Id<User> userId);
 

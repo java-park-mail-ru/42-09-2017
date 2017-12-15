@@ -7,6 +7,8 @@ import org.jbox2d.dynamics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.mail.park.domain.Id;
+import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.exceptions.FramesOutOfBoundException;
 import ru.mail.park.mechanics.listeners.SensorListener;
@@ -16,22 +18,30 @@ import ru.mail.park.mechanics.objects.body.BodyOptions;
 import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.mechanics.objects.joint.GJoint;
+import ru.mail.park.services.GameDao;
 import ru.mail.park.websocket.message.from.SnapMessage;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static ru.mail.park.info.constants.Constants.*;
 
 @Service
 public class WorldRunnerService {
     private Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
+    private ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
+    private final GameDao gameDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunnerService.class);
 
-    public WorldRunnerService() {
-
+    public WorldRunnerService(
+            GameDao gameDao
+    ) {
+        this.gameDao = gameDao;
     }
 
     public WorldRunner getWorldRunnerFor(GameSession gameSession) {
@@ -42,11 +52,25 @@ public class WorldRunnerService {
         worldRunnerMap.remove(gameSession);
     }
 
-    // ToDo: 14.12.17 не задерживать WorldRunnerService симуляцией прямо здесь
-    public void runSimulation(GameSession gameSession) {
-        WorldRunner worldRunner = worldRunnerMap.get(gameSession);
-        worldRunner.run();
-        gameSession.setState(GameState.SIMULATED);
+    public void initAndRun(GameSession session) {
+        executorService.submit(() -> {
+            LOGGER.warn("Starting simulation in new thread");
+            BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
+            Map<Long, GBody> bodiesMap = new HashMap<>();
+            board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
+            Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
+            for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
+                initSnap.getValue().forEach(bodyFrame -> {
+                    BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
+                    bodyData.setPosition(bodyFrame.getPosition());
+                    bodyData.setAngle(bodyFrame.getAngle());
+                });
+            }
+            WorldRunner worldRunner = initWorld(session, board);
+            worldRunnerMap.put(session, worldRunner);
+            worldRunner.run();
+            session.setState(GameState.SIMULATED);
+        });
     }
 
     public boolean checkSnap(GameSession session, SnapMessage snap) throws NullPointerException {
@@ -82,7 +106,7 @@ public class WorldRunnerService {
         return cheat;
     }
 
-    public void initWorld(GameSession gameSession, BoardRequest.Data board) {
+    public WorldRunner initWorld(GameSession gameSession, BoardRequest.Data board) {
         LOGGER.info("World initialization started");
         World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
         Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
@@ -143,8 +167,8 @@ public class WorldRunnerService {
         WorldRunner worldRunner = new WorldRunner(world, gameBodies, dynamicBodies, diffsPerFrame);
         world.setContactListener(new SensorListener(worldRunner));
         world.setContinuousPhysics(false);
-        worldRunnerMap.put(gameSession, worldRunner);
         LOGGER.warn("All bodies created");
+        return worldRunner;
     }
 
     private void setPhysicalProperties(BodyOptions options, boolean simpleBody, FixtureDef... fixDefs) {

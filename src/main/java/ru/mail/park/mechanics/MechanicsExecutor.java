@@ -5,35 +5,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.concurrent.Executor;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ru.mail.park.info.constants.Constants.MICRO_SECOND;
+import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
 import static ru.mail.park.info.constants.Constants.TICK;
 
 @Service
-public class MechanicsExecutor implements Runnable {
+public class MechanicsExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MechanicsExecutor.class);
-    private final GameMechanics gameMechanics;
-    private final Executor tickExecutor = Executors.newSingleThreadExecutor();
+    private final GameMechanicsService gameMechanicsService;
+    private final ExecutorService tickExecutor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     public MechanicsExecutor(
-            GameMechanics gameMechanics
+            GameMechanicsService gameMechanicsService
     ) {
-        this.gameMechanics = gameMechanics;
+        this.gameMechanicsService = gameMechanicsService;
     }
 
     @PostConstruct
     public void initAfterStartup() {
-        tickExecutor.execute(this);
+        List<GameMechanics> mechanicsList = gameMechanicsService.initMechanics(THREAD_POOL_SIZE);
+        mechanicsList.forEach(mechanics -> tickExecutor.submit(() -> gameLoop(mechanics)));
     }
 
-    @Override
-    public void run() {
-        gameLoop();
-    }
-
-    private void gameLoop() {
+    private void gameLoop(GameMechanics gameMechanics) {
         long beforeTime = System.nanoTime();
         long afterTime;
         long sleepTime;

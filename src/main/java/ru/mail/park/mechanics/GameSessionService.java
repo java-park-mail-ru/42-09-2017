@@ -12,17 +12,14 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class GameSessionService {
     private Map<Id<User>, GameSession> gameSessionMap = new ConcurrentHashMap<>();
     private Map<Id<User>, Player> playerMap = new ConcurrentHashMap<>();
-    private Set<GameSession> sessions = new LinkedHashSet<>();
+    private Map<Id<GameMechanics>, Set<GameSession>> sessionsMap = new ConcurrentHashMap<>();
     private final GameDao gameDao;
     private final UserDao userDao;
     private final RemotePointService remotePointService;
@@ -43,8 +40,8 @@ public class GameSessionService {
         this.worldRunnerService = worldRunnerService;
     }
 
-    public Set<GameSession> getSessions() {
-        return sessions;
+    public Set<GameSession> getSessionsByMechanicsId(Id<GameMechanics> mechanicsId) {
+        return sessionsMap.get(mechanicsId);
     }
 
     public boolean isMovingState(Id<User> userId) {
@@ -113,12 +110,13 @@ public class GameSessionService {
         }
     }
 
-    public void joinGame(Id<Board> boardId, Set<Id<User>> players) {
+    public void joinGame(Id<GameMechanics> mechanicsId, Id<Board> boardId, Set<Id<User>> players) {
         GameSession gameSession = new GameSession(boardId, players);
         players.forEach(player -> {
             gameSessionMap.put(player, gameSession);
             playerMap.put(player, new Player(userDao.findUserById(player.getId())));
         });
+        Set<GameSession> sessions = sessionsMap.putIfAbsent(mechanicsId, new HashSet<>());
         sessions.add(gameSession);
     }
 
@@ -176,17 +174,20 @@ public class GameSessionService {
         remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
     }
 
-    public void removeSessionForTeam(GameSession session) {
+    public void removeSessionForTeam(Id<GameMechanics> mechanicsId, GameSession session) {
         if (session == null) {
             return;
         }
-        sessions.remove(session);
+        sessionsMap.computeIfPresent(mechanicsId, (ignore, sessionsSet) -> {
+            sessionsSet.remove(session);
+            return sessionsSet;
+        });
         worldRunnerService.removeWorldRunnerFor(session);
     }
 
-    public void removeSessionForTeam(Id<User> userId) {
+    public void removeSessionForTeam(Id<GameMechanics> mechanicsId, Id<User> userId) {
         GameSession session = gameSessionMap.get(userId);
-        removeSessionForTeam(session);
+        removeSessionForTeam(mechanicsId, session);
     }
 
     public Player getPlayer(Id<User> userId) {

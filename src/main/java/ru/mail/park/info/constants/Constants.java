@@ -23,7 +23,7 @@ public class Constants {
     public static final int MAX_FRAMES_DELTA = 3;
 
     /* Multi Threading*/
-    public static final int POOL_SIZE = 4;
+    public static final int THREAD_POOL_SIZE = 2;
 
     /* Box2d constants */
     public static final long TIMEOUT = 30L;

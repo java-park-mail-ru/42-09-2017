@@ -3,28 +3,27 @@ package ru.mail.park.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.info.constants.Constants;
-import ru.mail.park.mechanics.GameMechanics;
-import ru.mail.park.mechanics.GameSessionService;
+import ru.mail.park.mechanics.GameMechanicsService;
 import ru.mail.park.mechanics.RemotePointService;
-import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.SocketMessage;
 
 import java.io.IOException;
 
 import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
+import static ru.mail.park.info.constants.Constants.OAUTH_VK_ATTR;
+import static ru.mail.park.info.constants.Constants.SESSION_ATTR;
 
 public class SocketHandler extends TextWebSocketHandler {
     private final UserDao userDao;
-    private final GameDao gameDao;
-    private final GameMechanics gameMechanics;
+    private final GameMechanicsService gameMechanicsService;
     private final RemotePointService remotePointService;
-    private final GameSessionService gameSessionService;
     private final MessageHandlerContainer messageHandlerContainer;
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -33,30 +32,33 @@ public class SocketHandler extends TextWebSocketHandler {
 
     public SocketHandler(
             UserDao userDao,
-            GameDao gameDao,
-            GameMechanics gameMechanics,
+            GameMechanicsService gameMechanicsService,
             RemotePointService remotePointService,
-            GameSessionService gameSessionService,
             MessageHandlerContainer messageHandlerContainer
     ) {
         this.userDao = userDao;
-        this.gameDao = gameDao;
-        this.gameMechanics = gameMechanics;
+        this.gameMechanicsService = gameMechanicsService;
         this.remotePointService = remotePointService;
-        this.gameSessionService = gameSessionService;
         this.messageHandlerContainer = messageHandlerContainer;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
-        if (userId == null || userDao.findUserById(userId) == null) {
-            LOGGER.warn("Empty HTTP session. Closing");
-            closeSession(session, ACCESS_DENIED);
-            return;
+        Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
+        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+
+        if (userId != null && userDao.findUserById(userId) != null) {
+            remotePointService.registerUser(Id.of(userId), session);
+            LOGGER.info("CONNECTED");
+        } else if (vkToken != null) {
+            User user = userDao.findUserVkByToken(vkToken);
+            if (user != null) {
+                remotePointService.registerUser(Id.of(user.getId()), session);
+                LOGGER.info("CONNECTED");
+            }
         }
-        remotePointService.registerUser(Id.of(userId), session);
-        LOGGER.info("CONNECTED");
+        LOGGER.warn("Empty HTTP session. Closing");
+        closeSession(session, ACCESS_DENIED);
     }
 
     @Override
@@ -65,7 +67,7 @@ public class SocketHandler extends TextWebSocketHandler {
             LOGGER.warn("Warning. Session is not opened");
             return;
         }
-        Long userId = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
         if (userId == null || userDao.findUserById(userId) == null) {
             LOGGER.warn("Empty HTTP session. Closing");
             closeSession(session, ACCESS_DENIED);
@@ -92,11 +94,11 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        Long id = (Long) session.getAttributes().get(Constants.SESSION_ATTR);
+        Long id = (Long) session.getAttributes().get(SESSION_ATTR);
         if (id == null) {
             return;
         }
-        gameMechanics.userDisconnected(Id.of(id));
+        gameMechanicsService.handleDisconnect(Id.of(id));
         LOGGER.warn("CLOSED");
     }
 

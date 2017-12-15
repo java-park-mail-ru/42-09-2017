@@ -2,16 +2,14 @@ package ru.mail.park.mechanics;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.body.BodyData;
-import ru.mail.park.mechanics.objects.body.GBody;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.from.MovingMessage;
@@ -27,11 +25,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static ru.mail.park.info.constants.Constants.POOL_SIZE;
+import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
 import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 @Service
+@Scope("prototype")
 public class GameMechanicsImpl implements GameMechanics {
+    private Id<GameMechanics> id;
     private final UserDao userDao;
     private final GameDao gameDao;
     private final RemotePointService remotePointService;
@@ -39,7 +39,7 @@ public class GameMechanicsImpl implements GameMechanics {
     private final WorldRunnerService worldRunnerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(POOL_SIZE);
+    private ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     private Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
     private Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
@@ -58,6 +58,14 @@ public class GameMechanicsImpl implements GameMechanics {
         this.remotePointService = remotePointService;
         this.gameSessionService = gameSessionService;
         this.worldRunnerService = worldRunnerService;
+    }
+
+    public Id<GameMechanics> getId() {
+        return id;
+    }
+
+    public void setId(int mechanicsId) {
+        id = Id.of(mechanicsId);
     }
 
     public void gameStep() {
@@ -79,16 +87,16 @@ public class GameMechanicsImpl implements GameMechanics {
         tryJoinGame();
     }
 
-    public void addWaiter(Id<User> userId, Id<Board> board) {
+    public boolean addWaiter(Id<User> userId, Id<Board> board) {
         if (gameSessionService.isPlaying(userId)) {
             LOGGER.warn("Player is in game now");
-            return;
+            return false;
         }
         Id<Board> found = userBoardMap.get(userId);
         if (found != null) {
             if (found.equals(board)) {
                 LOGGER.warn("Already subscribed on this board");
-                return;
+                return false;
             } else {
                 LOGGER.warn("Resubscribing on another board");
                 boardUserMap.get(found)
@@ -99,7 +107,7 @@ public class GameMechanicsImpl implements GameMechanics {
         if (meta == null) {
             LOGGER.error("Subscribed on bad board. Closing session");
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
-            return;
+            return false;
         }
         boardUserMap.putIfAbsent(board, new LinkedHashSet<>());
         boardCapacityMap.putIfAbsent(board, meta.getPlayers());
@@ -107,21 +115,22 @@ public class GameMechanicsImpl implements GameMechanics {
                 .add(userId);
         userBoardMap.put(userId, board);
         LOGGER.info("User added in queue");
+        return true;
     }
 
     public void addBoardMessageTask(Set<Id<User>> players) {
         LOGGER.info("Team is found");
         BoardMessage message = new BoardMessage();
-        final long[] id = {1};
+        final long[] playerId = {1};
         players.forEach(player -> tasks.add(() -> {
             LOGGER.info("Sending board message");
             try {
-                message.setPlayerID(id[0]);
+                message.setPlayerID(playerId[0]);
                 remotePointService.sendMessageTo(player, message);
                 gameSessionService.setMovingForSession(player);
-                id[0]++;
+                playerId[0]++;
             } catch (IOException e) {
-                LOGGER.warn("Can't send board message to player " + id[0]);
+                LOGGER.warn("Can't send board message to player " + playerId[0]);
             }
 
         }));
@@ -131,11 +140,11 @@ public class GameMechanicsImpl implements GameMechanics {
         Set<Id<User>> players = gameSessionService.getTeamOf(from);
         MovingMessage message = new MovingMessage(snap);
         players.stream()
-                .filter(id -> !from.equals(id))
-                .forEach(id -> tasks.add(() -> {
+                .filter(playerId -> !from.equals(playerId))
+                .forEach(playerId -> tasks.add(() -> {
                     LOGGER.info("Sending moving message from " + userDao.findUserById(from.getId()).getUsername());
                     try {
-                        remotePointService.sendMessageTo(id, message);
+                        remotePointService.sendMessageTo(playerId, message);
                     } catch (IOException e) {
                         LOGGER.error("Can't send moving snap");
                     }
@@ -146,9 +155,9 @@ public class GameMechanicsImpl implements GameMechanics {
         StartedMessage message = new StartedMessage();
         session.getPlayers().stream()
                 .filter(Objects::nonNull)
-                .forEach(id -> tasks.add(() -> {
+                .forEach(playerId -> tasks.add(() -> {
                     try {
-                        remotePointService.sendMessageTo(id, message);
+                        remotePointService.sendMessageTo(playerId, message);
                     } catch (IOException e) {
                         LOGGER.warn("Error with sending started message");
                     }
@@ -207,7 +216,7 @@ public class GameMechanicsImpl implements GameMechanics {
             while (waiters.size() / players > 0) {
                 matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
-                    gameSessionService.joinGame(boardId, matchedPlayers);
+                    gameSessionService.joinGame(id, boardId, matchedPlayers);
                     addBoardMessageTask(matchedPlayers);
                 }
             }
@@ -215,31 +224,16 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     public void tryStartSimulation() {
-        gameSessionService.getSessions().stream()
+        gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isReady)
                 .forEach(session -> {
                     session.setState(GameState.SIMULATION);
-                    executorService.submit(() -> {
-                        LOGGER.warn("Starting simulation in new thread");
-                        BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
-                        Map<Long, GBody> bodiesMap = new HashMap<>();
-                        board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
-                        Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
-                        for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
-                            initSnap.getValue().forEach(bodyFrame -> {
-                                BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
-                                bodyData.setPosition(bodyFrame.getPosition());
-                                bodyData.setAngle(bodyFrame.getAngle());
-                            });
-                        }
-                        worldRunnerService.initWorld(session, board);
-                        worldRunnerService.runSimulation(session);
-                    });
+                    worldRunnerService.initAndRun(session);
                 });
     }
 
     public void processFinishedSimulation() {
-        gameSessionService.getSessions().stream()
+        gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isSimulated)
                 .forEach(session -> {
                     session.setState(GameState.HANDLING);
@@ -248,9 +242,9 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     public void tryFinishGame() {
-        gameSessionService.getSessions().stream()
+        gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isFinished)
-                .forEach(gameSessionService::removeSessionForTeam);
+                .forEach(session -> gameSessionService.removeSessionForTeam(id, session));
     }
 
     private boolean checkCandidate(Id<User> userId) {
@@ -278,7 +272,7 @@ public class GameMechanicsImpl implements GameMechanics {
         if (session.isMoving() || session.isReady()) {
             FinishedMessage message = new FinishedMessage(0L, GAME_ERROR);
             session.getPlayers().forEach(player -> addFinishedMessageTask(player, message));
-            gameSessionService.removeSessionForTeam(userId);
+            gameSessionService.removeSessionForTeam(id, userId);
         } else {
             gameSessionService.removeSessionFor(userId);
         }
