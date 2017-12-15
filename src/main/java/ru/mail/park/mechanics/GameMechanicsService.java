@@ -119,6 +119,9 @@ public class GameMechanicsService {
     }
 
     public void handleDisconnect(Id<User> userId) {
-        gameMechanicsMap.get(userId).userDisconnected(userId);
+        GameMechanics mechanics = gameMechanicsMap.get(userId);
+        if (mechanics != null) {
+            mechanics.userDisconnected(userId);
+        }
     }
 }
