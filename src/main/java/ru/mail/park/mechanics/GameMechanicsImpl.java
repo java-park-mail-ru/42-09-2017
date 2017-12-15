@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
 import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 @Service
@@ -38,8 +35,6 @@ public class GameMechanicsImpl implements GameMechanics {
     private final GameSessionService gameSessionService;
     private final WorldRunnerService worldRunnerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
-
-    private ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     private Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
     private Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
@@ -72,13 +67,11 @@ public class GameMechanicsImpl implements GameMechanics {
         while (!tasks.isEmpty()) {
             final Runnable nextTask = tasks.poll();
             if (nextTask != null) {
-                executorService.submit(() -> {
-                    try {
-                        nextTask.run();
-                    } catch (RuntimeException ex) {
-                        LOGGER.error("Can't handle game task", ex);
-                    }
-                });
+                try {
+                    nextTask.run();
+                } catch (RuntimeException ex) {
+                    LOGGER.error("Can't handle game task", ex);
+                }
             }
         }
         tryFinishGame();
@@ -237,7 +230,7 @@ public class GameMechanicsImpl implements GameMechanics {
                 .filter(GameSession::isSimulated)
                 .forEach(session -> {
                     session.setState(GameState.HANDLING);
-                    executorService.submit(() -> addStartedMessageTask(session));
+                    addStartedMessageTask(session);
                 });
     }
 
