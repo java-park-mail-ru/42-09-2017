@@ -12,7 +12,10 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -38,6 +41,15 @@ public class GameSessionService {
         this.userDao = userDao;
         this.remotePointService = remotePointService;
         this.worldRunnerService = worldRunnerService;
+    }
+
+    public void initSessions(Set<Id<GameMechanics>> mechanicsList) {
+        if (!sessionsMap.isEmpty()) {
+            return;
+        }
+        for (Id<GameMechanics> mechanicsId : mechanicsList) {
+            sessionsMap.put(mechanicsId, new HashSet<>());
+        }
     }
 
     public Set<GameSession> getSessionsByMechanicsId(Id<GameMechanics> mechanicsId) {
@@ -116,7 +128,11 @@ public class GameSessionService {
             gameSessionMap.put(player, gameSession);
             playerMap.put(player, new Player(userDao.findUserById(player.getId())));
         });
-        Set<GameSession> sessions = sessionsMap.putIfAbsent(mechanicsId, new HashSet<>());
+        Set<GameSession> sessions = sessionsMap.get(mechanicsId);
+        if (sessions == null) {
+            LOGGER.error("SessionsMap for this mechanics is null");
+            return;
+        }
         sessions.add(gameSession);
     }
 

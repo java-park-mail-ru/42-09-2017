@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,8 +26,8 @@ public class MechanicsExecutor {
 
     @PostConstruct
     public void initAfterStartup() {
-        List<GameMechanics> mechanicsList = gameMechanicsService.initMechanics(THREAD_POOL_SIZE);
-        mechanicsList.forEach(mechanics -> tickExecutor.scheduleAtFixedRate(mechanics::gameStep,
+        Set<GameMechanics> mechanicsSet = gameMechanicsService.initMechanics(THREAD_POOL_SIZE);
+        mechanicsSet.forEach(mechanics -> tickExecutor.scheduleAtFixedRate(mechanics::gameStep,
                 0, TICK, TimeUnit.MILLISECONDS));
     }
 

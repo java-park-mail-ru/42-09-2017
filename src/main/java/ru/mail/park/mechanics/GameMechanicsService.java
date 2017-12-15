@@ -11,9 +11,10 @@ import ru.mail.park.mechanics.objects.BodyFrame;
 import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
@@ -38,16 +39,19 @@ public class GameMechanicsService {
         this.worldRunnerService = worldRunnerService;
     }
 
-    public List<GameMechanics> initMechanics(int count) {
+    public Set<GameMechanics> initMechanics(int count) {
         if (!idMechanicsMap.isEmpty()) {
-            return new ArrayList<>(idMechanicsMap.values());
+            return new HashSet<>(idMechanicsMap.values());
         }
+        Set<GameMechanics> resultSet = new HashSet<>();
         for (int i = 0; i < count; i++) {
             GameMechanicsImpl mechanics = applicationContext.getBean(GameMechanicsImpl.class);
             mechanics.setId(i);
+            resultSet.add(mechanics);
             idMechanicsMap.put(mechanics.getId(), mechanics);
         }
-        return new ArrayList<>(idMechanicsMap.values());
+        gameSessionService.initSessions(idMechanicsMap.keySet());
+        return resultSet;
     }
 
     private Id<GameMechanics> calculateMechanicsId(Id<Board> boardId) {
