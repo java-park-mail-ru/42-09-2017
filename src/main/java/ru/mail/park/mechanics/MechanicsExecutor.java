@@ -6,18 +6,17 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import static ru.mail.park.info.constants.Constants.MICRO_SECOND;
-import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
-import static ru.mail.park.info.constants.Constants.TICK;
+import static ru.mail.park.info.constants.Constants.*;
 
 @Service
 public class MechanicsExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MechanicsExecutor.class);
     private final GameMechanicsService gameMechanicsService;
-    private final ExecutorService tickExecutor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final ScheduledExecutorService tickExecutor = Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
 
     public MechanicsExecutor(
             GameMechanicsService gameMechanicsService
@@ -28,7 +27,8 @@ public class MechanicsExecutor {
     @PostConstruct
     public void initAfterStartup() {
         List<GameMechanics> mechanicsList = gameMechanicsService.initMechanics(THREAD_POOL_SIZE);
-        mechanicsList.forEach(mechanics -> tickExecutor.submit(() -> gameLoop(mechanics)));
+        mechanicsList.forEach(mechanics -> tickExecutor.scheduleAtFixedRate(mechanics::gameStep,
+                0, TICK, TimeUnit.MILLISECONDS));
     }
 
     private void gameLoop(GameMechanics gameMechanics) {
