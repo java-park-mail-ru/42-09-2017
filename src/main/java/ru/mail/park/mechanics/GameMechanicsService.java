@@ -70,6 +70,7 @@ public class GameMechanicsService {
                 return;
             }
         }
+        LOGGER.warn("Putting new player into mechanics #" + newMechanicsId);
         boolean added = mechanicsNew.addWaiter(userId, boardId);
         if (added) {
             gameMechanicsMap.put(userId, mechanicsNew);
