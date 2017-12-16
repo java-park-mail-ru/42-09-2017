@@ -28,7 +28,7 @@ public class SocketHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketHandler.class);
-    public static final CloseStatus ACCESS_DENIED = new CloseStatus(4500, "Not logged in");
+    private static final CloseStatus ACCESS_DENIED = new CloseStatus(4500, "Not logged in");
 
     public SocketHandler(
             UserDao userDao,
@@ -70,15 +70,23 @@ public class SocketHandler extends TextWebSocketHandler {
             return;
         }
         Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
-        if (userId == null || userDao.findUserById(userId) == null) {
-            LOGGER.warn("Empty HTTP session. Closing");
-            closeSession(session, ACCESS_DENIED);
+        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+
+        if (userId != null && userDao.findUserById(userId) != null) {
+            handleMessage(Id.of(userId), message);
             return;
+        } else if (vkToken != null) {
+            User user = userDao.findUserVkByToken(vkToken);
+            if (user != null) {
+                handleMessage(Id.of(user.getId()), message);
+                return;
+            }
         }
-        handleMessage(Id.of(userId), message);
+        LOGGER.warn("Empty HTTP session. Closing");
+        closeSession(session, ACCESS_DENIED);
     }
 
-    public void handleMessage(Id<User> userId, TextMessage textMessage) {
+    private void handleMessage(Id<User> userId, TextMessage textMessage) {
         final SocketMessage message;
         try {
             message = mapper.readValue(textMessage.getPayload(), SocketMessage.class);
