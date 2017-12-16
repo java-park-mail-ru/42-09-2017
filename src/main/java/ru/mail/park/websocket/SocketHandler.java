@@ -105,10 +105,16 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         Long id = (Long) session.getAttributes().get(SESSION_ATTR);
-        if (id == null) {
-            return;
+        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+
+        if (id != null) {
+            gameMechanicsService.handleDisconnect(Id.of(id));
+        } else if (vkToken != null) {
+            User user = userDao.findUserVkByToken(vkToken);
+            if (user != null) {
+                gameMechanicsService.handleDisconnect(Id.of(user.getId()));
+            }
         }
-        gameMechanicsService.handleDisconnect(Id.of(id));
         LOGGER.warn("CLOSED");
     }
 
