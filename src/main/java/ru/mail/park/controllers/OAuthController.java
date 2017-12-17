@@ -1,9 +1,12 @@
 package ru.mail.park.controllers;
 
+import com.vk.api.sdk.client.Lang;
 import com.vk.api.sdk.client.VkApiClient;
+import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.UserAuthResponse;
+import com.vk.api.sdk.objects.users.UserXtrCounters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +22,7 @@ import ru.mail.park.services.UserDao;
 import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static ru.mail.park.info.constants.Constants.*;
 
@@ -58,7 +62,13 @@ public class OAuthController {
             if (user != null) {
                 userDao.updateUserVk(user, accessToken);
             } else {
-                userDao.createUserVk(userId, accessToken);
+                UserActor actor = new UserActor(userId, accessToken);
+                List<UserXtrCounters> users = vkApiClient.users().get(actor)
+                        .userIds(userId.toString())
+                        .lang(Lang.EN)
+                        .execute();
+                UserXtrCounters userNew = users.get(0);
+                userDao.createUserVk(userId, userNew.getFirstName(), accessToken);
             }
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (ApiException | ClientException | URISyntaxException e) {

@@ -20,8 +20,6 @@ public class UserDao {
     private final PasswordEncoder passwordEncoder;
     private EntityManager em;
 
-    private static final long MILLION = 1000000;
-
     public UserDao(
             PasswordEncoder passwordEncoder,
             EntityManager em
@@ -30,25 +28,13 @@ public class UserDao {
         this.em = em;
     }
 
-    public User createUserVk(Integer userId, String token) {
-        String pattern = "Player";
-        long count = 0;
-        String username;
-        while (true) {
-            username = pattern + String.valueOf(count);
-            if (!hasUsername(username)) {
-                User user = new User();
-                user.setUsername(username);
-                user.setVkId(userId);
-                em.persist(user);
-                return user;
-            }
-            count++;
-            if (count > MILLION) {
-                return null;
-                // ToDo: 26.11.17 throw an exception
-            }
-        }
+    public User createUserVk(Integer userId, String username, String token) {
+        User user = new User();
+        user.setUsername(username);
+        user.setVkId(userId);
+        user.setVkToken(token);
+        em.persist(user);
+        return user;
     }
 
     public void createUser(User userData) {
@@ -132,7 +118,9 @@ public class UserDao {
 
     public User findUserByUsername(String username) {
         try {
-            return em.createQuery("select u from User as u where lower(username)=lower(:username)", User.class)
+            return em.createQuery(
+                    "select u from User as u where lower(username)=lower(:username)"
+                            + "and vk_id is null", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -151,14 +139,18 @@ public class UserDao {
     }
 
     public boolean hasUsername(String username) {
-        Long count = em.createQuery("select count(id) from User where lower(username)=lower(:username)", Long.class)
+        Long count = em.createQuery(
+                "select count(id) from User where lower(username)=lower(:username)"
+                        + "and vk_id is null", Long.class)
                 .setParameter("username", username)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean hasEmail(String email) {
-        Long count = em.createQuery("select count(id) from User where lower(email)=lower(:email)", Long.class)
+        Long count = em.createQuery(
+                "select count(id) from User where lower(email)=lower(:email)"
+                + "and vk_id is null", Long.class)
                 .setParameter("email", email)
                 .getSingleResult();
         return count > 0;
