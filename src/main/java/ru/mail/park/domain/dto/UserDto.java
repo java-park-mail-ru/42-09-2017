@@ -39,10 +39,6 @@ public class UserDto {
         this.password = password;
     }
 
-    public UserDto(UserDto user) {
-        this(user.getUsername(), user.getEmail(), user.getPassword());
-    }
-
     public String getUsername() {
         return username;
     }

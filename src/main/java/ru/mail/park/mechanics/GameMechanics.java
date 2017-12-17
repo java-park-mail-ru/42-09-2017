@@ -3,7 +3,7 @@ package ru.mail.park.mechanics;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 

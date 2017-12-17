@@ -13,7 +13,7 @@ public class BoardMetaHelper {
         if (boardMeta == null) {
             return null;
         }
-        BoardMetaDto boardMetaDto = new BoardMetaDto();
+        final BoardMetaDto boardMetaDto = new BoardMetaDto();
         boardMetaDto.setId(boardMeta.getId());
         boardMetaDto.setMapId(boardMeta.getBoard().getId());
         boardMetaDto.setName(boardMeta.getName());
@@ -28,7 +28,7 @@ public class BoardMetaHelper {
     }
 
     public static List<BoardMetaDto> toDto(List<BoardMeta> boardMetaList) {
-        List<BoardMetaDto> boardMetaDtos = new ArrayList<>();
+        final List<BoardMetaDto> boardMetaDtos = new ArrayList<>();
         for (BoardMeta boardMeta : boardMetaList) {
             boardMetaDtos.add(toDto(boardMeta));
         }
@@ -39,7 +39,7 @@ public class BoardMetaHelper {
         if (boardMetaDto == null) {
             return null;
         }
-        BoardMeta boardMeta = new BoardMeta();
+        final BoardMeta boardMeta = new BoardMeta();
         boardMeta.setName(boardMetaDto.getName());
         boardMeta.setLevel(boardMetaDto.getLevel());
         boardMeta.setTimer(boardMetaDto.getTimer());
@@ -68,7 +68,7 @@ public class BoardMetaHelper {
     }
 
     public static List<BoardMeta> fromDto(List<BoardMetaDto> boardMetaDtoList) {
-        List<BoardMeta> boardMetas = new ArrayList<>();
+        final List<BoardMeta> boardMetas = new ArrayList<>();
         for (BoardMetaDto boardMetaDto : boardMetaDtoList) {
             boardMetas.add(fromDto(boardMetaDto));
         }

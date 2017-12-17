@@ -9,7 +9,7 @@ import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
 import ru.mail.park.websocket.message.from.MovingMessage;
@@ -36,10 +36,10 @@ public class GameMechanicsImpl implements GameMechanics {
     private final WorldRunnerService worldRunnerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
 
-    private Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
-    private Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
-    private Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
-    private Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
+    private final Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
+    private final Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
+    private final Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
+    private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
     public GameMechanicsImpl(
             UserDao userDao,
@@ -63,6 +63,7 @@ public class GameMechanicsImpl implements GameMechanics {
         id = Id.of(mechanicsId);
     }
 
+    @Override
     public void gameStep() {
         while (!tasks.isEmpty()) {
             final Runnable nextTask = tasks.poll();
@@ -80,12 +81,13 @@ public class GameMechanicsImpl implements GameMechanics {
         tryJoinGame();
     }
 
+    @Override
     public boolean addWaiter(Id<User> userId, Id<Board> board) {
         if (gameSessionService.isPlaying(userId)) {
             LOGGER.warn("Player is in game now");
             return false;
         }
-        Id<Board> found = userBoardMap.get(userId);
+        final Id<Board> found = userBoardMap.get(userId);
         if (found != null) {
             if (found.equals(board)) {
                 LOGGER.warn("Already subscribed on this board");
@@ -96,7 +98,7 @@ public class GameMechanicsImpl implements GameMechanics {
                         .remove(userId);
             }
         }
-        BoardMeta meta = gameDao.getMetaOf(board.getId());
+        final BoardMeta meta = gameDao.getMetaOf(board.getId());
         if (meta == null) {
             LOGGER.error("Subscribed on bad board. Closing session");
             remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
@@ -111,9 +113,10 @@ public class GameMechanicsImpl implements GameMechanics {
         return true;
     }
 
+    @Override
     public void addBoardMessageTask(Set<Id<User>> players) {
         LOGGER.info("Team is found");
-        BoardMessage message = new BoardMessage();
+        final BoardMessage message = new BoardMessage();
         final long[] playerId = {1};
         players.forEach(player -> tasks.add(() -> {
             LOGGER.info("Sending board message");
@@ -129,9 +132,10 @@ public class GameMechanicsImpl implements GameMechanics {
         }));
     }
 
+    @Override
     public void addMovingMessageTask(Id<User> from, BodyFrame snap) {
-        Set<Id<User>> players = gameSessionService.getTeamOf(from);
-        MovingMessage message = new MovingMessage(snap);
+        final Set<Id<User>> players = gameSessionService.getTeamOf(from);
+        final MovingMessage message = new MovingMessage(snap);
         players.stream()
                 .filter(playerId -> !from.equals(playerId))
                 .forEach(playerId -> tasks.add(() -> {
@@ -144,8 +148,9 @@ public class GameMechanicsImpl implements GameMechanics {
                 }));
     }
 
+    @Override
     public void addStartedMessageTask(GameSession session) {
-        StartedMessage message = new StartedMessage();
+        final StartedMessage message = new StartedMessage();
         session.getPlayers().stream()
                 .filter(Objects::nonNull)
                 .forEach(playerId -> tasks.add(() -> {
@@ -157,6 +162,7 @@ public class GameMechanicsImpl implements GameMechanics {
                 }));
     }
 
+    @Override
     public void addSnapMessageTask(Id<User> userId, SnapMessage message) {
         tasks.add(() -> {
             try {
@@ -168,6 +174,7 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     // ToDo: 01.12.17  Try second way: checking all finished players in gmStep() with tryFinishGame()
+    @Override
     public void addFinishedMessageTask(Id<User> userId, FinishedMessage message) {
         tasks.add(() -> {
             try {
@@ -182,11 +189,11 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     private Set<Id<User>> matchPlayers(Set<Id<User>> waiters, int players) {
-        Set<Id<User>> matchedPlayers = new LinkedHashSet<>();
-        Iterator<Id<User>> waitersIterator = waiters.iterator();
+        final Set<Id<User>> matchedPlayers = new LinkedHashSet<>();
+        final Iterator<Id<User>> waitersIterator = waiters.iterator();
         int count = 0;
         while (count < players && waitersIterator.hasNext()) {
-            Id<User> waiter = waitersIterator.next();
+            final Id<User> waiter = waitersIterator.next();
             if (!checkCandidate(waiter)) {
                 waitersIterator.remove();
                 continue;
@@ -202,12 +209,12 @@ public class GameMechanicsImpl implements GameMechanics {
         return matchedPlayers;
     }
 
+    @Override
     public void tryJoinGame() {
         boardUserMap.forEach((boardId, waiters) -> {
-            int players = boardCapacityMap.get(boardId);
-            Set<Id<User>> matchedPlayers;
+            final int players = boardCapacityMap.get(boardId);
             while (waiters.size() / players > 0) {
-                matchedPlayers = matchPlayers(waiters, players);
+                final Set<Id<User>> matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
                     gameSessionService.joinGame(id, boardId, matchedPlayers);
                     addBoardMessageTask(matchedPlayers);
@@ -216,6 +223,7 @@ public class GameMechanicsImpl implements GameMechanics {
         });
     }
 
+    @Override
     public void tryStartSimulation() {
         gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isReady)
@@ -225,6 +233,7 @@ public class GameMechanicsImpl implements GameMechanics {
                 });
     }
 
+    @Override
     public void processFinishedSimulation() {
         gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isSimulated)
@@ -234,6 +243,7 @@ public class GameMechanicsImpl implements GameMechanics {
                 });
     }
 
+    @Override
     public void tryFinishGame() {
         gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isFinished)
@@ -246,24 +256,26 @@ public class GameMechanicsImpl implements GameMechanics {
                 && userDao.findUserById(userId.getId()) != null;
     }
 
+    @Override
     public void removeWaiter(Id<User> userId) {
         LOGGER.warn("Removing board waiter");
-        Id<Board> toRemove = userBoardMap.remove(userId);
+        final Id<Board> toRemove = userBoardMap.remove(userId);
         if (toRemove != null) {
             boardUserMap.get(toRemove)
                     .remove(userId);
         }
     }
 
+    @Override
     public void userDisconnected(Id<User> userId) {
         removeWaiter(userId);
-        GameSession session = gameSessionService.getSessionFor(userId);
+        final GameSession session = gameSessionService.getSessionFor(userId);
         if (session == null) {
             LOGGER.warn("User disconnected. GameSession was null");
             return;
         }
         if (session.isMoving() || session.isReady()) {
-            FinishedMessage message = new FinishedMessage(0L, GAME_ERROR);
+            final FinishedMessage message = new FinishedMessage(0L, GAME_ERROR);
             session.getPlayers().forEach(player -> addFinishedMessageTask(player, message));
             gameSessionService.removeSessionForTeam(id, userId);
         } else {

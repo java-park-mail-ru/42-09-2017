@@ -36,6 +36,7 @@ import ru.mail.park.services.UserDao;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
@@ -52,12 +53,12 @@ public class UserControllerTest {
 
     @Test
     public void testSignup_DuplicateUsername() throws Exception {
-        User user = new User();
+        final User user = new User();
         user.setUsername("testuser");
         user.setEmail("testemail2@example.com");
         user.setPassword("testpass");
 
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         errors.add(MessageConstants.EXISTS_USERNAME);
 
         doThrow(new ControllerValidationException(errors)).when(userDao).createUser(any(User.class));
@@ -74,12 +75,12 @@ public class UserControllerTest {
 
     @Test
     public void testSignup_DuplicateEmail() throws Exception {
-        User user = new User();
+        final User user = new User();
         user.setUsername("testuser2");
         user.setEmail("testemail@example.com");
         user.setPassword("testpass");
 
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         errors.add(MessageConstants.EXISTS_EMAIL);
 
         doThrow(new ControllerValidationException(errors)).when(userDao).createUser(any(User.class));
@@ -96,7 +97,7 @@ public class UserControllerTest {
     @SuppressWarnings("Duplicates")
     @Test
     public void testSignup_AlreadyAuthorized() throws Exception {
-        User user = new User();
+        final User user = new User();
         user.setUsername("testuser2");
         user.setEmail("testemail2@example.com");
         user.setPassword("testpass");
@@ -111,10 +112,9 @@ public class UserControllerTest {
                         .value(MessageConstants.AUTHORIZED));
     }
 
-    @SuppressWarnings("Duplicates")
     @Test
     public void testUpdate_Unauthorized() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("testUsernameUpdate");
 
         mockMvc
@@ -128,7 +128,7 @@ public class UserControllerTest {
 
     @Test
     public void testUpdate_UsernameUpdateSuccess() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("testUsernameUpdate");
 
         when(userDao.hasUsername(anyString())).thenReturn(false);
@@ -146,7 +146,7 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_Success() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("login");
         userTest.setEmail("email");
 
@@ -166,7 +166,7 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_UserNotExists() throws Exception {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         errors.add(MessageConstants.USERNAME_NOT_EXISTS);
 
         when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenThrow(new ControllerValidationException(errors));
@@ -182,7 +182,7 @@ public class UserControllerTest {
 
     @Test
     public void testLogin_BadLoginData() throws Exception {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         errors.add(MessageConstants.PASSWORD_WRONG);
 
         when(userDao.prepareSignIn(any(UserSigninInfo.class))).thenThrow(new ControllerValidationException(errors));
@@ -199,7 +199,7 @@ public class UserControllerTest {
 
     @Test
     public void testMe_Success() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("username");
         userTest.setEmail("email");
 

@@ -11,8 +11,8 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class FinishHandler extends MessageHandler<FinishMessage> {
-    private MessageHandlerContainer messageHandlerContainer;
-    private GameMechanicsService gameMechanicsService;
+    private final MessageHandlerContainer messageHandlerContainer;
+    private final GameMechanicsService gameMechanicsService;
 
     public FinishHandler(
             MessageHandlerContainer messageHandlerContainer,
@@ -29,7 +29,7 @@ public class FinishHandler extends MessageHandler<FinishMessage> {
     }
 
     @Override
-    public void handle(FinishMessage message, Id<User> userId) throws Exception {
+    public void handle(FinishMessage message, Id<User> userId) {
         gameMechanicsService.handleFinish(userId);
     }
 }

@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.joint;
+package ru.mail.park.mechanics.domain.objects.joint;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

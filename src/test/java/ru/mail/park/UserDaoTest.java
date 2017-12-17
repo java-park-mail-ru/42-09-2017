@@ -35,6 +35,7 @@ import ru.mail.park.info.UserUpdateInfo;
 import ru.mail.park.info.constants.Constants;
 import ru.mail.park.services.UserDao;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
@@ -50,7 +51,7 @@ public class UserDaoTest {
     private ObjectMapper mapper;
 
     private User user;
-    private static UserDto userDto = new UserDto("testuser", "testemail@example.com", "testpassword");;
+    private static final UserDto userDto = new UserDto("testuser", "testemail@example.com", "testpassword");
 
     @Before
     public void setup() {
@@ -60,15 +61,15 @@ public class UserDaoTest {
 
     @Test
     public void testSignup_DuplicateUsername() throws Exception {
-        User user = new User();
-        user.setUsername("testuser");
-        user.setEmail("testemail2@example.com");
-        user.setPassword("testpass");
+        final User userTest = new User();
+        userTest.setUsername("testuser");
+        userTest.setEmail("testemail2@example.com");
+        userTest.setPassword("testpass");
 
         mockMvc
                 .perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user)))
+                        .content(mapper.writeValueAsString(userTest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message").value("USERNAME_ALREADY_EXISTS"));
 
@@ -83,15 +84,15 @@ public class UserDaoTest {
 
     @Test
     public void testSignup_DuplicateEmail() throws Exception {
-        User user = new User();
-        user.setUsername("testuser2");
-        user.setEmail("testemail@example.com");
-        user.setPassword("testpass");
+        final User userTest = new User();
+        userTest.setUsername("testuser2");
+        userTest.setEmail("testemail@example.com");
+        userTest.setPassword("testpass");
 
         mockMvc
                 .perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user)))
+                        .content(mapper.writeValueAsString(userTest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message").value("EMAIL_ALREADY_EXISTS"));
 
@@ -106,25 +107,24 @@ public class UserDaoTest {
     @SuppressWarnings("Duplicates")
     @Test
     public void testSignup_AlreadyAuthorized() throws Exception {
-        User user = new User();
-        user.setUsername("testuser2");
-        user.setEmail("testemail2@example.com");
-        user.setPassword("testpass");
+        final User userTest = new User();
+        userTest.setUsername("testuser2");
+        userTest.setEmail("testemail2@example.com");
+        userTest.setPassword("testpass");
 
         mockMvc
                 .perform(post("/api/auth/signup")
                         .sessionAttr(Constants.SESSION_ATTR, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user)))
+                        .content(mapper.writeValueAsString(userTest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message")
                         .value(MessageConstants.AUTHORIZED));
     }
 
-    @SuppressWarnings("Duplicates")
     @Test
     public void testUpdate_Unauthorized() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("testUsernameUpdate");
 
         mockMvc
@@ -138,7 +138,7 @@ public class UserDaoTest {
 
     @Test
     public void testUpdate_UsernameUpdateSuccess() throws Exception {
-        User userTest = new User();
+        final User userTest = new User();
         userTest.setUsername("testUsernameUpdate");
 
         mockMvc

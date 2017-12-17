@@ -18,9 +18,7 @@ public class User {
     private Integer vkId;
     private String vkToken;
 
-    @Transient
-    private boolean ready;
-
+    @SuppressWarnings("RedundantNoArgConstructor")
     public User() { }
 
     public Long getId() {
@@ -71,6 +69,7 @@ public class User {
         this.level = level;
     }
 
+    @SuppressWarnings("unused")
     public Integer getVkId() {
         return vkId;
     }
@@ -79,19 +78,12 @@ public class User {
         this.vkId = vkId;
     }
 
+    @SuppressWarnings("unused")
     public String getVkToken() {
         return vkToken;
     }
 
     public void setVkToken(String vkToken) {
         this.vkToken = vkToken;
-    }
-
-    public boolean isReady() {
-        return ready;
-    }
-
-    public void setReady(boolean ready) {
-        this.ready = ready;
     }
 }

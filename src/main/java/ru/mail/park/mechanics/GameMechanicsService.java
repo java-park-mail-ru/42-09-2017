@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.Player;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 
@@ -22,10 +23,10 @@ import static ru.mail.park.info.constants.Constants.THREAD_POOL_SIZE;
 @Service
 public class GameMechanicsService {
     private final ApplicationContext applicationContext;
-    private Map<Id<GameMechanics>, GameMechanics> idMechanicsMap = new ConcurrentHashMap<>();
-    private Map<Id<User>, GameMechanics> gameMechanicsMap = new ConcurrentHashMap<>();
+    private final Map<Id<GameMechanics>, GameMechanics> idMechanicsMap = new ConcurrentHashMap<>();
+    private final Map<Id<User>, GameMechanics> gameMechanicsMap = new ConcurrentHashMap<>();
     private final GameSessionService gameSessionService;
-    private WorldRunnerService worldRunnerService;
+    private final WorldRunnerService worldRunnerService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanicsService.class);
 
@@ -43,9 +44,9 @@ public class GameMechanicsService {
         if (!idMechanicsMap.isEmpty()) {
             return new HashSet<>(idMechanicsMap.values());
         }
-        Set<GameMechanics> resultSet = new HashSet<>();
+        final Set<GameMechanics> resultSet = new HashSet<>();
         for (int i = 0; i < count; i++) {
-            GameMechanicsImpl mechanics = applicationContext.getBean(GameMechanicsImpl.class);
+            final GameMechanicsImpl mechanics = applicationContext.getBean(GameMechanicsImpl.class);
             mechanics.setId(i);
             resultSet.add(mechanics);
             idMechanicsMap.put(mechanics.getId(), mechanics);
@@ -59,9 +60,9 @@ public class GameMechanicsService {
     }
 
     public void handleSubscribe(Id<User> userId, Id<Board> boardId) {
-        GameMechanicsImpl mechanics = (GameMechanicsImpl) gameMechanicsMap.get(userId);
-        Id<GameMechanics> newMechanicsId = calculateMechanicsId(boardId);
-        GameMechanics mechanicsNew = idMechanicsMap.get(newMechanicsId);
+        final GameMechanicsImpl mechanics = (GameMechanicsImpl) gameMechanicsMap.get(userId);
+        final Id<GameMechanics> newMechanicsId = calculateMechanicsId(boardId);
+        final GameMechanics mechanicsNew = idMechanicsMap.get(newMechanicsId);
         if (mechanics != null) {
             if (mechanics.getId().equals(newMechanicsId)) {
                 mechanics.addWaiter(userId, boardId);
@@ -75,7 +76,7 @@ public class GameMechanicsService {
             }
         }
         LOGGER.warn("Putting new player into mechanics #" + newMechanicsId);
-        boolean added = mechanicsNew.addWaiter(userId, boardId);
+        final boolean added = mechanicsNew.addWaiter(userId, boardId);
         if (added) {
             gameMechanicsMap.put(userId, mechanicsNew);
         }
@@ -98,11 +99,11 @@ public class GameMechanicsService {
 
     public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
         LOGGER.info("Handle snap");
-        GameSession session = gameSessionService.getSessionFor(userId);
+        final GameSession session = gameSessionService.getSessionFor(userId);
         if (session == null) {
             LOGGER.error("Can't handle snap. Session is null");
         }
-        boolean cheat = worldRunnerService.checkSnap(session, snap);
+        final boolean cheat = worldRunnerService.checkSnap(session, snap);
         if (cheat) {
             gameMechanicsMap.get(userId).addSnapMessageTask(userId, snap);
         }
@@ -110,13 +111,13 @@ public class GameMechanicsService {
 
     public void handleFinish(Id<User> userId) {
         LOGGER.info("Handle finish");
-        Player player = gameSessionService.getPlayer(userId);
+        final Player player = gameSessionService.getPlayer(userId);
         if (player.isFinished()) {
             return;
         }
         gameSessionService.setFinishedForPlayer(userId);
-        GameSession session = gameSessionService.getSessionFor(userId);
-        FinishedMessage message = new FinishedMessage(player.getScore(), session.getResult());
+        final GameSession session = gameSessionService.getSessionFor(userId);
+        final FinishedMessage message = new FinishedMessage(player.getScore(), session.getResult());
         gameMechanicsMap.get(userId).addFinishedMessageTask(userId, message);
         if (gameSessionService.isTeamFinished(userId)) {
             gameSessionService.setFinishedForSession(userId);
@@ -124,7 +125,7 @@ public class GameMechanicsService {
     }
 
     public void handleDisconnect(Id<User> userId) {
-        GameMechanics mechanics = gameMechanicsMap.get(userId);
+        final GameMechanics mechanics = gameMechanicsMap.get(userId);
         if (mechanics != null) {
             mechanics.userDisconnected(userId);
         }

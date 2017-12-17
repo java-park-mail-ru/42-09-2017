@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.fixture;
+package ru.mail.park.mechanics.domain.objects.fixture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.jbox2d.common.Vec2;

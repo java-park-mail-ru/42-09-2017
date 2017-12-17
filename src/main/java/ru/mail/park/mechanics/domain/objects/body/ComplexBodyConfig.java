@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.body;
+package ru.mail.park.mechanics.domain.objects.body;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
@@ -16,6 +16,7 @@ public class ComplexBodyConfig {
         return bottomLength;
     }
 
+    @SuppressWarnings("unused")
     public void setBottomLength(Float bottomLength) {
         this.bottomLength = bottomLength;
     }
@@ -24,6 +25,7 @@ public class ComplexBodyConfig {
         return wallThickness;
     }
 
+    @SuppressWarnings("unused")
     public void setWallThickness(Float wallThickness) {
         this.wallThickness = wallThickness;
     }
@@ -32,6 +34,7 @@ public class ComplexBodyConfig {
         return height;
     }
 
+    @SuppressWarnings("unused")
     public void setHeight(Float height) {
         this.height = height;
     }

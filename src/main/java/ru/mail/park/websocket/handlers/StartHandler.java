@@ -30,7 +30,7 @@ public class StartHandler extends MessageHandler<StartMessage> {
     }
 
     @Override
-    public void handle(StartMessage message, Id<User> userId) throws Exception {
+    public void handle(StartMessage message, Id<User> userId) {
         gameMechanicsService.handleStart(userId, message.getBodies());
     }
 }

@@ -25,7 +25,7 @@ public class CSizeValidator implements ConstraintValidator<CSize, CharSequence> 
         if (charSequence == null || charSequence.length() == 0) {
             return true;
         }
-        int length = charSequence.length();
+        final int length = charSequence.length();
         return length >= min && length <= max;
     }
 

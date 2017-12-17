@@ -12,12 +12,12 @@ import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.exceptions.FramesOutOfBoundException;
 import ru.mail.park.mechanics.listeners.SensorListener;
-import ru.mail.park.mechanics.objects.BodyFrame;
-import ru.mail.park.mechanics.objects.body.BodyData;
-import ru.mail.park.mechanics.objects.body.BodyOptions;
-import ru.mail.park.mechanics.objects.body.ComplexBodyConfig;
-import ru.mail.park.mechanics.objects.body.GBody;
-import ru.mail.park.mechanics.objects.joint.GJoint;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.body.BodyData;
+import ru.mail.park.mechanics.domain.objects.body.BodyOptions;
+import ru.mail.park.mechanics.domain.objects.body.ComplexBodyConfig;
+import ru.mail.park.mechanics.domain.objects.body.GBody;
+import ru.mail.park.mechanics.domain.objects.joint.GJoint;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.websocket.message.from.SnapMessage;
 
@@ -32,8 +32,8 @@ import static ru.mail.park.info.constants.Constants.*;
 
 @Service
 public class WorldRunnerService {
-    private Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
-    private ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(SIMULATION_THREAD_POOL_SIZE);
 
     private final GameDao gameDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunnerService.class);
@@ -55,18 +55,18 @@ public class WorldRunnerService {
     public void initAndRun(GameSession session) {
         executorService.submit(() -> {
             LOGGER.warn("Starting simulation in new thread");
-            BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
-            Map<Long, GBody> bodiesMap = new HashMap<>();
+            final BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
+            final Map<Long, GBody> bodiesMap = new HashMap<>();
             board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
-            Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
+            final Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();
             for (Map.Entry<Id<User>, List<BodyFrame>> initSnap : initSnapsMap.entrySet()) {
                 initSnap.getValue().forEach(bodyFrame -> {
-                    BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
+                    final BodyData bodyData = bodiesMap.get(bodyFrame.getId()).getData();
                     bodyData.setPosition(bodyFrame.getPosition());
                     bodyData.setAngle(bodyFrame.getAngle());
                 });
             }
-            WorldRunner worldRunner = initWorld(session, board);
+            final WorldRunner worldRunner = initWorld(session, board);
             worldRunnerMap.put(session, worldRunner);
             worldRunner.run();
             session.setState(GameState.SIMULATED);
@@ -74,10 +74,10 @@ public class WorldRunnerService {
     }
 
     public boolean checkSnap(GameSession session, SnapMessage snap) throws NullPointerException {
-        WorldRunner worldRunner = worldRunnerMap.get(session);
+        final WorldRunner worldRunner = worldRunnerMap.get(session);
         LOGGER.info("Got changes");
-        long frameNumber = snap.getFrame();
-        long serverFrames = worldRunner.getFrames();
+        final long frameNumber = snap.getFrame();
+        final long serverFrames = worldRunner.getFrames();
         LOGGER.info("   client frame: " + frameNumber);
         if (frameNumber > serverFrames) {
             if (frameNumber - serverFrames > MAX_FRAMES_DELTA) {
@@ -85,16 +85,16 @@ public class WorldRunnerService {
             }
             throw new NullPointerException();
         }
-        List<BodyFrame> bodyFrames = snap.getBodies();
+        final List<BodyFrame> bodyFrames = snap.getBodies();
         boolean cheat = false;
         for (BodyFrame bodyFrame : bodyFrames) {
-            Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
-            BodyFrame serverFrame = serverDiffs.get(frameNumber);
-            Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
-            Vec2 serverLinVel = new Vec2(serverFrame.getLinVelocity().x, -serverFrame.getLinVelocity().y);
-            float serverAngVel = -serverFrame.getAngVelocity();
-            float serverAngle = -serverFrame.getAngle();
-            Vec2 posDiff = serverPos.sub(bodyFrame.getPosition());
+            final Map<Long, BodyFrame> serverDiffs = worldRunner.getDiffsPerFrame().get(bodyFrame.getId());
+            final BodyFrame serverFrame = serverDiffs.get(frameNumber);
+            final Vec2 serverPos = new Vec2(serverFrame.getPosition().x, -serverFrame.getPosition().y);
+            final Vec2 serverLinVel = new Vec2(serverFrame.getLinVelocity().x, -serverFrame.getLinVelocity().y);
+            final float serverAngVel = -serverFrame.getAngVelocity();
+            final float serverAngle = -serverFrame.getAngle();
+            final Vec2 posDiff = serverPos.sub(bodyFrame.getPosition());
             if (Math.max(posDiff.x, posDiff.y) > ALLOWED_POS_DELTA) {
                 cheat = true;
                 bodyFrame.setPosition(serverPos);
@@ -108,20 +108,20 @@ public class WorldRunnerService {
 
     public WorldRunner initWorld(GameSession gameSession, BoardRequest.Data board) {
         LOGGER.info("World initialization started");
-        World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
-        Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
-        Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
-        Map<Long, Map<Long, BodyFrame>> diffsPerFrame = new ConcurrentHashMap<>();
+        final World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
+        final Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
+        final Map<Long, Body> dynamicBodies = new ConcurrentHashMap<>();
+        final Map<Long, Map<Long, BodyFrame>> diffsPerFrame = new ConcurrentHashMap<>();
 
-        List<GBody> bodies = board.getBodies();
-        List<GJoint> joints = board.getJoints();
+        final List<GBody> bodies = board.getBodies();
+        final List<GJoint> joints = board.getJoints();
         for (GBody gbody : bodies) {
-            BodyDef bodyDef = new BodyDef();
+            final BodyDef bodyDef = new BodyDef();
             bodyDef.type = BodyType.values()[gbody.getData().getType()];
-            Vec2 position = gbody.getData().getPosition();
+            final Vec2 position = gbody.getData().getPosition();
             bodyDef.position = new Vec2(position.x, -position.y);
             bodyDef.angle = -gbody.getData().getAngle();
-            Body body = world.createBody(bodyDef);
+            final Body body = world.createBody(bodyDef);
             gameBodies.put(gbody.getId(), body);
             if (bodyDef.type == BodyType.DYNAMIC) {
                 diffsPerFrame.put(gbody.getId(), new ConcurrentHashMap<>());
@@ -133,8 +133,8 @@ public class WorldRunnerService {
                     + bodyDef.position.toString() + ", "
                     + String.valueOf(bodyDef.angle));
 
-            String kind = gbody.getKind();
-            BodyData bodyData = gbody.getData();
+            final String kind = gbody.getKind();
+            final BodyData bodyData = gbody.getData();
             switch (kind) {
                 case "rect":
                     rectCreator(body, bodyData);
@@ -164,7 +164,7 @@ public class WorldRunnerService {
                 );
             }
         }
-        WorldRunner worldRunner = new WorldRunner(world, gameBodies, dynamicBodies, diffsPerFrame);
+        final WorldRunner worldRunner = new WorldRunner(world, gameBodies, dynamicBodies, diffsPerFrame);
         world.setContactListener(new SensorListener(worldRunner));
         world.setContinuousPhysics(false);
         LOGGER.warn("All bodies created");
@@ -172,9 +172,9 @@ public class WorldRunnerService {
     }
 
     private void setPhysicalProperties(BodyOptions options, boolean simpleBody, FixtureDef... fixDefs) {
-        float density = options.getDensity();
-        float friction = options.getFriction();
-        float restitution = options.getRestitution();
+        final float density = options.getDensity();
+        final float friction = options.getFriction();
+        final float restitution = options.getRestitution();
         for (FixtureDef fixDef : fixDefs) {
             fixDef.density = density;
             fixDef.friction = friction;
@@ -187,11 +187,11 @@ public class WorldRunnerService {
     }
 
     private void rectCreator(Body body, BodyData bodyData) {
-        Vec2 size = bodyData.getSize();
+        final Vec2 size = bodyData.getSize();
         if (size == null) {
             throw new RuntimeException("Size is null");
         }
-        FixtureDef fixDef = new FixtureDef();
+        final FixtureDef fixDef = new FixtureDef();
         fixDef.shape = new PolygonShape();
         ((PolygonShape) fixDef.shape).setAsBox(size.x / 2, size.y / 2);
 
@@ -200,11 +200,11 @@ public class WorldRunnerService {
     }
 
     private void circleCreator(Body body, BodyData bodyData) {
-        Float radius = bodyData.getRadius();
+        final Float radius = bodyData.getRadius();
         if (radius == null) {
             throw new RuntimeException("Radius is null");
         }
-        FixtureDef fixDef = new FixtureDef();
+        final FixtureDef fixDef = new FixtureDef();
         fixDef.shape = new CircleShape();
         fixDef.shape.setRadius(radius);
 
@@ -213,39 +213,39 @@ public class WorldRunnerService {
     }
 
     private void bucketCreator(Body body, BodyData bodyData) {
-        float wallWidth;
-        float bottomLength;
-        float height;
-        ComplexBodyConfig config = bodyData.getConfig();
+        final float wallWidth;
+        final float bottomLength;
+        final float height;
+        final ComplexBodyConfig config = bodyData.getConfig();
         try {
             wallWidth = config.getWallThickness();
             bottomLength = config.getBottomLength();
             height = config.getHeight();
         } catch (NullPointerException e) {
-            throw new RuntimeException("Config is null");
+            throw new RuntimeException("Config is null", e);
         }
 
-        int notKeyBodyBits = 0x0001;
+        final int notKeyBodyBits = 0x0001;
 
-        FixtureDef fixDefLeft = new FixtureDef();
+        final FixtureDef fixDefLeft = new FixtureDef();
         fixDefLeft.shape = new PolygonShape();
         ((PolygonShape) fixDefLeft.shape).setAsBox(wallWidth / 2, height / 2,
                 new Vec2(-(bottomLength + wallWidth) / 2, 0), 0);
         fixDefLeft.filter.categoryBits = notKeyBodyBits;
 
-        FixtureDef fixDefRight = new FixtureDef();
+        final FixtureDef fixDefRight = new FixtureDef();
         fixDefRight.shape = new PolygonShape();
         ((PolygonShape) fixDefRight.shape).setAsBox(wallWidth / 2, height / 2,
                 new Vec2((bottomLength + wallWidth) / 2, 0), 0);
         fixDefRight.filter.categoryBits = notKeyBodyBits;
 
-        FixtureDef fixDefDown = new FixtureDef();
+        final FixtureDef fixDefDown = new FixtureDef();
         fixDefDown.shape = new PolygonShape();
         ((PolygonShape) fixDefDown.shape).setAsBox(bottomLength / 2, wallWidth / 2,
                 new Vec2(0, -(height - wallWidth) / 2), 0);
         fixDefDown.filter.categoryBits = notKeyBodyBits;
 
-        FixtureDef fixDefSensor = new FixtureDef();
+        final FixtureDef fixDefSensor = new FixtureDef();
         fixDefSensor.shape = new PolygonShape();
         ((PolygonShape) fixDefSensor.shape).setAsBox(bottomLength / 2, (height - wallWidth) / 2,
                 new Vec2(0f, wallWidth / 2), 0);

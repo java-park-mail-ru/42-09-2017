@@ -15,6 +15,7 @@ public class BoardMessage extends SocketMessage {
         this.playerID = playerID;
     }
 
+    @SuppressWarnings("unused")
     public Long getPlayerID() {
         return playerID;
     }

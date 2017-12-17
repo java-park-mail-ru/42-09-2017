@@ -6,7 +6,7 @@ import org.jbox2d.dynamics.World;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class GameSession {
     private GameState state = GameState.NONE;
     private String result = GAME_ERROR;
 
-    private Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
+    private final Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
 
     public GameSession(
             @NotNull Id<Board> boardId,

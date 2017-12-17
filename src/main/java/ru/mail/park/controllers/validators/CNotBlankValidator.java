@@ -12,6 +12,6 @@ public class CNotBlankValidator implements ConstraintValidator<CNotBlank, CharSe
 
     @Override
     public boolean isValid(CharSequence charSequence, ConstraintValidatorContext constraintValidatorContext) {
-        return charSequence == null || charSequence.toString().trim().length() > 0;
+        return charSequence == null || !charSequence.toString().trim().isEmpty();
     }
 }

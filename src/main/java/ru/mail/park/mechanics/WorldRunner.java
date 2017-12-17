@@ -7,14 +7,14 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
 import java.util.Map;
 
 import static ru.mail.park.info.constants.Constants.*;
 
 public class WorldRunner implements Runnable {
-    private World world;
+    private final World world;
     private boolean calculation = true;
     private long frames = 0L;
     private Map<Long, Body> gameBodies;
@@ -40,10 +40,10 @@ public class WorldRunner implements Runnable {
 
     @Override
     public void run() {
-        long frameNumber = 0;
 
 
         LOGGER.warn("Start running");
+        long frameNumber = 0;
         while (calculation) {
             if (frameNumber / FPS > TIMEOUT) {
                 calculation = false;
@@ -52,11 +52,11 @@ public class WorldRunner implements Runnable {
             frameNumber++;
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
-                long bodyId = bodyEntry.getKey();
-                Body body = bodyEntry.getValue();
-                Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
+                final long bodyId = bodyEntry.getKey();
+                final Body body = bodyEntry.getValue();
+                final Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
                 bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
-                    BodyFrame bodyFrame = new BodyFrame();
+                    final BodyFrame bodyFrame = new BodyFrame();
                     bodyFrame.setPosition(new Vec2(body.getPosition()));
                     bodyFrame.setLinVelocity(new Vec2(body.getLinearVelocity()));
                     bodyFrame.setAngVelocity(body.getAngularVelocity());
@@ -86,22 +86,27 @@ public class WorldRunner implements Runnable {
         return frames;
     }
 
+    @SuppressWarnings("unused")
     public void setFrames(long frames) {
         this.frames = frames;
     }
 
+    @SuppressWarnings("unused")
     public Map<Long, Body> getGameBodies() {
         return gameBodies;
     }
 
+    @SuppressWarnings("unused")
     public void setGameBodies(Map<Long, Body> gameBodies) {
         this.gameBodies = gameBodies;
     }
 
+    @SuppressWarnings("unused")
     public Map<Long, Body> getDynamicBodies() {
         return dynamicBodies;
     }
 
+    @SuppressWarnings("unused")
     public void setDynamicBodies(Map<Long, Body> dynamicBodies) {
         this.dynamicBodies = dynamicBodies;
     }
@@ -110,12 +115,13 @@ public class WorldRunner implements Runnable {
         return diffsPerFrame;
     }
 
+    @SuppressWarnings("unused")
     public void setDiffsPerFrame(Map<Long, Map<Long, BodyFrame>> diffsPerFrame) {
         this.diffsPerFrame = diffsPerFrame;
     }
 
     public void setScore(Long playerId, Long score) {
-        Long oldScore = playerScoreMap.getOrDefault(playerId, 0L);
+        final Long oldScore = playerScoreMap.getOrDefault(playerId, 0L);
         playerScoreMap.put(playerId, oldScore + score);
     }
 }

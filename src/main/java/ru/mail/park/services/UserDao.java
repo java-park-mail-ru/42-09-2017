@@ -18,7 +18,7 @@ import java.util.List;
 @Transactional
 public class UserDao {
     private final PasswordEncoder passwordEncoder;
-    private EntityManager em;
+    private final EntityManager em;
 
     public UserDao(
             PasswordEncoder passwordEncoder,
@@ -28,8 +28,9 @@ public class UserDao {
         this.em = em;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public User createUserVk(Integer userId, String username, String token) {
-        User user = new User();
+        final User user = new User();
         user.setUsername(username);
         user.setVkId(userId);
         user.setVkToken(token);
@@ -38,7 +39,7 @@ public class UserDao {
     }
 
     public void createUser(User userData) {
-        List<String> errors = checkIfNotExists(userData.getUsername(), userData.getEmail());
+        final List<String> errors = checkIfNotExists(userData.getUsername(), userData.getEmail());
         if (!errors.isEmpty()) {
             throw new ControllerValidationException(errors);
         }
@@ -57,7 +58,7 @@ public class UserDao {
         final String username = userData.getUsername();
         final String email = userData.getEmail();
         final String password = userData.getPassword();
-        List<String> errors = checkIfNotExists(username, email);
+        final List<String> errors = checkIfNotExists(username, email);
         if (!errors.isEmpty()) {
             throw new ControllerValidationException(errors);
         }
@@ -74,7 +75,7 @@ public class UserDao {
     }
 
     public User prepareSignIn(UserSigninInfo userSigninInfo) {
-        List<String> errors = checkIfExists(userSigninInfo.getLogin());
+        final List<String> errors = checkIfExists(userSigninInfo.getLogin());
         if (!errors.isEmpty()) {
             throw new ControllerValidationException(errors);
         }
@@ -90,7 +91,7 @@ public class UserDao {
     }
 
     public List<String> checkIfExists(String login) {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         if (!hasUsername(login) && !hasEmail(login)) {
             errors.add(MessageConstants.USERNAME_NOT_EXISTS);
         }
@@ -98,7 +99,7 @@ public class UserDao {
     }
 
     public List<String> checkIfNotExists(String username, String email) {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         if (username != null && hasUsername(username)) {
             errors.add(MessageConstants.EXISTS_USERNAME);
         }
@@ -139,7 +140,7 @@ public class UserDao {
     }
 
     public boolean hasUsername(String username) {
-        Long count = em.createQuery(
+        final Long count = em.createQuery(
                 "select count(id) from User where lower(username)=lower(:username)"
                         + "and vk_id is null", Long.class)
                 .setParameter("username", username)
@@ -148,7 +149,7 @@ public class UserDao {
     }
 
     public boolean hasEmail(String email) {
-        Long count = em.createQuery(
+        final Long count = em.createQuery(
                 "select count(id) from User where lower(email)=lower(:email)"
                 + "and vk_id is null", Long.class)
                 .setParameter("email", email)

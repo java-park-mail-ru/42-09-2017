@@ -11,8 +11,8 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class MovingHandler extends MessageHandler<MovingMessage> {
-    private MessageHandlerContainer messageHandlerContainer;
-    private GameMechanicsService gameMechanicsService;
+    private final MessageHandlerContainer messageHandlerContainer;
+    private final GameMechanicsService gameMechanicsService;
 
     public MovingHandler(
             MessageHandlerContainer messageHandlerContainer,
@@ -29,7 +29,7 @@ public class MovingHandler extends MessageHandler<MovingMessage> {
     }
 
     @Override
-    public void handle(MovingMessage message, Id<User> userId) throws Exception {
+    public void handle(MovingMessage message, Id<User> userId) {
         gameMechanicsService.handleMoving(userId, message.getSnap());
     }
 }

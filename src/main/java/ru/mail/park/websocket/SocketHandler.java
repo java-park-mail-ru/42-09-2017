@@ -44,15 +44,15 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
-        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+        final Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
+        final String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
 
         if (userId != null && userDao.findUserById(userId) != null) {
             remotePointService.registerUser(Id.of(userId), session);
             LOGGER.info("CONNECTED");
             return;
         } else if (vkToken != null) {
-            User user = userDao.findUserVkByToken(vkToken);
+            final User user = userDao.findUserVkByToken(vkToken);
             if (user != null) {
                 remotePointService.registerUser(Id.of(user.getId()), session);
                 LOGGER.info("CONNECTED");
@@ -69,14 +69,14 @@ public class SocketHandler extends TextWebSocketHandler {
             LOGGER.warn("Warning. Session is not opened");
             return;
         }
-        Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
-        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+        final Long userId = (Long) session.getAttributes().get(SESSION_ATTR);
+        final String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
 
         if (userId != null && userDao.findUserById(userId) != null) {
             handleMessage(Id.of(userId), message);
             return;
         } else if (vkToken != null) {
-            User user = userDao.findUserVkByToken(vkToken);
+            final User user = userDao.findUserVkByToken(vkToken);
             if (user != null) {
                 handleMessage(Id.of(user.getId()), message);
                 return;
@@ -95,7 +95,6 @@ public class SocketHandler extends TextWebSocketHandler {
             return;
         }
         try {
-            //noinspection ConstantConditions
             messageHandlerContainer.handle(message, userId);
         } catch (Exception e) {
             LOGGER.error("Can't handle message of type " + message.getClass().getName() + " with content: " + textMessage, e);
@@ -104,13 +103,13 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        Long id = (Long) session.getAttributes().get(SESSION_ATTR);
-        String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
+        final Long id = (Long) session.getAttributes().get(SESSION_ATTR);
+        final String vkToken = (String) session.getAttributes().get(OAUTH_VK_ATTR);
 
         if (id != null) {
             gameMechanicsService.handleDisconnect(Id.of(id));
         } else if (vkToken != null) {
-            User user = userDao.findUserVkByToken(vkToken);
+            final User user = userDao.findUserVkByToken(vkToken);
             if (user != null) {
                 gameMechanicsService.handleDisconnect(Id.of(user.getId()));
             }
@@ -119,7 +118,7 @@ public class SocketHandler extends TextWebSocketHandler {
     }
 
     private void closeSession(WebSocketSession webSocketSession, CloseStatus closeStatus) {
-        CloseStatus status;
+        final CloseStatus status;
         if (closeStatus == null) {
             status = SERVER_ERROR;
         } else {

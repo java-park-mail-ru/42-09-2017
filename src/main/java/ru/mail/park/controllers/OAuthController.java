@@ -44,30 +44,30 @@ public class OAuthController {
     @GetMapping("vk")
     public ResponseEntity<?> oauth(@RequestParam String code, HttpSession httpSession) {
         String accessToken = (String) httpSession.getAttribute(OAUTH_VK_ATTR);
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         try {
-            URI redirectURI = new URI(RESULT_REDIRECT_URI);
+            final URI redirectURI = new URI(RESULT_REDIRECT_URI);
             headers.setLocation(redirectURI);
             if (accessToken != null && userDao.findUserVkByToken(accessToken) != null) {
                 return new ResponseEntity<>(headers, HttpStatus.FOUND);
             }
-            UserAuthResponse userAuthResponse = vkApiClient
+            final UserAuthResponse userAuthResponse = vkApiClient
                     .oauth().userAuthorizationCodeFlow(
                             CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, code
                     ).execute();
             accessToken = userAuthResponse.getAccessToken();
             httpSession.setAttribute(OAUTH_VK_ATTR, accessToken);
-            Integer userId = userAuthResponse.getUserId();
-            User user = userDao.findUserVkById(userId);
+            final Integer userId = userAuthResponse.getUserId();
+            final User user = userDao.findUserVkById(userId);
             if (user != null) {
                 userDao.updateUserVk(user, accessToken);
             } else {
-                UserActor actor = new UserActor(userId, accessToken);
-                List<UserXtrCounters> users = vkApiClient.users().get(actor)
+                final UserActor actor = new UserActor(userId, accessToken);
+                final List<UserXtrCounters> users = vkApiClient.users().get(actor)
                         .userIds(userId.toString())
                         .lang(Lang.EN)
                         .execute();
-                UserXtrCounters userNew = users.get(0);
+                final UserXtrCounters userNew = users.get(0);
                 userDao.createUserVk(userId, userNew.getFirstName(), accessToken);
             }
             return new ResponseEntity<>(headers, HttpStatus.FOUND);

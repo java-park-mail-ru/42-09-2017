@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class SnapHandler extends MessageHandler<SnapMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapHandler.class);
-    private GameMechanicsService gameMechanicsService;
+    private final GameMechanicsService gameMechanicsService;
     private final MessageHandlerContainer messageHandlerContainer;
 
     public SnapHandler(
@@ -33,7 +33,7 @@ public class SnapHandler extends MessageHandler<SnapMessage> {
     }
 
     @Override
-    public void handle(SnapMessage message, Id<User> userId) throws Exception {
+    public void handle(SnapMessage message, Id<User> userId) {
         try {
             gameMechanicsService.handleSnap(userId, message);
         } catch (NullPointerException e) {

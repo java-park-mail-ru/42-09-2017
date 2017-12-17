@@ -11,8 +11,8 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
-    private GameMechanicsService gameMechanicsService;
-    private MessageHandlerContainer handlersContainer;
+    private final GameMechanicsService gameMechanicsService;
+    private final MessageHandlerContainer handlersContainer;
 
     public SubscribeHandler(
             GameMechanicsService gameMechanicsService,
@@ -29,7 +29,7 @@ public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
     }
 
     @Override
-    public void handle(SubscribeMessage message, Id<User> userId) throws Exception {
+    public void handle(SubscribeMessage message, Id<User> userId) {
         gameMechanicsService.handleSubscribe(userId, message.getBoard());
     }
 }

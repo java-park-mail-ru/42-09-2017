@@ -5,9 +5,9 @@ import ru.mail.park.domain.dto.UserDto;
 
 public class UserHelper {
     public static UserDto toDto(User user) {
-        UserDto userDto = new UserDto();
+        final UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
-        String email = user.getEmail();
+        final String email = user.getEmail();
         if (email != null) {
             userDto.setEmail(email);
         }
@@ -15,9 +15,9 @@ public class UserHelper {
     }
 
     public static User fromDto(UserDto userDto) {
-        User user = new User();
+        final User user = new User();
         user.setUsername(userDto.getUsername());
-        String email = userDto.getEmail();
+        final String email = userDto.getEmail();
         if (email != null) {
             user.setEmail(email);
         }

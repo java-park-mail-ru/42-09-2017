@@ -2,7 +2,7 @@ package ru.mail.park.websocket.message.from;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.websocket.message.SocketMessage;
 
 public class MovingMessage extends SocketMessage {
@@ -22,6 +22,7 @@ public class MovingMessage extends SocketMessage {
         return snap;
     }
 
+    @SuppressWarnings("unused")
     public void setSnap(BodyFrame snap) {
         this.snap = snap;
     }

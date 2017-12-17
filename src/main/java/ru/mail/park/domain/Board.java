@@ -49,6 +49,7 @@ public class Board {
         return meta;
     }
 
+    @SuppressWarnings("unused")
     public void setMeta(BoardMeta meta) {
         this.meta = meta;
     }

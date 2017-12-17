@@ -24,6 +24,7 @@ public class Constants {
 
     /* Multi Threading*/
     public static final int THREAD_POOL_SIZE = 2;
+    public static final int SIMULATION_THREAD_POOL_SIZE = 2;
 
     /* Box2d constants */
     public static final long TIMEOUT = 30L;
@@ -32,11 +33,7 @@ public class Constants {
     public static final float DELTA = 1 / 60f;
     public static final int VEL_ITER = 10;
     public static final int POS_ITER = 10;
-    public static final int SECOND = 1000000000;
-    public static final int MICRO_SECOND = 1000000;
     public static final int FPS = 60;
 
     public static final float ALLOWED_POS_DELTA = 0.1f;
-    public static final float ALLOWED_VEL_DELTA = 0.05f;
-    public static final float ALLOWED_ANGLE_DELTA = 0.05f;
 }

@@ -43,7 +43,7 @@ public class JsonBStringType implements UserType {
     @Override
     public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
             throws HibernateException, SQLException {
-        PGobject pgo = new PGobject();
+        final PGobject pgo = new PGobject();
         pgo.setType("jsonb");
         pgo.setValue((String) value);
         st.setObject(index, pgo);

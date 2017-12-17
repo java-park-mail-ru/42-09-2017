@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import static ru.mail.park.info.constants.Constants.HASHCODE_CONSTANT;
 
+@SuppressWarnings("ALL")
 public class Id<T> {
     private final long id;
 

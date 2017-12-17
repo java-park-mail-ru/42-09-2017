@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics;
+package ru.mail.park.mechanics.domain;
 
 import ru.mail.park.domain.User;
 

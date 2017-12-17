@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -41,7 +40,7 @@ public class SpyBeanUserControllerTest {
 
     @Test
     public void loginWithSpyBean() {
-        User user = new User();
+        final User user = new User();
         user.setId(1L);
         user.setUsername("foo");
         user.setPassword(passwordEncoder.encode("bar"));
@@ -49,19 +48,20 @@ public class SpyBeanUserControllerTest {
         doReturn(true).when(userDao).hasUsername(anyString());
         doReturn(user).when(userDao).findUserByUsername(anyString());
 
-        ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
+        final ResponseEntity<UserDto> loginResp = restTemplate.postForEntity(
                 "/api/auth/login",
                 new UserSigninInfo("foo", "bar"),
                 UserDto.class
         );
         assertEquals(HttpStatus.OK, loginResp.getStatusCode());
-        List<String> cookies = loginResp.getHeaders().get("Set-Cookie");
+        final List<String> cookies = loginResp.getHeaders().get("Set-Cookie");
         assertNotNull(cookies);
         assertFalse(cookies.isEmpty());
 
-        UserDto userResp = loginResp.getBody();
+        final UserDto userResp = loginResp.getBody();
         assertNotNull(user);
 
+        assert userResp != null;
         assertEquals("foo", userResp.getUsername());
         verify(userDao).hasUsername(anyString());
         verify(userDao).findUserByUsername(anyString());

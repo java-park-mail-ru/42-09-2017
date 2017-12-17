@@ -18,8 +18,8 @@ public class SensorListener implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        int keyA = contact.getFixtureA().getFilterData().categoryBits;
-        int keyB = contact.getFixtureB().getFilterData().categoryBits;
+        final int keyA = contact.getFixtureA().getFilterData().categoryBits;
+        final int keyB = contact.getFixtureB().getFilterData().categoryBits;
 
         if (keyA == 0x0002 && keyB == 0x0002) {
             LOGGER.warn("CONTACT");
