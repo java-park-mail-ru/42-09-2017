@@ -97,7 +97,7 @@ public class GameMechanics {
         LOGGER.info("Player added!");
     }
 
-    public synchronized void tryStartSimulation(Id<User> userId, List<BodyFrame> snap) {
+    public void tryStartSimulation(Id<User> userId, List<BodyFrame> snap) {
         LOGGER.warn("Trying to start simulation");
         if (!gameSessionService.isPlaying(userId)) {
             LOGGER.error("Should start game before simulation");
