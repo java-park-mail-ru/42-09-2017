@@ -1,8 +1,6 @@
 package ru.mail.park.mechanics;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.World;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
@@ -14,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static ru.mail.park.info.constants.Constants.GRAVITY_X;
-import static ru.mail.park.info.constants.Constants.GRAVITY_Y;
 import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 public class GameSession {
@@ -23,7 +19,6 @@ public class GameSession {
     private Id<Board> boardId;
     @NotEmpty
     private Set<Id<User>> players;
-    private World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
     private GameState state = GameState.NONE;
     private String result = GAME_ERROR;
 

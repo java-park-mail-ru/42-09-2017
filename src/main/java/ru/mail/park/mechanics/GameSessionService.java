@@ -11,6 +11,7 @@ import ru.mail.park.mechanics.domain.Player;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.services.UserDao;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class GameSessionService {
         this.worldRunnerService = worldRunnerService;
     }
 
-    public void initSessions(Set<Id<GameMechanics>> mechanicsList) {
+    public void initSessions(@NotNull Set<Id<GameMechanics>> mechanicsList) {
         if (!sessionsMap.isEmpty()) {
             return;
         }
@@ -47,30 +48,30 @@ public class GameSessionService {
         }
     }
 
-    public Set<GameSession> getSessionsByMechanicsId(Id<GameMechanics> mechanicsId) {
+    public Set<GameSession> getSessionsByMechanicsId(@NotNull Id<GameMechanics> mechanicsId) {
         return sessionsMap.get(mechanicsId);
     }
 
-    public boolean isMovingState(Id<User> userId) {
+    public boolean isMovingState(@NotNull Id<User> userId) {
         final GameSession session = getSessionFor(userId);
         return session != null && session.getState() == GameState.MOVING;
     }
 
-    public boolean isPlaying(Id<User> userId) {
+    public boolean isPlaying(@NotNull Id<User> userId) {
         return gameSessionMap.containsKey(userId);
     }
 
-    public boolean isSimulationStartedFor(Id<User> userId) {
+    public boolean isSimulationStartedFor(@NotNull Id<User> userId) {
         final GameSession gameSession = gameSessionMap.get(userId);
         return gameSession == null || gameSession.getState() == GameState.SIMULATION;
     }
 
-    public boolean isTeamReady(GameSession session) {
+    public boolean isTeamReady(@NotNull GameSession session) {
         return session.getPlayers().stream()
                 .allMatch(id -> playerMap.get(id).isReady());
     }
 
-    public boolean isTeamReady(Id<User> userId) {
+    public boolean isTeamReady(@NotNull Id<User> userId) {
         final GameSession session = gameSessionMap.get(userId);
         if (session == null) {
             LOGGER.error("isTeamReady() - session is null");
@@ -79,7 +80,7 @@ public class GameSessionService {
         return isTeamReady(session);
     }
 
-    public boolean isTeamFinished(Id<User> userId) {
+    public boolean isTeamFinished(@NotNull Id<User> userId) {
         final GameSession session = gameSessionMap.get(userId);
         if (session == null) {
             LOGGER.error("isTeamFinished() - session is null");
@@ -92,11 +93,11 @@ public class GameSessionService {
                 });
     }
 
-    public GameSession getSessionFor(Id<User> userId) {
+    public GameSession getSessionFor(@NotNull Id<User> userId) {
         return gameSessionMap.get(userId);
     }
 
-    public void prepareSimulation(Id<User> userId, List<BodyFrame> snap) {
+    public void prepareSimulation(@NotNull Id<User> userId, @NotNull List<BodyFrame> snap) {
         LOGGER.warn("Trying to start simulation");
         if (!isPlaying(userId)) {
             LOGGER.error("Should start game before simulation");
@@ -114,7 +115,7 @@ public class GameSessionService {
         }
     }
 
-    public void joinGame(Id<GameMechanics> mechanicsId, Id<Board> boardId, Set<Id<User>> players) {
+    public void joinGame(@NotNull Id<GameMechanics> mechanicsId, @NotNull Id<Board> boardId, @NotNull Set<Id<User>> players) {
         final GameSession gameSession = new GameSession(boardId, players);
         players.forEach(player -> {
             gameSessionMap.put(player, gameSession);
@@ -128,7 +129,7 @@ public class GameSessionService {
         sessions.add(gameSession);
     }
 
-    public void setMovingForSession(Id<User> userId) {
+    public void setMovingForSession(@NotNull Id<User> userId) {
         final GameSession session = getSessionFor(userId);
         if (session == null || session.getState() == GameState.MOVING) {
             LOGGER.warn("Session is null or already in Moving state");
@@ -137,7 +138,7 @@ public class GameSessionService {
         session.setState(GameState.MOVING);
     }
 
-    public void setReadyForPlayer(Id<User> userId) {
+    public void setReadyForPlayer(@NotNull Id<User> userId) {
         final Player player = playerMap.get(userId);
         if (player == null) {
             LOGGER.warn("Can't set ready for player");
@@ -146,7 +147,7 @@ public class GameSessionService {
         player.setReady(true);
     }
 
-    public void setReadyForSession(Id<User> userId) {
+    public void setReadyForSession(@NotNull Id<User> userId) {
         final GameSession session = getSessionFor(userId);
         if (session == null || session.getState() == GameState.READY) {
             LOGGER.warn("Session is null or already in Ready state");
@@ -155,7 +156,7 @@ public class GameSessionService {
         session.setState(GameState.READY);
     }
 
-    public void setFinishedForPlayer(Id<User> userId) {
+    public void setFinishedForPlayer(@NotNull Id<User> userId) {
         final Player player = playerMap.get(userId);
         if (player == null) {
             LOGGER.warn("Can't set finished for player");
@@ -164,7 +165,7 @@ public class GameSessionService {
         player.setFinished();
     }
 
-    public void setFinishedForSession(Id<User> userId) {
+    public void setFinishedForSession(@NotNull Id<User> userId) {
         final GameSession session = getSessionFor(userId);
         if (session == null || session.getState() == GameState.FINISHED) {
             LOGGER.warn("Session is null or already in Finished state");
@@ -173,7 +174,7 @@ public class GameSessionService {
         session.setState(GameState.FINISHED);
     }
 
-    public void removeSessionFor(Id<User> userId) {
+    public void removeSessionFor(@NotNull Id<User> userId) {
         final GameSession session = gameSessionMap.remove(userId);
         if (session != null) {
             session.removePlayer(userId);
@@ -182,7 +183,7 @@ public class GameSessionService {
         remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
     }
 
-    public void removeSessionForTeam(Id<GameMechanics> mechanicsId, GameSession session) {
+    public void removeSessionForTeam(@NotNull Id<GameMechanics> mechanicsId, @NotNull GameSession session) {
         if (session == null) {
             return;
         }
@@ -193,7 +194,7 @@ public class GameSessionService {
         worldRunnerService.removeWorldRunnerFor(session);
     }
 
-    public void removeSessionForTeam(Id<GameMechanics> mechanicsId, Id<User> userId) {
+    public void removeSessionForTeam(@NotNull Id<GameMechanics> mechanicsId, @NotNull Id<User> userId) {
         final GameSession session = gameSessionMap.get(userId);
         removeSessionForTeam(mechanicsId, session);
     }
@@ -202,11 +203,32 @@ public class GameSessionService {
         return playerMap.get(userId);
     }
 
-    public Set<Id<User>> getTeamOf(Id<User> userId) {
+    public void setPlayerId(@NotNull Id<User> userId, @NotNull Id<Player> playerId) {
+        final Player player = getPlayer(userId);
+        if (player != null) {
+            player.setId(playerId);
+        }
+    }
+
+    public Set<Id<User>> getTeamOf(@NotNull Id<User> userId) {
         final GameSession gameSession = gameSessionMap.get(userId);
         if (gameSession == null) {
             return null;
         }
         return gameSession.getPlayers();
+    }
+
+    public void setScores(@NotNull GameSession session) {
+        final WorldRunner worldRunner = worldRunnerService.getWorldRunnerFor(session);
+        if (worldRunner == null) {
+            return;
+        }
+        final Map<Id<Player>, Long> scoreMap = worldRunner.getPlayerScoreMap();
+        session.getPlayers()
+                .forEach(userId -> {
+                    final Player player = getPlayer(userId);
+                    final Long score = scoreMap.getOrDefault(player.getId(), 0L);
+                    player.setScore(score);
+                });
     }
 }

@@ -11,6 +11,7 @@ public class UserHelper {
         if (email != null) {
             userDto.setEmail(email);
         }
+        userDto.setLevel(user.getLevel());
         return userDto;
     }
 

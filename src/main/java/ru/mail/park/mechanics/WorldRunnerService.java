@@ -68,7 +68,8 @@ public class WorldRunnerService {
             }
             final WorldRunner worldRunner = initWorld(session, board);
             worldRunnerMap.put(session, worldRunner);
-            worldRunner.run();
+            String result = worldRunner.runSimulation();
+            session.setResult(result);
             session.setState(GameState.SIMULATED);
         });
     }

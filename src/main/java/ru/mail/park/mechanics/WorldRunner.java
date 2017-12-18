@@ -1,30 +1,31 @@
 package ru.mail.park.mechanics;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.mail.park.domain.Id;
+import ru.mail.park.mechanics.domain.Player;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static ru.mail.park.info.constants.Constants.*;
+import static ru.mail.park.info.constants.MessageConstants.GAME_SUCCESS;
+import static ru.mail.park.info.constants.MessageConstants.GAME_TIMEOUT;
 
-public class WorldRunner implements Runnable {
+public class WorldRunner {
     private final World world;
     private boolean calculation = true;
     private long frames = 0L;
     private Map<Long, Body> gameBodies;
     private Map<Long, Body> dynamicBodies;
     private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
-
-    private Map<Long, Long> playerScoreMap;
+    private Map<Id<Player>, Long> playerScoreMap = new HashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunner.class);
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public WorldRunner(
             World world,
@@ -38,16 +39,13 @@ public class WorldRunner implements Runnable {
         this.diffsPerFrame = diffsPerFrame;
     }
 
-    @Override
-    public void run() {
-
-
+    public String runSimulation() {
         LOGGER.warn("Start running");
         long frameNumber = 0;
         while (calculation) {
             if (frameNumber / FPS > TIMEOUT) {
-                calculation = false;
                 LOGGER.error("Running timeout");
+                return GAME_TIMEOUT;
             }
             frameNumber++;
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
@@ -61,17 +59,13 @@ public class WorldRunner implements Runnable {
                     bodyFrame.setLinVelocity(new Vec2(body.getLinearVelocity()));
                     bodyFrame.setAngVelocity(body.getAngularVelocity());
                     bodyFrame.setAngle(body.getAngle());
-                    try {
-                        LOGGER.error(mapper.writeValueAsString(bodyFrame));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
                     return bodyFrame;
                 });
             }
             world.step(DELTA, VEL_ITER, POS_ITER);
         }
         frames = frameNumber;
+        return GAME_SUCCESS;
     }
 
     public boolean isCalculation() {
@@ -120,7 +114,11 @@ public class WorldRunner implements Runnable {
         this.diffsPerFrame = diffsPerFrame;
     }
 
-    public void setScore(Long playerId, Long score) {
+    public Map<Id<Player>, Long> getPlayerScoreMap() {
+        return playerScoreMap;
+    }
+
+    public void setScore(Id<Player> playerId, Long score) {
         final Long oldScore = playerScoreMap.getOrDefault(playerId, 0L);
         playerScoreMap.put(playerId, oldScore + score);
     }

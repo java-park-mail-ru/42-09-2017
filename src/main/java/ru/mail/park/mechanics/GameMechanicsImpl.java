@@ -123,6 +123,7 @@ public class GameMechanicsImpl implements GameMechanics {
             try {
                 message.setPlayerID(playerId[0]);
                 remotePointService.sendMessageTo(player, message);
+                gameSessionService.setPlayerId(player, Id.of(playerId[0]));
                 gameSessionService.setMovingForSession(player);
                 playerId[0]++;
             } catch (IOException e) {
@@ -238,6 +239,7 @@ public class GameMechanicsImpl implements GameMechanics {
         gameSessionService.getSessionsByMechanicsId(id).stream()
                 .filter(GameSession::isSimulated)
                 .forEach(session -> {
+                    gameSessionService.setScores(session);
                     session.setState(GameState.HANDLING);
                     addStartedMessageTask(session);
                 });

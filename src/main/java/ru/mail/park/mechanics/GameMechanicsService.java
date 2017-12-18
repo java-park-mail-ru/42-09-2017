@@ -60,6 +60,7 @@ public class GameMechanicsService {
     }
 
     public void handleSubscribe(Id<User> userId, Id<Board> boardId) {
+        LOGGER.info("Handle subscribe");
         final GameMechanicsImpl mechanics = (GameMechanicsImpl) gameMechanicsMap.get(userId);
         final Id<GameMechanics> newMechanicsId = calculateMechanicsId(boardId);
         final GameMechanics mechanicsNew = idMechanicsMap.get(newMechanicsId);
