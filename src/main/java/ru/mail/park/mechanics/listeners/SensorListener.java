@@ -31,8 +31,14 @@ public class SensorListener implements ContactListener {
             return;
         }
 
-        final Long playerIdA = ((GBody) contact.getFixtureA().getUserData()).getPlayerID();
-        final Long playerIdB = ((GBody) contact.getFixtureB().getUserData()).getPlayerID();
+        final GBody bodyA = (GBody) contact.getFixtureA().getUserData();
+        final GBody bodyB = (GBody) contact.getFixtureB().getUserData();
+
+        if (bodyA == null || bodyB == null) {
+            return;
+        }
+        final Long playerIdA = bodyA.getPlayerID();
+        final Long playerIdB = bodyB.getPlayerID();
 
         if (keyA == 0x0002 && playerIdB != null) {
             worldRunner.setScore(Id.of(playerIdB), CONTACT_SCORE);
