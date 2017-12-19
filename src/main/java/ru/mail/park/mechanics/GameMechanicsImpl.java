@@ -65,20 +65,24 @@ public class GameMechanicsImpl implements GameMechanics {
 
     @Override
     public void gameStep() {
-        while (!tasks.isEmpty()) {
-            final Runnable nextTask = tasks.poll();
-            if (nextTask != null) {
-                try {
-                    nextTask.run();
-                } catch (RuntimeException ex) {
-                    LOGGER.error("Can't handle game task", ex);
+        try {
+            while (!tasks.isEmpty()) {
+                final Runnable nextTask = tasks.poll();
+                if (nextTask != null) {
+                    try {
+                        nextTask.run();
+                    } catch (RuntimeException ex) {
+                        LOGGER.error("Can't handle game task", ex);
+                    }
                 }
             }
+            tryFinishGame();
+            processFinishedSimulation();
+            tryStartSimulation();
+            tryJoinGame();
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
-        tryFinishGame();
-        processFinishedSimulation();
-        tryStartSimulation();
-        tryJoinGame();
     }
 
     @Override
