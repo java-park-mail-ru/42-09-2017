@@ -13,8 +13,8 @@ public class User {
     private String email;
     private String password;
 
-    private Long scores;
-    private Integer level;
+    private Long scores = 0L;
+    private Integer level = 1;
     private Integer vkId;
     private String vkToken;
 
