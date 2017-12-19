@@ -46,6 +46,7 @@ public class WorldRunner {
             if (frameNumber / FPS > TIMEOUT) {
                 LOGGER.error("Running timeout");
                 playerScoreMap.clear();
+                frames = frameNumber;
                 return GAME_TIMEOUT;
             }
             frameNumber++;
