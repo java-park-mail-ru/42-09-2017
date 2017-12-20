@@ -39,7 +39,7 @@ public class GameMechanicsImpl implements GameMechanics {
 
     private final Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
     private final Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
-    private final Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
+    private final Map<Id<Board>, BoardMeta> boardMetaMap = new ConcurrentHashMap<>();
     private final Map<Id<Board>, BoardRequest.Data> boardMap = new ConcurrentHashMap<>();
     private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
@@ -111,7 +111,7 @@ public class GameMechanicsImpl implements GameMechanics {
             return false;
         }
         boardUserMap.putIfAbsent(board, new LinkedHashSet<>());
-        boardCapacityMap.putIfAbsent(board, meta.getPlayers());
+        boardMetaMap.putIfAbsent(board, meta);
         boardMap.computeIfAbsent(board, boardId -> gameDao.getBoard(boardId.getId()));
         boardUserMap.get(board)
                 .add(userId);
@@ -220,12 +220,12 @@ public class GameMechanicsImpl implements GameMechanics {
     @Override
     public void tryJoinGame() {
         boardUserMap.forEach((boardId, waiters) -> {
-            final int players = boardCapacityMap.get(boardId);
+            final int players = boardMetaMap.get(boardId).getPlayers();
             while (waiters.size() / players > 0) {
                 final Set<Id<User>> matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
-                    BoardRequest.Data board = boardMap.get(boardId);
-                    gameSessionService.joinGame(id, board, matchedPlayers);
+                    final BoardRequest.Data board = boardMap.get(boardId);
+                    gameSessionService.joinGame(id, boardId, board, matchedPlayers);
                     addBoardMessageTask(matchedPlayers);
                 }
             }
@@ -238,7 +238,8 @@ public class GameMechanicsImpl implements GameMechanics {
                 .filter(GameSession::isReady)
                 .forEach(session -> {
                     session.setState(GameState.SIMULATION);
-                    worldRunnerService.initAndRun(session);
+                    final BoardMeta meta = boardMetaMap.get(session.getBoardId());
+                    worldRunnerService.initAndRun(session, meta.getTimer());
                 });
     }
 

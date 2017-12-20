@@ -39,11 +39,11 @@ public class WorldRunner {
         this.diffsPerFrame = diffsPerFrame;
     }
 
-    public String runSimulation() {
+    public String runSimulation(Integer timeout) {
         LOGGER.warn("Start running");
         long frameNumber = 0;
         while (calculation) {
-            if (frameNumber / FPS > TIMEOUT) {
+            if (frameNumber / FPS > timeout) {
                 LOGGER.error("Running timeout");
                 playerScoreMap.clear();
                 frames = frameNumber;

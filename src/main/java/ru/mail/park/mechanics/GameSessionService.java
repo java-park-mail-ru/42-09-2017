@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
+import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
@@ -115,8 +116,12 @@ public class GameSessionService {
         }
     }
 
-    public void joinGame(@NotNull Id<GameMechanics> mechanicsId, @NotNull BoardRequest.Data board, @NotNull Set<Id<User>> players) {
-        final GameSession gameSession = new GameSession(board, players);
+    public void joinGame(@NotNull Id<GameMechanics> mechanicsId,
+                         @NotNull Id<Board> boardId,
+                         @NotNull BoardRequest.Data board,
+                         @NotNull Set<Id<User>> players
+    ) {
+        final GameSession gameSession = new GameSession(boardId, board, players);
         players.forEach(player -> {
             gameSessionMap.put(player, gameSession);
             playerMap.put(player, new Player(userDao.findUserById(player.getId())));

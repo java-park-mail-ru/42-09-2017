@@ -48,7 +48,7 @@ public class WorldRunnerService {
         worldRunnerMap.remove(gameSession);
     }
 
-    public void initAndRun(GameSession session) {
+    public void initAndRun(GameSession session, Integer timeout) {
         executorService.submit(() -> {
             LOGGER.warn("Starting simulation in new thread");
             final BoardRequest.Data board = session.getBoard();
@@ -62,9 +62,9 @@ public class WorldRunnerService {
                     bodyData.setAngle(bodyFrame.getAngle());
                 });
             }
-            final WorldRunner worldRunner = initWorld(session, board);
+            final WorldRunner worldRunner = initWorld(board);
             worldRunnerMap.put(session, worldRunner);
-            String result = worldRunner.runSimulation();
+            final String result = worldRunner.runSimulation(timeout);
             session.setResult(result);
             session.setState(GameState.SIMULATED);
         });
@@ -103,7 +103,7 @@ public class WorldRunnerService {
         return cheat;
     }
 
-    public WorldRunner initWorld(GameSession gameSession, BoardRequest.Data board) {
+    public WorldRunner initWorld(BoardRequest.Data board) {
         LOGGER.info("World initialization started");
         final World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
         final Map<Long, Body> gameBodies = new ConcurrentHashMap<>();
