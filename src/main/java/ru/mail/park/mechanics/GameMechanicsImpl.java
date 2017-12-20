@@ -9,6 +9,7 @@ import ru.mail.park.domain.Board;
 import ru.mail.park.domain.BoardMeta;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.services.GameDao;
 import ru.mail.park.services.UserDao;
@@ -36,9 +37,10 @@ public class GameMechanicsImpl implements GameMechanics {
     private final WorldRunnerService worldRunnerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMechanics.class);
 
+    private final Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
     private final Map<Id<Board>, Set<Id<User>>> boardUserMap = new ConcurrentHashMap<>();
     private final Map<Id<Board>, Integer> boardCapacityMap = new ConcurrentHashMap<>();
-    private final Map<Id<User>, Id<Board>> userBoardMap = new ConcurrentHashMap<>();
+    private final Map<Id<Board>, BoardRequest.Data> boardMap = new ConcurrentHashMap<>();
     private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
     public GameMechanicsImpl(
@@ -110,6 +112,7 @@ public class GameMechanicsImpl implements GameMechanics {
         }
         boardUserMap.putIfAbsent(board, new LinkedHashSet<>());
         boardCapacityMap.putIfAbsent(board, meta.getPlayers());
+        boardMap.computeIfAbsent(board, boardId -> gameDao.getBoard(boardId.getId()));
         boardUserMap.get(board)
                 .add(userId);
         userBoardMap.put(userId, board);
@@ -144,7 +147,7 @@ public class GameMechanicsImpl implements GameMechanics {
         players.stream()
                 .filter(playerId -> !from.equals(playerId))
                 .forEach(playerId -> tasks.add(() -> {
-                    LOGGER.info("Sending moving message from " + userDao.findUserById(from.getId()).getUsername());
+                    LOGGER.info("Sending moving message");
                     try {
                         remotePointService.sendMessageTo(playerId, message);
                     } catch (IOException e) {
@@ -221,7 +224,8 @@ public class GameMechanicsImpl implements GameMechanics {
             while (waiters.size() / players > 0) {
                 final Set<Id<User>> matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
-                    gameSessionService.joinGame(id, boardId, matchedPlayers);
+                    BoardRequest.Data board = boardMap.get(boardId);
+                    gameSessionService.joinGame(id, board, matchedPlayers);
                     addBoardMessageTask(matchedPlayers);
                 }
             }

@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
-import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.domain.Player;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.services.UserDao;
@@ -115,8 +115,8 @@ public class GameSessionService {
         }
     }
 
-    public void joinGame(@NotNull Id<GameMechanics> mechanicsId, @NotNull Id<Board> boardId, @NotNull Set<Id<User>> players) {
-        final GameSession gameSession = new GameSession(boardId, players);
+    public void joinGame(@NotNull Id<GameMechanics> mechanicsId, @NotNull BoardRequest.Data board, @NotNull Set<Id<User>> players) {
+        final GameSession gameSession = new GameSession(board, players);
         players.forEach(player -> {
             gameSessionMap.put(player, gameSession);
             playerMap.put(player, new Player(userDao.findUserById(player.getId())));

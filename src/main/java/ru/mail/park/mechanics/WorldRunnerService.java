@@ -11,14 +11,13 @@ import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.exceptions.FramesOutOfBoundException;
-import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.mechanics.domain.objects.body.BodyData;
 import ru.mail.park.mechanics.domain.objects.body.BodyOptions;
 import ru.mail.park.mechanics.domain.objects.body.ComplexBodyConfig;
 import ru.mail.park.mechanics.domain.objects.body.GBody;
 import ru.mail.park.mechanics.domain.objects.joint.GJoint;
-import ru.mail.park.services.GameDao;
+import ru.mail.park.mechanics.listeners.SensorListener;
 import ru.mail.park.websocket.message.from.SnapMessage;
 
 import java.util.HashMap;
@@ -35,13 +34,10 @@ public class WorldRunnerService {
     private final Map<GameSession, WorldRunner> worldRunnerMap = new ConcurrentHashMap<>();
     private final ExecutorService executorService = Executors.newFixedThreadPool(SIMULATION_THREAD_POOL_SIZE);
 
-    private final GameDao gameDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunnerService.class);
 
-    public WorldRunnerService(
-            GameDao gameDao
-    ) {
-        this.gameDao = gameDao;
+    public WorldRunnerService() {
+
     }
 
     public WorldRunner getWorldRunnerFor(GameSession gameSession) {
@@ -55,7 +51,7 @@ public class WorldRunnerService {
     public void initAndRun(GameSession session) {
         executorService.submit(() -> {
             LOGGER.warn("Starting simulation in new thread");
-            final BoardRequest.Data board = gameDao.getBoard(session.getBoardId().getId());
+            final BoardRequest.Data board = session.getBoard();
             final Map<Long, GBody> bodiesMap = new HashMap<>();
             board.getBodies().forEach(body -> bodiesMap.put(body.getId(), body));
             final Map<Id<User>, List<BodyFrame>> initSnapsMap = session.getInitSnapsMap();

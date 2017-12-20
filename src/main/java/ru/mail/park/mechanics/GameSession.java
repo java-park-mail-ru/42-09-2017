@@ -1,9 +1,9 @@
 package ru.mail.park.mechanics;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
 import javax.validation.constraints.NotNull;
@@ -16,7 +16,7 @@ import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 public class GameSession {
     @NotNull
-    private Id<Board> boardId;
+    private BoardRequest.Data board;
     @NotEmpty
     private Set<Id<User>> players;
     private GameState state = GameState.NONE;
@@ -25,19 +25,19 @@ public class GameSession {
     private final Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
 
     public GameSession(
-            @NotNull Id<Board> boardId,
+            @NotNull BoardRequest.Data board,
             @NotEmpty Set<Id<User>> players
     ) {
-        this.boardId = boardId;
+        this.board = board;
         this.players = players;
     }
 
-    public Id<Board> getBoardId() {
-        return boardId;
+    public BoardRequest.Data getBoard() {
+        return board;
     }
 
-    public void setBoardId(Id<Board> boardId) {
-        this.boardId = boardId;
+    public void setBoard(BoardRequest.Data board) {
+        this.board = board;
     }
 
     public Set<Id<User>> getPlayers() {
