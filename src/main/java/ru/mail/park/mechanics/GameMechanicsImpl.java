@@ -136,6 +136,7 @@ public class GameMechanicsImpl implements GameMechanics {
                 message.setPlayerID(playerId[0]);
                 message.setFriend(friend.getUsername());
                 message.setLevel(friend.getLevel());
+                LOGGER.warn("  friend: " + friend.getUsername());
                 remotePointService.sendMessageTo(userId, message);
                 gameSessionService.setPlayerId(userId, Id.of(playerId[0]));
                 gameSessionService.setMovingForSession(userId);
