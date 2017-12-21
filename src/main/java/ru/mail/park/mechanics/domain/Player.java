@@ -2,6 +2,7 @@ package ru.mail.park.mechanics.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
 
@@ -56,6 +57,7 @@ public class Player {
         return score;
     }
 
+    @Transactional
     public void setScore(Long score) {
         if (this.score != 0L || score == 0L) {
             return;
