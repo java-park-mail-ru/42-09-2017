@@ -31,8 +31,8 @@ public class SensorListener implements ContactListener {
             return;
         }
 
-        final GBody bodyA = (GBody) contact.getFixtureA().getUserData();
-        final GBody bodyB = (GBody) contact.getFixtureB().getUserData();
+        final GBody bodyA = (GBody) contact.getFixtureA().getBody().getUserData();
+        final GBody bodyB = (GBody) contact.getFixtureB().getBody().getUserData();
 
         if (bodyA == null || bodyB == null) {
             return;
