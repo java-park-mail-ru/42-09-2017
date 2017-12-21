@@ -121,22 +121,28 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     @Override
-    public void addBoardMessageTask(Map<Id<User>, User> players) {
+    public void addBoardMessageTask(Map<Id<User>, User> userMap) {
         LOGGER.info("Team is found");
         final BoardMessage message = new BoardMessage();
         final long[] playerId = {1};
-        players.forEach((userId, user) -> tasks.add(() -> {
+        userMap.forEach((userId, user) -> tasks.add(() -> {
             LOGGER.info("Sending board message");
             try {
-                final Id<User> friendId = Id.of((userId.getId() + 1) % 2);
-                final User friend = players.get(friendId);
-                if (friend == null) {
+                final User[] friend = {null};
+                userMap.forEach((friendId, friendObj) -> {
+                    if (!userId.equals(friendId)) {
+                        friend[0] = friendObj;
+                    }
+                });
+                if (friend[0] == null) {
+                    LOGGER.error("Friend is null");
                     return;
+                } else {
+                    message.setFriend(friend[0].getUsername());
+                    message.setLevel(friend[0].getLevel());
+                    LOGGER.warn("  friend: " + friend[0].getUsername());
                 }
                 message.setPlayerID(playerId[0]);
-                message.setFriend(friend.getUsername());
-                message.setLevel(friend.getLevel());
-                LOGGER.warn("  friend: " + friend.getUsername());
                 remotePointService.sendMessageTo(userId, message);
                 gameSessionService.setPlayerId(userId, Id.of(playerId[0]));
                 gameSessionService.setMovingForSession(userId);
