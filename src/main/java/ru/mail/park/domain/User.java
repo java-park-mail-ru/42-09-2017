@@ -5,7 +5,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "player")
 public class User {
-    @Id
+    @javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -15,6 +15,11 @@ public class User {
 
     private Long scores;
     private Integer level;
+    private Integer vkId;
+    private String vkToken;
+
+    @Transient
+    private boolean ready;
 
     public User() { }
 
@@ -64,5 +69,29 @@ public class User {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public Integer getVkId() {
+        return vkId;
+    }
+
+    public void setVkId(Integer vkId) {
+        this.vkId = vkId;
+    }
+
+    public String getVkToken() {
+        return vkToken;
+    }
+
+    public void setVkToken(String vkToken) {
+        this.vkToken = vkToken;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 }

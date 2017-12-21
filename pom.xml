@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.0.M5</version>
+        <version>2.0.0.M4</version>
     </parent>
 
     <dependencies>
@@ -49,6 +49,16 @@
             <groupId>org.jbox2d</groupId>
             <artifactId>jbox2d-library</artifactId>
             <version>2.2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>5.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vk.api</groupId>
+            <artifactId>sdk</artifactId>
+            <version>0.5.6</version>
         </dependency>
     </dependencies>
 

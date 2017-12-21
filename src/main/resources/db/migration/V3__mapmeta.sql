@@ -1,6 +1,6 @@
 CREATE TABLE board_meta (
   id           BIGSERIAL PRIMARY KEY,
-  board_id     INT,
+  board_id     BIGINT,
   name         TEXT UNIQUE,
   level        INT,
   timer        INT,

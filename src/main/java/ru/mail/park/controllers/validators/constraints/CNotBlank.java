@@ -12,6 +12,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * The difference to {@link org.hibernate.validator.constraints.NotBlank}
+ * is that {@code null} values are getting ignored
+ *
+ * @author Artur Ahadov
+ */
 @Documented
 @Constraint(validatedBy = { CNotBlankValidator.class })
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
