@@ -124,7 +124,7 @@ public class GameSessionService {
         final GameSession gameSession = new GameSession(boardId, board, players);
         players.forEach(player -> {
             gameSessionMap.put(player, gameSession);
-            playerMap.put(player, new Player(userDao.findUserById(player.getId())));
+            playerMap.put(player, new Player(userDao, userDao.findUserById(player.getId())));
         });
         final Set<GameSession> sessions = sessionsMap.get(mechanicsId);
         if (sessions == null) {

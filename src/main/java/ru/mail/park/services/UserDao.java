@@ -74,6 +74,14 @@ public class UserDao {
         return user;
     }
 
+    public User updateScores(User user, Long scores) {
+        if (scores == null) {
+            return null;
+        }
+        user.setScores(scores);
+        return user;
+    }
+
     public User prepareSignIn(UserSigninInfo userSigninInfo) {
         final List<String> errors = checkIfExists(userSigninInfo.getLogin());
         if (!errors.isEmpty()) {

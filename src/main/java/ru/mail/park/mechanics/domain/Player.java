@@ -2,9 +2,9 @@ package ru.mail.park.mechanics.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
+import ru.mail.park.services.UserDao;
 
 public class Player {
     private Id<Player> id;
@@ -13,11 +13,14 @@ public class Player {
     private boolean finished = false;
     private Long score = 0L;
 
+    private final UserDao userDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
     public Player(
+            UserDao userDao,
             User user
     ) {
+        this.userDao = userDao;
         this.user = user;
     }
 
@@ -57,13 +60,12 @@ public class Player {
         return score;
     }
 
-    @Transactional
     public void setScore(Long score) {
         if (this.score != 0L || score == 0L) {
             return;
         }
         LOGGER.warn("Setting score to player " + id);
         this.score = score;
-        user.setScores(this.score);
+        userDao.updateScores(user, score);
     }
 }
