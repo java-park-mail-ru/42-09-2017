@@ -119,12 +119,12 @@ public class GameSessionService {
     public void joinGame(@NotNull Id<GameMechanics> mechanicsId,
                          @NotNull Id<Board> boardId,
                          @NotNull BoardRequest.Data board,
-                         @NotNull Set<Id<User>> players
+                         @NotNull Map<Id<User>, User> users
     ) {
-        final GameSession gameSession = new GameSession(boardId, board, players);
-        players.forEach(player -> {
-            gameSessionMap.put(player, gameSession);
-            playerMap.put(player, new Player(userDao, userDao.findUserById(player.getId())));
+        final GameSession gameSession = new GameSession(boardId, board, users.keySet());
+        users.forEach((userId, user) -> {
+            gameSessionMap.put(userId, gameSession);
+            playerMap.put(userId, new Player(userDao, user));
         });
         final Set<GameSession> sessions = sessionsMap.get(mechanicsId);
         if (sessions == null) {

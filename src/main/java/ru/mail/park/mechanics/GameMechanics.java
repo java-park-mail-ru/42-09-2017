@@ -7,7 +7,7 @@ import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.websocket.message.from.SnapMessage;
 import ru.mail.park.websocket.message.to.FinishedMessage;
 
-import java.util.Set;
+import java.util.Map;
 
 public interface GameMechanics {
     void gameStep();
@@ -16,7 +16,7 @@ public interface GameMechanics {
 
     void removeWaiter(Id<User> userId);
 
-    void addBoardMessageTask(Set<Id<User>> players);
+    void addBoardMessageTask(Map<Id<User>, User> players);
 
     void addMovingMessageTask(Id<User> from, BodyFrame snap);
 

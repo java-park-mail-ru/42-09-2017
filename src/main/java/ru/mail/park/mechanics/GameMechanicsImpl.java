@@ -121,17 +121,24 @@ public class GameMechanicsImpl implements GameMechanics {
     }
 
     @Override
-    public void addBoardMessageTask(Set<Id<User>> players) {
+    public void addBoardMessageTask(Map<Id<User>, User> players) {
         LOGGER.info("Team is found");
         final BoardMessage message = new BoardMessage();
         final long[] playerId = {1};
-        players.forEach(player -> tasks.add(() -> {
+        players.forEach((userId, user) -> tasks.add(() -> {
             LOGGER.info("Sending board message");
             try {
+                final Id<User> friendId = Id.of((userId.getId() + 1) % 2);
+                final User friend = players.get(friendId);
+                if (friend == null) {
+                    return;
+                }
                 message.setPlayerID(playerId[0]);
-                remotePointService.sendMessageTo(player, message);
-                gameSessionService.setPlayerId(player, Id.of(playerId[0]));
-                gameSessionService.setMovingForSession(player);
+                message.setFriend(friend.getUsername());
+                message.setLevel(friend.getLevel());
+                remotePointService.sendMessageTo(userId, message);
+                gameSessionService.setPlayerId(userId, Id.of(playerId[0]));
+                gameSessionService.setMovingForSession(userId);
                 playerId[0]++;
             } catch (IOException e) {
                 LOGGER.warn("Can't send board message to player " + playerId[0]);
@@ -225,8 +232,10 @@ public class GameMechanicsImpl implements GameMechanics {
                 final Set<Id<User>> matchedPlayers = matchPlayers(waiters, players);
                 if (matchedPlayers != null) {
                     final BoardRequest.Data board = boardMap.get(boardId);
-                    gameSessionService.joinGame(id, boardId, board, matchedPlayers);
-                    addBoardMessageTask(matchedPlayers);
+                    final Map<Id<User>, User> users = new HashMap<>();
+                    matchedPlayers.forEach(userId -> users.put(userId, userDao.findUserById(userId.getId())));
+                    gameSessionService.joinGame(id, boardId, board, users);
+                    addBoardMessageTask(users);
                 }
             }
         });

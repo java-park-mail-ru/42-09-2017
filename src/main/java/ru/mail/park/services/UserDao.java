@@ -78,7 +78,10 @@ public class UserDao {
         if (scores == null) {
             return null;
         }
-        user.setScores(scores);
+        em.createNativeQuery("update player set scores = scores + :scores where id = :id")
+                .setParameter("scores", scores)
+                .setParameter("id", user.getId())
+                .executeUpdate();
         return user;
     }
 

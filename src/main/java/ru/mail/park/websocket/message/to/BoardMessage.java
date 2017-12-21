@@ -5,6 +5,8 @@ import ru.mail.park.websocket.message.SocketMessage;
 
 public class BoardMessage extends SocketMessage {
     private Long playerID;
+    private String friend;
+    private Integer level;
 
     @JsonCreator
     public BoardMessage() {
@@ -22,5 +24,21 @@ public class BoardMessage extends SocketMessage {
 
     public void setPlayerID(Long playerID) {
         this.playerID = playerID;
+    }
+
+    public String getFriend() {
+        return friend;
+    }
+
+    public void setFriend(String friend) {
+        this.friend = friend;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }
