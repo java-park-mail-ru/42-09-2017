@@ -136,7 +136,6 @@ public class GameMechanicsImpl implements GameMechanics {
                 });
                 if (friend[0] == null) {
                     LOGGER.error("Friend is null");
-                    return;
                 } else {
                     message.setFriend(friend[0].getUsername());
                     message.setLevel(friend[0].getLevel());
