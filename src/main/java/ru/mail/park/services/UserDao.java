@@ -20,6 +20,8 @@ public class UserDao {
     private final PasswordEncoder passwordEncoder;
     private final EntityManager em;
 
+    private static final int LEVEL_FACTOR = 50;
+
     public UserDao(
             PasswordEncoder passwordEncoder,
             EntityManager em
@@ -78,10 +80,12 @@ public class UserDao {
         if (scores == null) {
             return null;
         }
-        em.createNativeQuery("update player set scores = scores + :scores where id = :id")
-                .setParameter("scores", scores)
-                .setParameter("id", user.getId())
-                .executeUpdate();
+        em.refresh(user);
+        user.setScores(user.getScores() + scores);
+        final Integer level = user.getLevel();
+        if (user.getScores() / LEVEL_FACTOR >= level) {
+            user.setLevel(level + 1);
+        }
         return user;
     }
 
