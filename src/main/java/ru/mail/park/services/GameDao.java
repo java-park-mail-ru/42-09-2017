@@ -165,6 +165,18 @@ public class GameDao {
         }
     }
 
+    public Long getBoardIdByName(String name) {
+        try {
+            final Board board = em.createQuery("select board from BoardMeta "
+                    + "where name = :name", Board.class)
+                    .setParameter("name", name)
+                    .getSingleResult();
+            return board.getId();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     public Long getSinglePlayerBoardId() {
         final List<Board> results = em.createQuery("select board from BoardMeta "
                 + "where players = 1", Board.class)

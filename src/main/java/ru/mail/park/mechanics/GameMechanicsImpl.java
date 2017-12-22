@@ -104,14 +104,21 @@ public class GameMechanicsImpl implements GameMechanics {
                         .remove(userId);
             }
         }
-        final BoardMeta meta = gameDao.getMetaOf(board.getId());
-        if (meta == null) {
-            LOGGER.error("Subscribed on bad board. Closing session");
-            remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
+        final boolean[] added = {true};
+        boardMetaMap.computeIfAbsent(board, boardId -> {
+            final BoardMeta meta = gameDao.getMetaOf(board.getId());
+            if (meta == null) {
+                LOGGER.error("Subscribed on bad board. Closing session");
+                remotePointService.cutDownConnection(userId, CloseStatus.SERVER_ERROR);
+                added[0] = false;
+                return null;
+            }
+            return meta;
+        });
+        if (!added[0]) {
             return false;
         }
         boardUserMap.putIfAbsent(board, new LinkedHashSet<>());
-        boardMetaMap.putIfAbsent(board, meta);
         boardMap.computeIfAbsent(board, boardId -> gameDao.getBoard(boardId.getId()));
         boardUserMap.get(board)
                 .add(userId);

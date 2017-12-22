@@ -59,38 +59,41 @@ public class GameMechanicsService {
         return Id.of(boardId.getId() % THREAD_POOL_SIZE);
     }
 
-    public void handleSubscribe(Id<User> userId, Id<Board> boardId) {
+    public boolean handleSubscribe(Id<User> userId, Id<Board> boardId) {
         LOGGER.info("Handle subscribe");
         final GameMechanicsImpl mechanics = (GameMechanicsImpl) gameMechanicsMap.get(userId);
         final Id<GameMechanics> newMechanicsId = calculateMechanicsId(boardId);
         final GameMechanics mechanicsNew = idMechanicsMap.get(newMechanicsId);
+        boolean added;
         if (mechanics != null) {
             if (mechanics.getId().equals(newMechanicsId)) {
-                mechanics.addWaiter(userId, boardId);
-                return;
+                added = mechanics.addWaiter(userId, boardId);
+                return added;
             } else if (!gameSessionService.isPlaying(userId)) {
                 mechanics.removeWaiter(userId);
                 gameMechanicsMap.remove(userId);
             } else {
                 LOGGER.error("Can't subscribe. User is playing.");
-                return;
+                return false;
             }
         }
         LOGGER.warn("Putting new player into mechanics #" + newMechanicsId);
-        final boolean added = mechanicsNew.addWaiter(userId, boardId);
+        added = mechanicsNew.addWaiter(userId, boardId);
         if (added) {
             gameMechanicsMap.put(userId, mechanicsNew);
         }
+        return added;
     }
 
-    public void handleMoving(Id<User> userId, BodyFrame snap) {
+    public boolean handleMoving(Id<User> userId, BodyFrame snap) {
         LOGGER.info("Handle moving");
         if (!gameSessionService.isPlaying(userId) || !gameSessionService.isMovingState(userId)) {
             LOGGER.warn("I will not send snapshot because you are not playing "
                     + "or session is not in Moving state");
-            return;
+            return false;
         }
         gameMechanicsMap.get(userId).addMovingMessageTask(userId, snap);
+        return true;
     }
 
     public void handleStart(Id<User> userId, List<BodyFrame> snap) {
@@ -98,23 +101,25 @@ public class GameMechanicsService {
         gameSessionService.prepareSimulation(userId, snap);
     }
 
-    public void handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
+    public boolean handleSnap(Id<User> userId, SnapMessage snap) throws NullPointerException {
         LOGGER.info("Handle snap");
         final GameSession session = gameSessionService.getSessionFor(userId);
         if (session == null) {
             LOGGER.error("Can't handle snap. Session is null");
+            return false;
         }
         final boolean cheat = worldRunnerService.checkSnap(session, snap);
         if (cheat) {
             gameMechanicsMap.get(userId).addSnapMessageTask(userId, snap);
         }
+        return true;
     }
 
-    public void handleFinish(Id<User> userId) {
+    public boolean handleFinish(Id<User> userId) {
         LOGGER.info("Handle finish");
         final Player player = gameSessionService.getPlayer(userId);
         if (!gameSessionService.isPlaying(userId) || player.isFinished()) {
-            return;
+            return false;
         }
         gameSessionService.setFinishedForPlayer(userId);
         final GameSession session = gameSessionService.getSessionFor(userId);
@@ -123,6 +128,7 @@ public class GameMechanicsService {
         if (gameSessionService.isTeamFinished(userId)) {
             gameSessionService.setFinishedForSession(userId);
         }
+        return true;
     }
 
     public void handleDisconnect(Id<User> userId) {

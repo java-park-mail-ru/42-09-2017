@@ -1,4 +1,4 @@
-package ru.mail.park;
+package ru.mail.park.controllers;
 
 
 import org.junit.Test;
