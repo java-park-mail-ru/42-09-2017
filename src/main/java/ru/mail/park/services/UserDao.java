@@ -76,11 +76,11 @@ public class UserDao {
         return user;
     }
 
-    public User updateScores(User user, Long scores) {
+    public User updateScores(User notManagedUser, Long scores) {
         if (scores == null) {
             return null;
         }
-        em.refresh(user);
+        final User user = em.merge(notManagedUser);
         user.setScores(user.getScores() + scores);
         final Integer level = user.getLevel();
         if (user.getScores() / LEVEL_FACTOR >= level) {
