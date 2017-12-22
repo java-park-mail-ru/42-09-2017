@@ -28,9 +28,9 @@ public class GameController {
 
     @GetMapping("maps")
     public ResponseEntity<List<BoardMetaDto>> getMaps(
-            @PathVariable(value = "sort", required = false) String sort,
-            @PathVariable(value = "page", required = false) Integer page,
-            @PathVariable(value = "offline", required = false) Boolean offline
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "offline", required = false) Boolean offline
     ) {
         return ResponseEntity
                 .ok(BoardMetaHelper.toDto(
