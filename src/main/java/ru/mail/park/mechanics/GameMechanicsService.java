@@ -113,7 +113,7 @@ public class GameMechanicsService {
     public void handleFinish(Id<User> userId) {
         LOGGER.info("Handle finish");
         final Player player = gameSessionService.getPlayer(userId);
-        if (player.isFinished()) {
+        if (!gameSessionService.isPlaying(userId) || player.isFinished()) {
             return;
         }
         gameSessionService.setFinishedForPlayer(userId);
