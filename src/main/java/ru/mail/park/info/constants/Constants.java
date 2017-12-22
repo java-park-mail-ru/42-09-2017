@@ -12,8 +12,8 @@ public class Constants {
     public static final int MAPS_ON_PAGE = 10;
 
     /* Vk OAUTH */
-    public static final int CLIENT_ID = 6306491;
-    public static final String CLIENT_SECRET = "HN4BbLJfTXr6PwgMvBgW";
+    public static final int CLIENT_ID = 6206034;
+    public static final String CLIENT_SECRET = "MIyVHEJs0GudeiNPRNfB";
     public static final String REDIRECT_URI = "https://physicsio.tech/backend/api/oauth/vk";
 
     public static final String RESULT_REDIRECT_URI = "https://physicsio.tech/online/lobby";
