@@ -32,8 +32,15 @@ public class GameDao {
         this.em = em;
     }
 
-    public List<BoardMeta> getMetas(@Nullable String sort, @Nullable Integer page) {
+    public List<BoardMeta> getMetas(
+            @Nullable String sort,
+            @Nullable Integer page,
+            @Nullable Boolean offline
+    ) {
         final StringBuilder sql = new StringBuilder("select m from BoardMeta m");
+        if (Boolean.TRUE.equals(offline)) {
+            sql.append(" where players = 1");
+        }
         if (sort != null) {
             sql.append(" order by ").append(sort);
         }
@@ -155,6 +162,17 @@ public class GameDao {
         }
         if (metaNew.getPreview() != null) {
             boardMeta.setPreview(metaNew.getPreview());
+        }
+    }
+
+    public Long getSinglePlayerBoardId() {
+        final List<Board> results = em.createQuery("select board from BoardMeta "
+                + "where players = 1", Board.class)
+                .getResultList();
+        if (!results.isEmpty()) {
+            return results.get(0).getId();
+        } else {
+            return null;
         }
     }
 }

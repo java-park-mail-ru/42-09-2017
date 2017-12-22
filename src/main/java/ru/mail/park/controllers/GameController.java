@@ -29,11 +29,12 @@ public class GameController {
     @GetMapping("maps")
     public ResponseEntity<List<BoardMetaDto>> getMaps(
             @PathVariable(value = "sort", required = false) String sort,
-            @PathVariable(value = "page", required = false) Integer page
+            @PathVariable(value = "page", required = false) Integer page,
+            @PathVariable(value = "offline", required = false) Boolean offline
     ) {
         return ResponseEntity
                 .ok(BoardMetaHelper.toDto(
-                        gameDao.getMetas(sort, page)
+                        gameDao.getMetas(sort, page, offline)
                 ));
     }
 
