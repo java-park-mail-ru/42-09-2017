@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.body;
+package ru.mail.park.mechanics.domain.objects.body;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,6 +35,7 @@ public class BodyData {
         return size;
     }
 
+    @SuppressWarnings("unused")
     public void setSize(Vec2 size) {
         this.size = size;
     }
@@ -43,6 +44,7 @@ public class BodyData {
         return radius;
     }
 
+    @SuppressWarnings("unused")
     public void setRadius(Float radius) {
         this.radius = radius;
     }
@@ -59,6 +61,7 @@ public class BodyData {
         return config;
     }
 
+    @SuppressWarnings("unused")
     public void setConfig(ComplexBodyConfig config) {
         this.config = config;
     }
@@ -67,6 +70,7 @@ public class BodyData {
         return options;
     }
 
+    @SuppressWarnings("unused")
     public void setOptions(BodyOptions options) {
         this.options = options;
     }

@@ -22,16 +22,17 @@ public class AppConfiguration {
 
     @Bean
     public VkApiClient getVkApiClient() {
-        TransportClient transportClient = HttpTransportClient.getInstance();
+        final TransportClient transportClient = HttpTransportClient.getInstance();
         return new VkApiClient(transportClient);
     }
 
     @Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
+        final CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://localhost:8000");
         config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("https://localhost:8080");
         config.addAllowedOrigin("https://physicsio.tech");
         config.addAllowedOrigin("https://194.87.110.17");
         config.addAllowedHeader("*");

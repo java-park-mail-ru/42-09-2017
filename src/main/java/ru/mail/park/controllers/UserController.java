@@ -1,5 +1,7 @@
 package ru.mail.park.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,8 @@ import java.util.List;
 public class UserController {
     private final UserDao userDao;
 
-    private Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public UserController(
             UserDao userDao
@@ -35,12 +38,13 @@ public class UserController {
     }
 
     @PostMapping("signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody UserDto userSignupInfo, HttpSession httpSession) {
-        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody UserDto userSignupInfo, HttpSession httpSession) {
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null
+                || httpSession.getAttribute(Constants.OAUTH_VK_ATTR) != null) {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
 
-        User user = UserHelper.fromDto(userSignupInfo);
+        final User user = UserHelper.fromDto(userSignupInfo);
         userDao.createUser(user);
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
@@ -49,18 +53,19 @@ public class UserController {
 
     @PutMapping("update")
     public ResponseEntity<?> update(@Valid @RequestBody UserUpdateInfo userUpdateInfo, HttpSession httpSession) {
-        List<String> errors = new ArrayList<>();
 
-        Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
-        if (id == null) {
+        final Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
+        final String vkToken = (String) httpSession.getAttribute(Constants.OAUTH_VK_ATTR);
+        if (id == null && vkToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message<>(MessageConstants.UNAUTHORIZED));
         }
 
-        String oldPassword = userUpdateInfo.getOldPassword();
-        String password = userUpdateInfo.getPassword();
+        final String oldPassword = userUpdateInfo.getOldPassword();
+        final String password = userUpdateInfo.getPassword();
 
-        User user = userDao.findUserById(id);
+        final User user = userDao.findUserById(id);
 
+        final List<String> errors = new ArrayList<>();
         if (oldPassword != null && password == null) {
             errors.add(MessageConstants.EMPTY_PASSWORD);
         } else if (oldPassword == null && password != null) {
@@ -77,23 +82,34 @@ public class UserController {
                 .ok(UserHelper.toDto(user));
     }
 
+    @SuppressWarnings("InstanceMethodNamingConvention")
     @GetMapping("me")
     public ResponseEntity<?> me(HttpSession httpSession) {
-        Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
-        if (id == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageConstants.UNAUTHORIZED);
+        final Long id = (Long) httpSession.getAttribute(Constants.SESSION_ATTR);
+        final String vkToken = (String) httpSession.getAttribute(Constants.OAUTH_VK_ATTR);
+        if (id != null) {
+            return ResponseEntity
+                    .ok(UserHelper.toDto(userDao.findUserById(id)));
+        } else if (vkToken != null) {
+            try {
+                LOGGER.warn(mapper.writeValueAsString(userDao.findUserVkByToken(vkToken)));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return ResponseEntity
+                    .ok(UserHelper.toDto(userDao.findUserVkByToken(vkToken)));
         }
-        return ResponseEntity
-                .ok(UserHelper.toDto(userDao.findUserById(id)));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageConstants.UNAUTHORIZED);
     }
 
     @PostMapping("login")
     public ResponseEntity<?> login(@Valid @RequestBody UserSigninInfo userSigninInfo, HttpSession httpSession) {
-        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null) {
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) != null
+                || httpSession.getAttribute(Constants.OAUTH_VK_ATTR) != null) {
             return ResponseEntity.badRequest().body(new Message<>(MessageConstants.AUTHORIZED));
         }
 
-        User user = userDao.prepareSignIn(userSigninInfo);
+        final User user = userDao.prepareSignIn(userSigninInfo);
 
         httpSession.setAttribute(Constants.SESSION_ATTR, user.getId());
         return ResponseEntity
@@ -102,7 +118,8 @@ public class UserController {
 
     @DeleteMapping("logout")
     public ResponseEntity<Message<String>> logout(HttpSession httpSession) {
-        if (httpSession.getAttribute(Constants.SESSION_ATTR) == null) {
+        if (httpSession.getAttribute(Constants.SESSION_ATTR) == null
+                && httpSession.getAttribute(Constants.OAUTH_VK_ATTR) == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new Message<>(MessageConstants.UNAUTHORIZED));

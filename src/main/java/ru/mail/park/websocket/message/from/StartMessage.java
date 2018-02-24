@@ -1,7 +1,7 @@
 package ru.mail.park.websocket.message.from;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 import ru.mail.park.websocket.message.SocketMessage;
 
 import javax.validation.Valid;

@@ -24,6 +24,8 @@ public class UserDto {
     @CSize(min = Constants.PASSWORD_MIN_LENGTH, message = MessageConstants.BAD_PASSWORD)
     private String password;
 
+    private Integer level;
+
     @JsonCreator
     public UserDto() {
 
@@ -39,15 +41,10 @@ public class UserDto {
         this.password = password;
     }
 
-    public UserDto(UserDto user) {
-        this(user.getUsername(), user.getEmail(), user.getPassword());
-    }
-
     public String getUsername() {
         return username;
     }
 
-    @JsonProperty("username")
     public void setUsername(String username) {
         this.username = username;
     }
@@ -56,7 +53,6 @@ public class UserDto {
         return email;
     }
 
-    @JsonProperty("email")
     public void setEmail(String email) {
         this.email = email;
     }
@@ -66,8 +62,16 @@ public class UserDto {
         return password;
     }
 
-    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }

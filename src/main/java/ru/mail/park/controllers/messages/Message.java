@@ -1,7 +1,7 @@
 package ru.mail.park.controllers.messages;
 
 public class Message<T> {
-    private T message;
+    private final T message;
 
     public Message(T message) {
         this.message = message;

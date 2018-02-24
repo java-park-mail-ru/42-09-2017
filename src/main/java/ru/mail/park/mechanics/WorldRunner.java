@@ -1,29 +1,31 @@
 package ru.mail.park.mechanics;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.domain.Id;
+import ru.mail.park.mechanics.domain.Player;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static ru.mail.park.info.constants.Constants.*;
+import static ru.mail.park.info.constants.MessageConstants.GAME_SUCCESS;
+import static ru.mail.park.info.constants.MessageConstants.GAME_TIMEOUT;
 
-public class WorldRunner implements Runnable {
-    private World world;
+public class WorldRunner {
+    private final World world;
     private boolean calculation = true;
     private long frames = 0L;
     private Map<Long, Body> gameBodies;
     private Map<Long, Body> dynamicBodies;
     private Map<Long, Map<Long, BodyFrame>> diffsPerFrame;
-
+    private Map<Id<Player>, Long> playerScoreMap = new HashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldRunner.class);
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public WorldRunner(
             World world,
@@ -37,59 +39,35 @@ public class WorldRunner implements Runnable {
         this.diffsPerFrame = diffsPerFrame;
     }
 
-    @Override
-    public void run() {
-        long startTime = System.nanoTime();
-        long beforeTime = startTime;
-        long afterTime;
-        long sleepTime;
-        long frameNumber = 0;
-
-
+    public String runSimulation(Integer timeout) {
         LOGGER.warn("Start running");
+        long frameNumber = 0;
         while (calculation) {
-            if (frameNumber / FPS > TIMEOUT) {
-                calculation = false;
+            if (frameNumber / FPS > timeout) {
                 LOGGER.error("Running timeout");
+                playerScoreMap.clear();
+                frames = frameNumber;
+                return GAME_TIMEOUT;
             }
-
             frameNumber++;
             LOGGER.warn("FRAME #" + String.valueOf(frameNumber));
             for (Map.Entry<Long, Body> bodyEntry : dynamicBodies.entrySet()) {
-                long bodyId = bodyEntry.getKey();
-                Body body = bodyEntry.getValue();
-                Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
+                final long bodyId = bodyEntry.getKey();
+                final Body body = bodyEntry.getValue();
+                final Map<Long, BodyFrame> bodyDiffMap = diffsPerFrame.get(bodyId);
                 bodyDiffMap.computeIfAbsent(frameNumber, ignored -> {
-                    BodyFrame bodyFrame = new BodyFrame();
+                    final BodyFrame bodyFrame = new BodyFrame();
                     bodyFrame.setPosition(new Vec2(body.getPosition()));
                     bodyFrame.setLinVelocity(new Vec2(body.getLinearVelocity()));
                     bodyFrame.setAngVelocity(body.getAngularVelocity());
                     bodyFrame.setAngle(body.getAngle());
-                    try {
-                        LOGGER.error(mapper.writeValueAsString(bodyFrame));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
                     return bodyFrame;
                 });
             }
             world.step(DELTA, VEL_ITER, POS_ITER);
-//            afterTime = System.nanoTime();
-
-//            sleepTime = (SECOND / FPS - (afterTime - beforeTime)) / MICRO_SECOND;
-//            if (sleepTime < 0) {
-//                sleepTime = 0;
-//            }
-//            try {
-//                LOGGER.info(String.valueOf(sleepTime));
-//                Thread.sleep(sleepTime);
-//            } catch (InterruptedException e) {
-//                LOGGER.error("Sleep interrupted");
-//            }
-//
-//            beforeTime = System.nanoTime();
         }
         frames = frameNumber;
+        return GAME_SUCCESS;
     }
 
     public boolean isCalculation() {
@@ -104,22 +82,27 @@ public class WorldRunner implements Runnable {
         return frames;
     }
 
+    @SuppressWarnings("unused")
     public void setFrames(long frames) {
         this.frames = frames;
     }
 
+    @SuppressWarnings("unused")
     public Map<Long, Body> getGameBodies() {
         return gameBodies;
     }
 
+    @SuppressWarnings("unused")
     public void setGameBodies(Map<Long, Body> gameBodies) {
         this.gameBodies = gameBodies;
     }
 
+    @SuppressWarnings("unused")
     public Map<Long, Body> getDynamicBodies() {
         return dynamicBodies;
     }
 
+    @SuppressWarnings("unused")
     public void setDynamicBodies(Map<Long, Body> dynamicBodies) {
         this.dynamicBodies = dynamicBodies;
     }
@@ -128,7 +111,17 @@ public class WorldRunner implements Runnable {
         return diffsPerFrame;
     }
 
+    @SuppressWarnings("unused")
     public void setDiffsPerFrame(Map<Long, Map<Long, BodyFrame>> diffsPerFrame) {
         this.diffsPerFrame = diffsPerFrame;
+    }
+
+    public Map<Id<Player>, Long> getPlayerScoreMap() {
+        return playerScoreMap;
+    }
+
+    public void setScore(Id<Player> playerId, Long score) {
+        final Long oldScore = playerScoreMap.getOrDefault(playerId, 0L);
+        playerScoreMap.put(playerId, oldScore + score);
     }
 }

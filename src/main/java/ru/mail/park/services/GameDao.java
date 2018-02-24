@@ -24,7 +24,7 @@ import static ru.mail.park.info.constants.Constants.MAPS_ON_PAGE;
 @Service
 @Transactional
 public class GameDao {
-    private EntityManager em;
+    private final EntityManager em;
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(GameDao.class);
 
@@ -32,8 +32,15 @@ public class GameDao {
         this.em = em;
     }
 
-    public List<BoardMeta> getMetas(@Nullable String sort, @Nullable Integer page) {
-        StringBuilder sql = new StringBuilder("select m from BoardMeta m");
+    public List<BoardMeta> getMetas(
+            @Nullable String sort,
+            @Nullable Integer page,
+            @Nullable Boolean offline
+    ) {
+        final StringBuilder sql = new StringBuilder("select m from BoardMeta m");
+        if (Boolean.TRUE.equals(offline)) {
+            sql.append(" where players = 1");
+        }
         if (sort != null) {
             sql.append(" order by ").append(sort);
         }
@@ -61,7 +68,7 @@ public class GameDao {
     }
 
     public String getBoardString(Long id) {
-        Board board = em.find(Board.class, id);
+        final Board board = em.find(Board.class, id);
         LOGGER.info("Found board with id " + id.toString());
         if (board == null) {
             return null;
@@ -70,7 +77,7 @@ public class GameDao {
     }
 
     public BoardRequest.Data getBoard(Long id) {
-        String boardString = getBoardString(id);
+        final String boardString = getBoardString(id);
         if (boardString == null) {
             return null;
         }
@@ -83,7 +90,7 @@ public class GameDao {
 
     public BoardMeta getMetaOf(Long boardId) {
         try {
-            Board board = em.find(Board.class, boardId);
+            final Board board = em.find(Board.class, boardId);
             return em.createQuery("select m from BoardMeta m where board = :board", BoardMeta.class)
                     .setParameter("board", board)
                     .getSingleResult();
@@ -95,7 +102,7 @@ public class GameDao {
 
     private boolean hasName(String name) {
         try {
-            Long count = em.createQuery("select count(id) from BoardMeta where name = :name", Long.class)
+            final Long count = em.createQuery("select count(id) from BoardMeta where name = :name", Long.class)
                     .setParameter("name", name)
                     .getSingleResult();
             return count != 0;
@@ -106,11 +113,11 @@ public class GameDao {
 
     public BoardMeta createBoard(BoardRequest.Data boardData, BoardMeta boardMeta) throws JsonProcessingException {
         if (hasName(boardMeta.getName())) {
-            List<String> errors = new ArrayList<>();
+            final List<String> errors = new ArrayList<>();
             errors.add(MessageConstants.BOARD_EXISTS);
             throw new ControllerValidationException(errors);
         }
-        Board board = new Board();
+        final Board board = new Board();
         LOGGER.warn(MAPPER.writeValueAsString(boardData.getBodies()));
         LOGGER.warn(MAPPER.writeValueAsString(boardData.getJoints()));
         board.setData(MAPPER.writeValueAsString(boardData));
@@ -122,7 +129,7 @@ public class GameDao {
     }
 
     public BoardMeta updateBoard(Long id, BoardRequest.Data boardData, BoardMeta boardMeta) {
-        Board board = em.find(Board.class, id);
+        final Board board = em.find(Board.class, id);
         if (board == null) {
             /* ToDo: 03.11.2017 Throw NotFoundException */
             return null;
@@ -155,6 +162,29 @@ public class GameDao {
         }
         if (metaNew.getPreview() != null) {
             boardMeta.setPreview(metaNew.getPreview());
+        }
+    }
+
+    public Long getBoardIdByName(String name) {
+        try {
+            final Board board = em.createQuery("select board from BoardMeta "
+                    + "where name = :name", Board.class)
+                    .setParameter("name", name)
+                    .getSingleResult();
+            return board.getId();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public Long getSinglePlayerBoardId() {
+        final List<Board> results = em.createQuery("select board from BoardMeta "
+                + "where players = 1", Board.class)
+                .getResultList();
+        if (!results.isEmpty()) {
+            return results.get(0).getId();
+        } else {
+            return null;
         }
     }
 }

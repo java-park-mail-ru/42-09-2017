@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 import ru.mail.park.info.constants.MessageConstants;
-import ru.mail.park.mechanics.objects.body.GBody;
-import ru.mail.park.mechanics.objects.joint.GJoint;
+import ru.mail.park.mechanics.domain.objects.body.GBody;
+import ru.mail.park.mechanics.domain.objects.joint.GJoint;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+@SuppressWarnings("RedundantNoArgConstructor")
 public class BoardRequest {
     @NotNull(message = MessageConstants.BOARD_META_EMPTY)
     private BoardMetaDto boardMetaDto;
@@ -28,6 +29,7 @@ public class BoardRequest {
         return boardMetaDto;
     }
 
+    @SuppressWarnings("unused")
     public void setBoardMetaDto(BoardMetaDto boardMetaDto) {
         this.boardMetaDto = boardMetaDto;
     }
@@ -37,10 +39,12 @@ public class BoardRequest {
         return boardData;
     }
 
+    @SuppressWarnings("unused")
     public void setBoardData(Data boardData) {
         this.boardData = boardData;
     }
 
+    @SuppressWarnings("RedundantNoArgConstructor")
     public static class Data {
         @NotEmpty(message = MessageConstants.BODIES_LIST_EMPTY)
         @Valid
@@ -57,6 +61,7 @@ public class BoardRequest {
             return bodies;
         }
 
+        @SuppressWarnings("unused")
         public void setBodies(List<GBody> bodies) {
             this.bodies = bodies;
         }
@@ -65,6 +70,7 @@ public class BoardRequest {
             return joints;
         }
 
+        @SuppressWarnings("unused")
         public void setJoints(List<GJoint> joints) {
             this.joints = joints;
         }

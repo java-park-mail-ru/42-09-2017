@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.body;
+package ru.mail.park.mechanics.domain.objects.body;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import ru.mail.park.info.constants.MessageConstants;
@@ -25,6 +25,7 @@ public class BodyOptions {
         return sensor;
     }
 
+    @SuppressWarnings("unused")
     public void setSensor(boolean sensor) {
         this.sensor = sensor;
     }
@@ -33,6 +34,7 @@ public class BodyOptions {
         return density;
     }
 
+    @SuppressWarnings("unused")
     public void setDensity(Float density) {
         this.density = density;
     }
@@ -41,6 +43,7 @@ public class BodyOptions {
         return friction;
     }
 
+    @SuppressWarnings("unused")
     public void setFriction(Float friction) {
         this.friction = friction;
     }
@@ -49,6 +52,7 @@ public class BodyOptions {
         return restitution;
     }
 
+    @SuppressWarnings("unused")
     public void setRestitution(Float restitution) {
         this.restitution = restitution;
     }
@@ -57,6 +61,7 @@ public class BodyOptions {
         return keyBodyID;
     }
 
+    @SuppressWarnings("unused")
     public void setKeyBodyID(Integer keyBodyID) {
         this.keyBodyID = keyBodyID;
     }

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RemotePointService {
-    private Map<Id<User>, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<Id<User>, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final ObjectMapper mapper = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(RemotePointService.class);
 
@@ -41,27 +41,21 @@ public class RemotePointService {
         }
     }
 
-    public void sendRowMessageTo(Id<User> userId, String message) throws IOException {
-        WebSocketSession session = checkSessionFor(userId);
-        try {
-            session.sendMessage(new TextMessage(message));
-        } catch (IOException e) {
-            throw new IOException("Unable to send the message");
-        }
-    }
-
-    public synchronized void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
-        WebSocketSession session = checkSessionFor(userId);
-        try {
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
-            LOGGER.info("SENT MESSAGE BY SOCKET");
-        } catch (IOException e) {
-            throw new IOException("Unable to send the message");
+    public void sendMessageTo(@NotNull Id<User> userId, @NotNull SocketMessage message) throws IOException {
+        final WebSocketSession session = checkSessionFor(userId);
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (session) {
+            try {
+                session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
+                LOGGER.info("SENT MESSAGE BY SOCKET");
+            } catch (IOException e) {
+                throw new IOException("Unable to send the message", e);
+            }
         }
     }
 
     private WebSocketSession checkSessionFor(Id<User> userId) throws IOException {
-        WebSocketSession session = sessions.get(userId);
+        final WebSocketSession session = sessions.get(userId);
         if (session == null) {
             throw new IOException("No WebSocket connection");
         }

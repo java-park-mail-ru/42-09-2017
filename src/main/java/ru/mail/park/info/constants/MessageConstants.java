@@ -23,8 +23,6 @@ public class MessageConstants {
     public static final String USERNAME_NOT_EXISTS = "USERNAME_NOT_EXISTS";
     public static final String PASSWORD_WRONG = "PASSWORD_WRONG";
 
-    public static final String VK_API_EXCEPTION = "VK_API_EXCEPTION";
-
     public static final String BODIES_LIST_EMPTY = "BODIES_LIST_EMPTY";
     public static final String BOARD_META_EMPTY = "BOARD_META_EMPTY";
     public static final String BOARD_DATA_EMPTY = "BOARD_DATA_EMPTY";
@@ -33,4 +31,8 @@ public class MessageConstants {
     public static final String BOARD_EXISTS = "BOARD_ALREADY_EXISTS";
 
     public static final String TYPE_OUT_OF_BOUNDS = "TYPE_OUT_OF_BOUNDS";
+
+    public static final String GAME_TIMEOUT = "TIMEOUT";
+    public static final String GAME_SUCCESS = "SUCCESS";
+    public static final String GAME_ERROR = "ERROR";
 }

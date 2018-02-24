@@ -1,26 +1,23 @@
 package ru.mail.park.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.domain.dto.BoardMetaDto;
+import ru.mail.park.domain.dto.BoardRequest;
 import ru.mail.park.domain.dto.helpers.BoardMetaHelper;
 import ru.mail.park.services.GameDao;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/game", produces = "application/json")
 public class GameController {
     private final GameDao gameDao;
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
 
     public GameController(GameDao gameDao) {
@@ -31,12 +28,13 @@ public class GameController {
 
     @GetMapping("maps")
     public ResponseEntity<List<BoardMetaDto>> getMaps(
-            @PathVariable(value = "sort", required = false) String sort,
-            @PathVariable(value = "page", required = false) Integer page
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "offline", required = false) Boolean offline
     ) {
         return ResponseEntity
                 .ok(BoardMetaHelper.toDto(
-                        gameDao.getMetas(sort, page)
+                        gameDao.getMetas(sort, page, offline)
                 ));
     }
 
@@ -45,7 +43,7 @@ public class GameController {
             @PathVariable String name, @Valid @RequestBody BoardRequest boardRequest
     ) throws JsonProcessingException {
         boardRequest.getBoardMetaDto().setName(name);
-        BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
+        final BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
                 gameDao.createBoard(
                         boardRequest.getBoardData(),
                         BoardMetaHelper.fromDto(boardRequest.getBoardMetaDto()))
@@ -61,7 +59,7 @@ public class GameController {
     public ResponseEntity<BoardMetaDto> updateMap(
             @PathVariable Long id, @Valid @RequestBody BoardRequest boardRequest
     ) {
-        BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
+        final BoardMetaDto boardMetaDto = BoardMetaHelper.toDto(
                 gameDao.updateBoard(
                         id,
                         boardRequest.getBoardData(),
@@ -77,21 +75,5 @@ public class GameController {
     public ResponseEntity<String> getMap(@PathVariable Long id) {
         return ResponseEntity
                 .ok(gameDao.getBoardString(id));
-    }
-
-    @GetMapping("map/{id}/init")
-    public ResponseEntity<String> runMap(@PathVariable Long id) {
-        BoardRequest.Data data = null;
-        try {
-            data = MAPPER.readValue(gameDao.getBoardString(id), BoardRequest.Data.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity
-                    .badRequest()
-                    .body("bad");
-        }
-
-        return ResponseEntity
-                .ok("good");
     }
 }

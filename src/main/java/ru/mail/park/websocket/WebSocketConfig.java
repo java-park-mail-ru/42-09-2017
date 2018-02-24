@@ -10,12 +10,13 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-    private WebSocketHandler socketHandler;
+    private final WebSocketHandler socketHandler;
 
     public WebSocketConfig(WebSocketHandler socketHandler) {
         this.socketHandler = socketHandler;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
         webSocketHandlerRegistry.addHandler(socketHandler, "/handler")

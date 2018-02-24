@@ -7,7 +7,7 @@ import ru.mail.park.websocket.message.SocketMessage;
 import javax.validation.constraints.NotNull;
 
 public abstract class MessageHandler<T> {
-    private Class<T> clazz;
+    private final Class<T> clazz;
 
     public MessageHandler(@NotNull Class<T> clazz) {
         this.clazz = clazz;
@@ -17,9 +17,9 @@ public abstract class MessageHandler<T> {
         try {
             handle(clazz.cast(message), userId);
         } catch (ClassCastException e) {
-            throw new Exception("Message is not convertible");
+            throw new Exception("Message is not convertible", e);
         }
     }
 
-    public abstract void handle(@NotNull T message, @NotNull Id<User> userId) throws Exception;
+    public abstract void handle(@NotNull T message, @NotNull Id<User> userId);
 }

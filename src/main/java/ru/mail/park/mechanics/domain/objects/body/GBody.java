@@ -1,4 +1,4 @@
-package ru.mail.park.mechanics.objects.body;
+package ru.mail.park.mechanics.domain.objects.body;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import ru.mail.park.info.constants.MessageConstants;
@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 public class GBody {
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long id;
-    @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     private Long playerID;
     @NotNull(message = MessageConstants.REQUIRED_FIELD_EMPTY)
     @Valid
@@ -31,10 +30,12 @@ public class GBody {
         this.id = id;
     }
 
+    @SuppressWarnings("unused")
     public Long getPlayerID() {
         return playerID;
     }
 
+    @SuppressWarnings("unused")
     public void setPlayerID(Long playerID) {
         this.playerID = playerID;
     }
@@ -43,14 +44,17 @@ public class GBody {
         return data;
     }
 
+    @SuppressWarnings("unused")
     public void setData(BodyData data) {
         this.data = data;
     }
 
+    @SuppressWarnings("unused")
     public boolean isSelectable() {
         return selectable;
     }
 
+    @SuppressWarnings("unused")
     public void setSelectable(boolean selectable) {
         this.selectable = selectable;
     }
@@ -59,6 +63,7 @@ public class GBody {
         return kind;
     }
 
+    @SuppressWarnings("unused")
     public void setKind(String kind) {
         this.kind = kind;
     }

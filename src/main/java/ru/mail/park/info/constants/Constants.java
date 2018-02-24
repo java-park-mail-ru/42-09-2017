@@ -11,23 +11,29 @@ public class Constants {
 
     public static final int MAPS_ON_PAGE = 10;
 
+    /* Vk OAUTH */
     public static final int CLIENT_ID = 6206034;
     public static final String CLIENT_SECRET = "MIyVHEJs0GudeiNPRNfB";
     public static final String REDIRECT_URI = "https://physicsio.tech/backend/api/oauth/vk";
 
+    public static final String RESULT_REDIRECT_URI = "https://physicsio.tech/online/lobby";
+
+    /* Game Mechanics*/
     public static final int TICK = 33;
-    // Box2d constants
+    public static final int MAX_FRAMES_DELTA = 3;
+
+    /* Multi Threading*/
+    public static final int THREAD_POOL_SIZE = 2;
+    public static final int SIMULATION_THREAD_POOL_SIZE = 2;
+
+    /* Box2d constants */
     public static final long TIMEOUT = 30L;
     public static final float GRAVITY_X = 0f;
     public static final float GRAVITY_Y = -10f;
     public static final float DELTA = 1 / 60f;
     public static final int VEL_ITER = 10;
     public static final int POS_ITER = 10;
-    public static final int SECOND = 1000000000;
-    public static final int MICRO_SECOND = 1000000;
     public static final int FPS = 60;
 
-    public static final float ALLOWED_POS_DELTA = 0.05f;
-    public static final float ALLOWED_VEL_DELTA = 0.05f;
-    public static final float ALLOWED_ANGLE_DELTA = 0.05f;
+    public static final float ALLOWED_POS_DELTA = 0.1f;
 }

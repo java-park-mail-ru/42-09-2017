@@ -1,7 +1,5 @@
 package ru.mail.park.websocket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
@@ -14,8 +12,7 @@ import java.util.Map;
 
 @Service
 public class MessageHandlerContainer {
-    private Map<Class<?>, MessageHandler<?>> handlersMap = new HashMap<>();
-    private final Logger logger = LoggerFactory.getLogger(MessageHandlerContainer.class);
+    private final Map<Class<?>, MessageHandler<?>> handlersMap = new HashMap<>();
 
     public void handle(@NotNull SocketMessage message, @NotNull Id<User> userId) throws Exception {
         final MessageHandler<?> messageHandler = handlersMap.get(message.getClass());

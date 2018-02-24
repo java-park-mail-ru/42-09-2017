@@ -3,7 +3,7 @@ package ru.mail.park.websocket.handlers;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.GameMechanics;
+import ru.mail.park.mechanics.GameMechanicsService;
 import ru.mail.park.websocket.MessageHandlerContainer;
 import ru.mail.park.websocket.message.from.StartMessage;
 
@@ -12,16 +12,16 @@ import javax.annotation.PostConstruct;
 @Service
 public class StartHandler extends MessageHandler<StartMessage> {
     private final MessageHandlerContainer messageHandlerContainer;
-    private final GameMechanics gameMechanics;
+    private final GameMechanicsService gameMechanicsService;
 
 
     public StartHandler(
             MessageHandlerContainer messageHandlerContainer,
-            GameMechanics gameMechanics
+            GameMechanicsService gameMechanicsService
     ) {
         super(StartMessage.class);
         this.messageHandlerContainer = messageHandlerContainer;
-        this.gameMechanics = gameMechanics;
+        this.gameMechanicsService = gameMechanicsService;
     }
 
     @PostConstruct
@@ -30,7 +30,7 @@ public class StartHandler extends MessageHandler<StartMessage> {
     }
 
     @Override
-    public void handle(StartMessage message, Id<User> userId) throws Exception {
-        gameMechanics.tryStartSimulation(userId, message.getBodies());
+    public void handle(StartMessage message, Id<User> userId) {
+        gameMechanicsService.handleStart(userId, message.getBodies());
     }
 }

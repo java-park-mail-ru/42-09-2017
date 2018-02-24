@@ -3,7 +3,7 @@ package ru.mail.park.websocket.handlers;
 import org.springframework.stereotype.Service;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.GameMechanics;
+import ru.mail.park.mechanics.GameMechanicsService;
 import ru.mail.park.websocket.MessageHandlerContainer;
 import ru.mail.park.websocket.message.from.SubscribeMessage;
 
@@ -11,15 +11,15 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
-    private GameMechanics gameMechanics;
-    private MessageHandlerContainer handlersContainer;
+    private final GameMechanicsService gameMechanicsService;
+    private final MessageHandlerContainer handlersContainer;
 
     public SubscribeHandler(
-            GameMechanics gameMechanics,
+            GameMechanicsService gameMechanicsService,
             MessageHandlerContainer handlersContainer
     ) {
         super(SubscribeMessage.class);
-        this.gameMechanics = gameMechanics;
+        this.gameMechanicsService = gameMechanicsService;
         this.handlersContainer = handlersContainer;
     }
 
@@ -29,8 +29,7 @@ public class SubscribeHandler extends MessageHandler<SubscribeMessage> {
     }
 
     @Override
-    public void handle(SubscribeMessage message, Id<User> userId) throws Exception {
-        gameMechanics.tryStartGame(userId, message.getBoard());
-//        gameMechanics.addWaiter(userId, message.getBoard());
+    public void handle(SubscribeMessage message, Id<User> userId) {
+        gameMechanicsService.handleSubscribe(userId, message.getBoard());
     }
 }

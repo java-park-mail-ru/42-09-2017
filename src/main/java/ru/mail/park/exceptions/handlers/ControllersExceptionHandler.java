@@ -18,7 +18,7 @@ public class ControllersExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Message<?>> validatorHandler(MethodArgumentNotValidException ex) {
-        List<String> response = new ArrayList<>();
+        final List<String> response = new ArrayList<>();
         for (ObjectError objectError : ex.getBindingResult().getAllErrors()) {
             response.add(objectError.getDefaultMessage());
         }

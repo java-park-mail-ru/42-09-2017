@@ -1,71 +1,95 @@
 package ru.mail.park.mechanics;
 
-import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.World;
+import org.hibernate.validator.constraints.NotEmpty;
 import ru.mail.park.domain.Board;
 import ru.mail.park.domain.Id;
 import ru.mail.park.domain.User;
-import ru.mail.park.mechanics.objects.BodyFrame;
+import ru.mail.park.domain.dto.BoardRequest;
+import ru.mail.park.mechanics.domain.objects.BodyFrame;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static ru.mail.park.info.constants.Constants.GRAVITY_X;
-import static ru.mail.park.info.constants.Constants.GRAVITY_Y;
+import static ru.mail.park.info.constants.MessageConstants.GAME_ERROR;
 
 public class GameSession {
-    @NotNull
-    private Id<User> first;
-    private Id<User> second;
-    @NotNull
     private Id<Board> boardId;
-    private World world = new World(new Vec2(GRAVITY_X, GRAVITY_Y));
-    private boolean simulating = false;
-    private Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
+    @NotNull
+    private BoardRequest.Data board;
+    @NotEmpty
+    private Set<Id<User>> players;
+    private GameState state = GameState.NONE;
+    private String result = GAME_ERROR;
+
+    private final Map<Id<User>, List<BodyFrame>> initSnapsMap = new HashMap<>();
 
     public GameSession(
-            @NotNull Id<User> first,
-            Id<User> second,
-            @NotNull Id<Board> boardId
+            @NotNull Id<Board> boardId,
+            @NotNull BoardRequest.Data board,
+            @NotEmpty Set<Id<User>> players
     ) {
-        this.first = first;
-        this.second = second;
         this.boardId = boardId;
-    }
-
-    public Id<User> getFirst() {
-        return first;
-    }
-
-    public void setFirst(Id<User> first) {
-        this.first = first;
-    }
-
-    public Id<User> getSecond() {
-        return second;
-    }
-
-    public void setSecond(Id<User> second) {
-        this.second = second;
+        this.board = board;
+        this.players = players;
     }
 
     public Id<Board> getBoardId() {
         return boardId;
     }
 
-    public void setBoardId(Id<Board> boardId) {
-        this.boardId = boardId;
+    public BoardRequest.Data getBoard() {
+        return board;
     }
 
-    public boolean isSimulating() {
-        return simulating;
+    public void setBoard(BoardRequest.Data board) {
+        this.board = board;
     }
 
-    public void setSimulating(boolean simulating) {
-        this.simulating = simulating;
+    public Set<Id<User>> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(Set<Id<User>> players) {
+        this.players = players;
+    }
+
+    public void removePlayer(Id<User> userId) {
+        players.remove(userId);
+    }
+
+    public boolean isMoving() {
+        return state == GameState.MOVING;
+    }
+
+    public boolean isReady() {
+        return state == GameState.READY;
+    }
+
+    public boolean isSimulated() {
+        return state == GameState.SIMULATED;
+    }
+
+    public boolean isFinished() {
+        return state == GameState.FINISHED;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     public Map<Id<User>, List<BodyFrame>> getInitSnapsMap() {
@@ -74,9 +98,5 @@ public class GameSession {
 
     public void putSnapFor(Id<User> userId, List<BodyFrame> snap) {
         initSnapsMap.putIfAbsent(userId, snap);
-    }
-
-    public List<Id<User>> getPlayers() {
-        return Arrays.asList(first, second);
     }
 }

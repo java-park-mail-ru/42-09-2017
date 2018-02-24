@@ -9,7 +9,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
@@ -25,7 +24,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface CSize {
     String message() default "";
 
-    Class<?>[] groups() default { };
+    @SuppressWarnings("unused") Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
 
